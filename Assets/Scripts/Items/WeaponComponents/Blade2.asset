@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff56ba286ad61a9448d383cccdcf7aad, type: 3}
+  m_Name: Blade2
+  m_EditorClassIdentifier: 
+  name: Starter's Blade
+  description: A small upgrade
+  image: {fileID: 895033278, guid: 5a462abc600549b439c7c741f4381fab, type: 3}
+  componentType: 0
+  ID: 2
+  rarity: COMMON
+  damageAmount: 1
+  knockBackForce: 1
+  AttackcoolDown: 1
+  critChance: 0
+  bladeLength: 14.1
