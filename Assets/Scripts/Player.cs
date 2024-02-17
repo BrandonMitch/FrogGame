@@ -11,13 +11,18 @@ public class Player : Mover
     [Header("Movement Variables")]
     // Movement Varaibles
     public float playerSpeed = 1.0f;
+    public float playerSpeedModifier = 0.0f;
+    public float attackSpeedModifer = -0.8f;
+    // TODO: Come up with better way to do this
+    public float attackSpeedModiferTime = 2f;
+    public bool attackSpeedModiferActive = false;
     public float dashSpeed = 3.0f;
     public float dashRecoverySpeed = 0.5f;
     public float dashCoolDown = 3.0f;
     public float dashDuration = 0.5f;
     private float lastDash;
     private bool dashing;
-    private Vector3 lastDirection = new Vector3(0,0,0);
+    [HideInInspector] public Vector3 lastDirection = new Vector3(0,0,0);
     private Vector3 dashDirection;
     private float xInput;
     private float yInput;
@@ -137,15 +142,15 @@ public class Player : Mover
         {
             dashing = false; // Set Dashing to false when the dash duration has elapsed.
         }
-
         // BackSlashTest
         if (Input.GetKeyDown(KeyCode.T))
         {
-            Debug.Log("pressed t");
+            //Debug.Log("pressed t");
             if (Time.time - lastAttack > attackCoolDown)
             {
-                Debug.Log("swing now");
+                //Debug.Log("swing now");
                 BackSwordSwing();
+
             }
             else
             {
@@ -199,7 +204,9 @@ public class Player : Mover
     }
     private void BackSwordSwing()
     {
+        // TODO: Sort out if we want to slow movement after a swing;
         animator.SetTrigger("QuickBackSlash");
+        attackSpeedModiferActive = true;
     }
 
     private void externalCall() // This method is used to call external events during an animation. If we want to spawn a slash then we set the enum to the correct value and then make a new event in the attack
@@ -261,7 +268,17 @@ public class Player : Mover
     }
     float CalculateSpeed()
     {
-        float speed = playerSpeed;
+        // TODO: Fixx this, very inefficient
+        if(Time.time - lastAttack < 2.0f)
+        {
+            attackSpeedModiferActive = true;
+        }
+        else
+        {
+            attackSpeedModiferActive = false;
+        }
+        //TODO: Fix this
+        float speed = Mathf.Clamp(playerSpeed * Mathf.Clamp(1.0f + playerSpeedModifier,0,20),0,20)*(1 + attackSpeedModifer*(attackSpeedModiferActive ? 1 : 0));
         if (quikRunActive)
         {
             speed *= quikRunMultiplier;
@@ -304,7 +321,7 @@ public class Player : Mover
         
 
     }
-
+    //TODO: Add equip component
     public void EquipComponent(WeaponComponent component)
     {
 

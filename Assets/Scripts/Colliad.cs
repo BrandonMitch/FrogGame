@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Colliad : MonoBehaviour
 {
+    [Header("FILTER")]
     public ContactFilter2D filter;
     protected BoxCollider2D boxCollider;
     protected Collider2D[] hits = new Collider2D[10];
@@ -30,7 +31,15 @@ public class Colliad : MonoBehaviour
     }
     protected virtual void OnCollide(Collider2D coll)
     {
-        Debug.Log("OnCollide was not implement in " + this.name);
+            Debug.Log("OnCollide WAS NOT IMPLEMENTED IN " + this.name + "\n");
+            Debug.Log("PLEASE implement this method");
     }
-
+    /**
+     * attackTypeBehavior is a method to describe specifc attack types like arc attacks, box collider attacks
+     * it is meant to be overridden so that we can create specific behaviour for Arc type colliders. 
+     */
+    public virtual void AttackTypeBehavior(Collider2D coll)
+    {
+        Debug.Log("AttackTypeBehavior() has not been implemented in " + this.name);
+    }
 }

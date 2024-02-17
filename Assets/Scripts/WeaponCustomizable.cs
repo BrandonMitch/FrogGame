@@ -6,12 +6,13 @@ public class WeaponCustomizable : Weapon
 {
 
     [Header("Player/Refernces")]
-    //public GameObject player;
+    public Player playerScript;
     public GameObject CharacterObject; // This is so that everything can be centered around the spirte center
     [Header("Weapon Component List")]
     public List<WeaponComponent> weaponcomponents;
     [Header("Sword")]
     public GameObject SwordSlashPrefab;
+    //TODO: unused
     private List<GameObject> SlashList = new List<GameObject>();
 
     // Start is called before the first frame update
@@ -25,14 +26,26 @@ public class WeaponCustomizable : Weapon
     }
 
     protected override void OnCollide(Collider2D coll)
-    {
+    { 
+
         base.OnCollide(coll);
     }
 
     public void BackSwordSlash() {
+        // Step 1: Instinate new slash
         GameObject newSlash = Instantiate(SwordSlashPrefab,CharacterObject.transform.position,Quaternion.identity);
-        
-        //player.GetComponent<Player>().animator.SetTrigger("QuickBackSlash");
+        // Step 2: Enable the Slash
+        newSlash.SetActive(true);
+        // Step 3: Rotate the slash towards the last looking direction
+        Vector3 lastLookDirection = playerScript.lastDirection;
+        float rotationAngle = Vector3.SignedAngle(new Vector3(0, 1, 0), lastLookDirection,new Vector3(0,0,1));
+        newSlash.GetComponent<Transform>().Rotate(0.0f, 0.0f, rotationAngle, Space.Self);
+        /**
+         * Debug.Log(rotationAngle);
+         player.GetComponent<Player>().animator.SetTrigger("QuickBackSlash");
+        **/
+        // Step 4: Give the new slash the information about the weapon
+        newSlash.GetComponent<ArcAttack>().setWeapon(this);
 
         newSlash.GetComponent<Animator>().SetTrigger("PlaySlashAnimation");
         SlashList.Add(newSlash);
