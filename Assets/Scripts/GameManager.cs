@@ -160,22 +160,31 @@ public class GameManager : MonoBehaviour
 
         string[] data = PlayerPrefs.GetString("SaveState").Split('|');
         //" 0|10|15|2 " -> ["0","10","15","2"]
-
-        // Change Player skin 
-        pesos = int.Parse(data[1]);
-        
-        // Experience and Levels
-        experience = int.Parse(data[2]);
-        if (GetCurrentLevel() != 1)
+        if (data.Length >= 4)
         {
-            player.SetLevel(GetCurrentLevel());
+            // Change peso or player skin? 
+            pesos = int.Parse(data[1]);
+
+            // Experience and Levels
+            experience = int.Parse(data[2]);
+            if (GetCurrentLevel() != 1)
+            {
+                player.SetLevel(GetCurrentLevel());
+            }
+
+            // Change weapon level
+            weapon.SetWeaponLevel(int.Parse(data[3]));
+
+        }
+        else
+        {
+            Debug.Log("SaveState/LoadStates is data is incomplete. Cannot Load State.");
         }
 
-        // Change weapon level
-        weapon.SetWeaponLevel(int.Parse(data[3]));
 
         //Debug.Log("we should teleport right now");
         player.transform.position = GameObject.Find("SpawnPoint").transform.position;
+
     }
 
     // Death Menu and Respond 

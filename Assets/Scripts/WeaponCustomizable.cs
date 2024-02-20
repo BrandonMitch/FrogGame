@@ -8,6 +8,7 @@ public class WeaponCustomizable : Weapon
     [Header("Player/Refernces")]
     public Player playerScript;
     public GameObject CharacterObject; // This is so that everything can be centered around the spirte center
+    public GameObject CrossHair;
     [Header("Weapon Component List")]
     public List<WeaponComponent> weaponcomponents;
     [Header("Sword")]
@@ -36,8 +37,11 @@ public class WeaponCustomizable : Weapon
         GameObject newSlash = Instantiate(SwordSlashPrefab,CharacterObject.transform.position,Quaternion.identity);
         // Step 2: Enable the Slash
         newSlash.SetActive(true);
-        // Step 3: Rotate the slash towards the last looking direction
-        Vector3 lastLookDirection = playerScript.lastDirection;
+        /*DEPRECATED Step 3: Rotate the slash towards the last looking direction
+        //Vector3 lastLookDirection = playerScript.lastDirection;
+        */
+        // Step 3: Rotate the slash towards the cursor
+        Vector3 lastLookDirection = CrossHair.GetComponent<CrossHairScript>().difference;
         float rotationAngle = Vector3.SignedAngle(new Vector3(0, 1, 0), lastLookDirection,new Vector3(0,0,1));
         newSlash.GetComponent<Transform>().Rotate(0.0f, 0.0f, rotationAngle, Space.Self);
         /**

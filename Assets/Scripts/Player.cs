@@ -42,6 +42,9 @@ public class Player : Mover
     public Animator animator;
     public GameObject customizableWeaponOjbect;
     private WeaponCustomizable customizableWeapon;
+    [SerializeField] private TongueManager tongue;
+    [SerializeField] private CrossHairScript crossHair;
+    
     public enum ExternalCall
     {
         backSlash,
@@ -143,7 +146,7 @@ public class Player : Mover
             dashing = false; // Set Dashing to false when the dash duration has elapsed.
         }
         // BackSlashTest
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetButtonDown("Fire1"))
         {
             //Debug.Log("pressed t");
             if (Time.time - lastAttack > attackCoolDown)
@@ -157,7 +160,23 @@ public class Player : Mover
                 Debug.Log("Attack on Cooldown ..." + (Time.time - lastAttack));
             }
         }
-
+        // Aiming the tongue
+        if (Input.GetButtonDown("Fire2"))
+        {
+            crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
+            crossHair.setCrossHairDistance(1);
+            tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+        }
+        // Spitting out the tongue on release
+        if (Input.GetButtonUp("Fire2"))
+        {
+            if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
+            {
+                Debug.Log("Sucessfully Thrown Tongue");
+            };
+            crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
+            crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
+        }
 
     }
     private void Animate()
@@ -214,7 +233,7 @@ public class Player : Mover
         switch (referenceCall)
         {
             case ExternalCall.backSlash:
-                Debug.Log("Trying to run method on customizable weapon");
+                //Debug.Log("Trying to run method on customizable weapon");
                 customizableWeapon.BackSwordSlash();
                 break;
             default:

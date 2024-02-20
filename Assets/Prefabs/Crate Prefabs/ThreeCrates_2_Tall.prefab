@@ -180,6 +180,7 @@ GameObject:
   - component: {fileID: 3288564587354784405}
   - component: {fileID: 6898140008368797255}
   - component: {fileID: 6474938275233668964}
+  - component: {fileID: 6465603805260502716}
   m_Layer: 8
   m_Name: ThreeCrates_2_Tall
   m_TagString: Fighter
@@ -258,6 +259,33 @@ SortingGroup:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &6465603805260502716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4569447157163110729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9aad8072c8b0db8429fc8eeba0bd8daf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  filter:
+    useTriggers: 0
+    useLayerMask: 0
+    useDepth: 0
+    useOutsideDepth: 0
+    useNormalAngle: 0
+    useOutsideNormalAngle: 0
+    layerMask:
+      serializedVersion: 2
+      m_Bits: 0
+    minDepth: 0
+    maxDepth: 0
+    minNormalAngle: 0
+    maxNormalAngle: 0
+  isUpdating: 0
 --- !u!1 &6856683904834275742
 GameObject:
   m_ObjectHideFlags: 0
