@@ -73,8 +73,6 @@ public class Player : Mover
         if (isAlive)
         {
             UpdateMotor(new Vector3(xInput, yInput, 0), dashing);
-
-            WhenBehindSprite(OverlayCheck());
         }
     }
     private void Update()

@@ -11,8 +11,6 @@ public abstract class Mover : Fighter
     public float xSpeed = 1.0f;
     protected bool swapSpriteDirection = false;
   
-    // Sprite With Overlay
-    public Sprite playerOverlaySprite;
 
     // Filter For collider?
     public ContactFilter2D overlayContactFilter;
@@ -20,9 +18,8 @@ public abstract class Mover : Fighter
     // Empty Colliders 
     public bool enableOverlaySprite = false;
     private Collider2D[] overlayhits = new Collider2D[10];
-    private bool stopRunning = false;
+    //private bool stopRunning = false;
     private bool lastState = false;
-    public GameObject highlightObject;
 
 
     protected virtual void Start()
@@ -98,30 +95,5 @@ public abstract class Mover : Fighter
         {
             return lastState;
         }
-    }
-
-    protected virtual void WhenBehindSprite(bool behindSprite)
-    {
-        if (lastState == behindSprite)
-        {
-            stopRunning = true;
-        }
-        // Reset the last state
-        lastState = behindSprite;
-
-        if (!stopRunning) // we don't want this part to run repeatedly, we just need updates when there is a change!!!!!!!!!!!!!!!!!!!
-        {
-
-            if (behindSprite)
-            {
-                highlightObject.GetComponent<SpriteRenderer>().enabled = true;
-            }
-            else
-            {
-                highlightObject.GetComponent<SpriteRenderer>().enabled = false;
-            }
-        }
-        // Reset stopRunning
-        stopRunning = false;
     }
 }
