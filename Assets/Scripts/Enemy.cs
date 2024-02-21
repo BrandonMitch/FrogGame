@@ -28,7 +28,6 @@ public class Enemy : Mover
         playerTransform = GameObject.Find("Player").transform;
         startingPosition = transform.position;
         hitbox = transform.GetChild(0).GetComponent<BoxCollider2D>();
-
     }
 
     private void FixedUpdate()
