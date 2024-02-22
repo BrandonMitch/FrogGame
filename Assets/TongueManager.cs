@@ -6,10 +6,13 @@ public class TongueManager : MonoBehaviour
 {
     private LineRenderer lineRenderer;
     private Transform parentTransform;
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private Rigidbody2D playerRB;
     [SerializeField] private Rigidbody2D rigidBody2D;
     [SerializeField] private CircleCollider2D circleCollider2D;
     [SerializeField] private Vector3 aimLocation;
     [SerializeField] private Transform endOfTongueTransform;
+    [SerializeField] private float lungeTime = 2.0f;
     public enum TongueState{
         StartShutOff,
         Off,
@@ -22,6 +25,8 @@ public class TongueManager : MonoBehaviour
         LungeRight,
         LungeLeft,
         LungeBack,
+        PlayerHit,
+        Lunging,
     };
     public enum LatchMovementType
     {
@@ -66,6 +71,13 @@ public class TongueManager : MonoBehaviour
         direction.Normalize();
         rigidBody2D.AddForce(20*direction);
     }
+    public void movePlayerTowards(Vector3 location)
+    {
+        Vector2 direction = new Vector2(location.x, location.y);
+        direction = (direction - (Vector2)transform.position);
+        direction.Normalize();
+        playerRB.AddForce(150 * direction);
+    }
     public void manageTongueState()
     {
         switch (tongueState)
@@ -95,7 +107,7 @@ public class TongueManager : MonoBehaviour
                 //lineRenderer.SetPosition(1, endOfTongueTransform.position);
                 lineRenderer.SetPosition(1, endOfTongueTransform.position);
                 // NEED TO RAY CAST
-                DistanceTest();
+                DistanceTestTongue();
                 break;
             case TongueState.Hit: // On Tongue Hit
                 rigidBody2D.velocity = Vector2.zero;
@@ -108,6 +120,18 @@ public class TongueManager : MonoBehaviour
                 {
                     ProcessInputs();
                 }
+                break;
+            case TongueState.LungeForward:
+                movePlayerTowards(endOfTongueTransform.position);
+                lineRenderer.SetPosition(0, parentTransform.position);
+                tongueState = TongueState.Lunging;
+                break;
+            case TongueState.Lunging:
+                DistanceTestPlayer();
+                break;
+            case TongueState.PlayerHit:
+                playerRB.velocity = Vector2.zero;
+                tongueState = TongueState.StartShutOff;
                 break;
             default:
                 Debug.LogError("Improper State of Tongue Manager");
@@ -163,7 +187,7 @@ public class TongueManager : MonoBehaviour
         // TODO: Implement false return values, this will let us decided what we don't want to latch onto
         return returnVal;
     }
-    public void DistanceTest()
+    public void DistanceTestTongue()
     {
         Vector2 vel = rigidBody2D.velocity;
         Vector2 currentPos = rigidBody2D.position;
@@ -190,7 +214,21 @@ public class TongueManager : MonoBehaviour
         }
         Debug.DrawLine(currentPos, nextPosition);
     }
+    public void DistanceTestPlayer()
+    {
+        Vector2 vel = playerRB.velocity;
+        Vector2 currentPos = playerRB.position;
+        Vector2 nextPosition = currentPos + vel * Time.fixedDeltaTime;
 
+        RaycastHit2D[] hits = Physics2D.CircleCastAll(currentPos, 0.2f, vel, (nextPosition - currentPos).magnitude);
+        foreach (RaycastHit2D hit in hits)
+        {
+            Debug.Log("PLAYER HIT" + hit);
+            Vector2 Latch_location = hit.point;
+            StartCoroutine(OnHitPlayer(hit));
+        }
+        Debug.DrawLine(currentPos, nextPosition);
+    }
     IEnumerator OnHit(Vector3 latch_location, RaycastHit2D hit)
     {
         tongueState = TongueState.Hit;
@@ -199,25 +237,60 @@ public class TongueManager : MonoBehaviour
         Debug.Log("after the yield");
         moveEndOfTongue(latch_location);
     }
+    IEnumerator OnHitPlayer(RaycastHit2D hit)
+    {
+        Debug.Log("next frame we hit, wait a frame");
+        yield return new WaitForFixedUpdate();
+        Debug.Log("After waiting, state should change to PlayerHit");
+        tongueState = TongueState.PlayerHit;
+    }
     public LatchMovementType readInputs() // Called on latch
     {
         Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         float xInput = movVec.x;
         float yInput = movVec.y;
-        // TODO: make sure this works for analog also it needs to be rotated to the refernce frame relative to the tongue direction
-        if( (xInput == 0) && (yInput == 0))
+        if (xInput != 0 || yInput != 0) // if we don't detect a movement then run the below code
         {
-            return LatchMovementType.Waiting;
-        } else if( yInput > 0) {
-            return LatchMovementType.LungeForward;
-        } else if (yInput < 0) {
-            return LatchMovementType.LungeBack;
-        } else if (xInput > 0) {
-            return LatchMovementType.LungeRight;
-        } else if (xInput < 0) {
-            return LatchMovementType.LungeLeft;
+            // We have make sure this works for analog also it needs to be rotated to the refernce frame relative to the tongue direction
+            // EOT = j hat
+            // right of this vector is i hat, which is EOTx{0,1,0}; 
+            Vector3 jhat = endOfTongueTransform.position - transform.position;
+            jhat.z = 0;
+            jhat.Normalize();
+
+            Vector3 khat = Vector3.forward;
+            Vector3 ihat = Vector3.Cross(jhat, khat); // gets the vector perpendicular to the tongue direction
+            //Debug.Log("ihat = " + ihat.x + "," + ihat.y + ",");
+            //Debug.Log("jhat = " + jhat.x + ","  + jhat.y + ",");;
+
+            // Now we compute 4 dot products on the vectors {j,0} forward, {-j,0} back, {0,i} right, {0,-i} left. This will give a number between -1 and 1 of how much the vector falls onto a certain direction
+            float f, d, r, l;
+            f = Vector3.Dot(movVec, jhat);
+            d = Vector3.Dot(movVec, -jhat);
+            r = Vector3.Dot(movVec, ihat);
+            l = Vector3.Dot(movVec, -ihat);
+            Debug.Log("f=" + f);
+            Debug.Log("d=" + d);
+            Debug.Log("r=" + r);
+            Debug.Log("l=" + l);
+            // Find the maximum value of these dot products
+            float max = Mathf.Max(f, Mathf.Max(d, Mathf.Max(r, l))); // Now the max value will correspond to the action the player is trying to preform
+            if        (max == f) {
+                return LatchMovementType.LungeForward;
+            } else if (max == d) {
+                return LatchMovementType.LungeBack;
+            } else if (max == r) {
+                return LatchMovementType.LungeRight;
+            } else if (max == l) {
+                return LatchMovementType.LungeLeft;
+            }
+            else
+            {
+                Debug.LogError("Problem");
+            }
+            
         }
-        Debug.LogError("can't detect state");
+        //Debug.LogError("can't detect state");
         return LatchMovementType.Waiting;
     }
     public void ProcessInputs()
@@ -248,19 +321,18 @@ public class TongueManager : MonoBehaviour
     }
     public void LungeForward()
     {
-
+        Debug.Log("Forward");
     }
     public void LungeBack()
     {
-        Debug.LogError("Not implemented yet for " + movementType);
+        Debug.Log("Backwards");
     }
     public void LungeLeft()
     {
-        Debug.LogError("Not implemented yet for " + movementType);
+        Debug.Log("Left");
     }
     public void LungeRight()
     {
-        Debug.LogError("Not implemented yet for " + movementType);
+        Debug.Log("Right");
     }
-
 }
