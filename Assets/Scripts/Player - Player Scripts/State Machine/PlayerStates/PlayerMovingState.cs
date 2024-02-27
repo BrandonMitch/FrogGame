@@ -41,7 +41,7 @@ public class PlayerMovingState : PlayerState
 
     public override void PhysicsUpdate()
     {
-        base.PhysicsUpdate();
+
     }
     // This is only ccalled when we leave the idle state
     public void setMoveVecToFirstInput(Vector2 firstMoveDiretion)

@@ -7,6 +7,7 @@ public class PlayerIdleState : PlayerState
     
     public PlayerIdleState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
+
     }
 
     public override void AnimationTriggerEvent(Player.AnimationTriggerType triggerType)
@@ -38,7 +39,6 @@ public class PlayerIdleState : PlayerState
         // Then check attack inputs
 
         // Then check movement
-
         if(moveVec != Vector2.zero)
         {
             player.movingState.setMoveVecToFirstInput(moveVec);

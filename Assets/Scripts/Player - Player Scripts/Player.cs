@@ -285,7 +285,6 @@ public class Player : Mover, IDamageable
 
         base.ReceiveDamage(dmg);
         GameManager.instance.OnHitpointChange();
-
     }
 
     /*public void OnLevelUp()
@@ -337,7 +336,6 @@ public class Player : Mover, IDamageable
 
         if (dashing)
         {
-
             // Update moveDelta to the push direction 
             moveDelta = dashDirection;
             // Reduce dash speed every frame.
