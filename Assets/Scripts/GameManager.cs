@@ -106,22 +106,18 @@ public class GameManager : MonoBehaviour
         }
         return xp;
     }
+    // TODO: REMOVE
     public void GrantXp(int xp)
     {
         int currLevel = GetCurrentLevel();
         experience += xp;
         if(currLevel < GetCurrentLevel())
         {
-            OnLevelUp();
+            /*OnLevelUp();*/
         }
     }
 
-    public void OnLevelUp()
-    {
-        Debug.Log("Level Up!");
-        player.OnLevelUp();
-        OnHitpointChange();
-    }
+
 
     // On Scene Loaded
     public void onSceneLoaded(Scene s, LoadSceneMode mode)
@@ -149,6 +145,7 @@ public class GameManager : MonoBehaviour
     }
 
     // Load State
+    // TODO: REFACTOR OR DELETE
     public void LoadState(Scene s, LoadSceneMode mode) 
     {
         SceneManager.sceneLoaded -= LoadState;
@@ -168,7 +165,7 @@ public class GameManager : MonoBehaviour
             experience = int.Parse(data[2]);
             if (GetCurrentLevel() != 1)
             {
-                player.SetLevel(GetCurrentLevel());
+                /*player.SetLevel(GetCurrentLevel());*/
             }
 
             // Change weapon level
@@ -184,7 +181,13 @@ public class GameManager : MonoBehaviour
         //Debug.Log("we should teleport right now");
         player.transform.position = GameObject.Find("SpawnPoint").transform.position;
 
-    }
+    }    
+    /*public void OnLevelUp()
+    {
+        Debug.Log("Level Up!");
+        player.OnLevelUp();
+        OnHitpointChange();
+    }*/
 
     // Death Menu and Respond 
     public void Respawn()

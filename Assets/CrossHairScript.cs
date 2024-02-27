@@ -33,12 +33,6 @@ public class CrossHairScript : MonoBehaviour
             difference *= maxDistance;
             transform.position = difference + transform.parent.transform.position;
         }
-        //transform.position = lookat;
-
-        //Vector3 difference = lookat - transform.position;
-        //difference.Normalize();
-        //float rotation_z = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
-        //transform.rotation = Quaternion.Euler(0f, 0f, rotation_z);
     }
     public void setCrossHairDistance(float distance)
     {

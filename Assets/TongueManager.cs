@@ -12,7 +12,7 @@ public class TongueManager : MonoBehaviour
     [SerializeField] private CircleCollider2D circleCollider2D;
     [SerializeField] private Vector3 aimLocation;
     [SerializeField] private Transform endOfTongueTransform;
-    [SerializeField] private float lungeTime = 2.0f;
+    [SerializeField] private Player player;
     public enum TongueState{
         StartShutOff,
         Off,
@@ -232,6 +232,7 @@ public class TongueManager : MonoBehaviour
     IEnumerator OnHit(Vector3 latch_location, RaycastHit2D hit)
     {
         tongueState = TongueState.Hit;
+        player.stateMachine.ChangeState(player.latchedState);
         Debug.Log("changed states, hopefully we wait a frame");
         yield return new WaitForFixedUpdate();
         Debug.Log("after the yield");
@@ -246,12 +247,12 @@ public class TongueManager : MonoBehaviour
     }
     public LatchMovementType readInputs() // Called on latch
     {
-        Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        Vector2 movVec = player.latchedState.getPlayerInput();
         float xInput = movVec.x;
         float yInput = movVec.y;
         if (xInput != 0 || yInput != 0) // if we don't detect a movement then run the below code
         {
-            // We have make sure this works for analog also it needs to be rotated to the refernce frame relative to the tongue direction
+            // We have make sure this works for analog also it needs to be rotated to the reference frame relative to the tongue direction
             // EOT = j hat
             // right of this vector is i hat, which is EOTx{0,1,0}; 
             Vector3 jhat = endOfTongueTransform.position - transform.position;
@@ -269,10 +270,11 @@ public class TongueManager : MonoBehaviour
             d = Vector3.Dot(movVec, -jhat);
             r = Vector3.Dot(movVec, ihat);
             l = Vector3.Dot(movVec, -ihat);
-            Debug.Log("f=" + f);
-            Debug.Log("d=" + d);
-            Debug.Log("r=" + r);
-            Debug.Log("l=" + l);
+            //Debug.Log("f = " + f);
+            //Debug.Log("d = " + d);
+            //Debug.Log("r = " + r);
+            //Debug.Log("l = " + l);
+
             // Find the maximum value of these dot products
             float max = Mathf.Max(f, Mathf.Max(d, Mathf.Max(r, l))); // Now the max value will correspond to the action the player is trying to preform
             if        (max == f) {

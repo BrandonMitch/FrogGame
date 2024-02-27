@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : Mover
+public class Player : Mover, IDamageable
 {
     private SpriteRenderer spriteRenderer;
     private bool isAlive = true;
@@ -22,10 +22,11 @@ public class Player : Mover
     public float dashDuration = 0.5f;
     private float lastDash;
     private bool dashing;
-    [HideInInspector] public Vector3 lastDirection = new Vector3(0,0,0);
+    [SerializeField] private Vector3 lastMoveDirection = new Vector3(0, 0, 0);
+
     private Vector3 dashDirection;
-    private float xInput;
-    private float yInput;
+    private float xInput { get; set; }
+    private float yInput { get; set; }
     private float speedForAnimation;
     public float quikRunMultiplier=1.2f;
     public float quikRunToActivateTime=3f;
@@ -60,15 +61,91 @@ public class Player : Mover
     [Header("Inventory Related")]
     public Item[] inventory;
 
+
+    //*** do we need these?//
+    public float MaxHealth { get ; set; }
+    public float CurrentHealth { get; set; }
+
+    /***********************************Player State Machine************************************/
+    /*State Machine Var's**/
+    #region State Machine Var's
+    public PlayerStateMachine stateMachine { get; set; }
+
+    public PlayerIdleState idleState { get; set; }
+    public PlayerMovingState movingState { get; set; }
+    public PlayerSlowingState slowingState { get; set; }
+    public PlayerAimingTongueState aimingTongueState { get; set; }
+    public PlayerThrowingState throwingState { get; set; }
+    public PlayerLungingState lungingState { get; set; }
+    public PlayerLatchedState latchedState { get; set; }
+    #endregion
+    private void Awake()
+    {
+        stateMachine = new PlayerStateMachine();
+        // Intialize all of the player states
+        idleState = new PlayerIdleState(this, stateMachine);
+        movingState = new PlayerMovingState(this, stateMachine);
+        slowingState = new PlayerSlowingState(this, stateMachine);
+        aimingTongueState = new PlayerAimingTongueState(this, stateMachine);
+        throwingState = new PlayerThrowingState(this, stateMachine);
+        lungingState = new PlayerLungingState(this, stateMachine);
+        latchedState = new PlayerLatchedState(this, stateMachine);
+    }
+    private void AnimationTriggerEvent(AnimationTriggerType triggerType)
+    {
+        //TODO: Fill this in once we made player state machine, watch video to fill this part in
+    }
+    public enum AnimationTriggerType
+    {
+        PlayerDamaged,
+        PlayerIdle,
+    }
+
+    // IMPLEMENT
+    public void Damage(float amount)
+    {
+        throw new System.NotImplementedException();
+    }
+    //IMPLEMENT
+    public void Die()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void SetMovementInputs(Vector2 moveVec)
+    {
+        speedForAnimation = Mathf.Clamp(moveVec.magnitude, 0.0f, 1.0f);
+        xInput = moveVec.x;
+        yInput = moveVec.y;
+    }
+    public void SetMovementInputs(Vector2 moveVec, float speedForAnimation)
+    {
+        speedForAnimation = Mathf.Clamp(speedForAnimation, 0.0f, 1.0f);
+        xInput = moveVec.x;
+        yInput = moveVec.y;
+    }
+    public Vector2 GetLastMoveDirection()
+    {
+        return lastMoveDirection;
+    }
+    public void SetLastMoveDirection(Vector2 direction)
+    {
+        lastMoveDirection = direction;
+    }
+
+    /***********************************---END---*********************************/
     protected override void Start()
     {
         base.Start();
+        stateMachine.Intialize(idleState);
         swapSpriteDirection = false;
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
     private void FixedUpdate()
     {
+        //*******STATE MACHINE******//
+        stateMachine.CurrentPlayerState.FrameUpdate();
         // Update movement. Every update motor with dashing will check if we are dashing
         if (isAlive)
         {
@@ -77,6 +154,8 @@ public class Player : Mover
     }
     private void Update()
     {
+        //*******STATE MACHINE******//
+        stateMachine.CurrentPlayerState.FrameUpdate();
         ProcessInputs();
 
         Animate();
@@ -85,10 +164,10 @@ public class Player : Mover
     {
         // Check x/y movement, normalize vector
         // negative is left, positive is right. CLAMP MOVEMENT SPEED IF CONTROLLERS ARE A PROBLEM
-        Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        speedForAnimation = Mathf.Clamp(movVec.magnitude,0.0f,1.0f);
-        xInput = movVec.x;
-        yInput = movVec.y;
+        //Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        speedForAnimation = Mathf.Clamp(new Vector2(xInput,yInput).magnitude,0.0f,1.0f);
+        //xInput = movVec.x;
+        //yInput = movVec.y;
 
         
         // Save the last player Direction, only when moving. 
@@ -96,7 +175,7 @@ public class Player : Mover
         {
             // Check if we are running in the same direction 
             
-            if (lastDirection.x == xInput && lastDirection.y == yInput)
+            if (lastMoveDirection.x == xInput && lastMoveDirection.y == yInput)
             {
                 if (!RunningInSameDirection)  // If it is the first time, then record the time.
                 {
@@ -117,7 +196,7 @@ public class Player : Mover
             }
 
             // Save the last direction after going through the checks
-            lastDirection = new Vector3(xInput, yInput, 0);
+            lastMoveDirection = new Vector3(xInput, yInput, 0);
         } 
         else if (quikRunActive) // if the input vector is zero, disable quik running
         {
@@ -126,6 +205,7 @@ public class Player : Mover
         }
 
         // Check for dash, then dash
+        /**
         if (Input.GetKeyDown(KeyCode.LeftShift))
         {
             if (Time.time - lastDash > dashCoolDown)
@@ -143,6 +223,7 @@ public class Player : Mover
         {
             dashing = false; // Set Dashing to false when the dash duration has elapsed.
         }
+        **/
         // BackSlashTest
         if (Input.GetButtonDown("Fire1"))
         {
@@ -159,28 +240,37 @@ public class Player : Mover
             }
         }
         // Aiming the tongue
-        if (Input.GetButtonDown("Fire2"))
+        /*8if (Input.GetButtonDown("Fire2"))
         {
-            crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
-            crossHair.setCrossHairDistance(1);
-            tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+            AimTongueCrossHair();
         }
         // Spitting out the tongue on release
         if (Input.GetButtonUp("Fire2"))
         {
-            if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
-            {
-                Debug.Log("Sucessfully Thrown Tongue");
-            };
-            crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
-            crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
-        }
+            SpitOutTongueOnRelease();
+        }**/
 
     }
-    private void Animate()
+    public void AimTongueCrossHair()
     {
-        animator.SetFloat("Horizontal", lastDirection.x);
-        animator.SetFloat("Vertical", lastDirection.y);
+        crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
+        crossHair.setCrossHairDistance(1);
+        tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+    }
+    public void SpitOutTongueOnRelease()
+    {
+        if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
+        {
+            Debug.Log("Sucessfully Thrown Tongue");
+        };
+        crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
+        crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
+    }
+
+    public void Animate()
+    {
+        animator.SetFloat("Horizontal", lastMoveDirection.x);
+        animator.SetFloat("Vertical", lastMoveDirection.y);
         animator.SetFloat("Speed",speedForAnimation);
     }
     public void SwapSprite(int skinID)
@@ -198,7 +288,7 @@ public class Player : Mover
 
     }
 
-    public void OnLevelUp()
+    /*public void OnLevelUp()
     {
         maxHitpoint++;
         hitpoint = maxHitpoint;
@@ -209,11 +299,11 @@ public class Player : Mover
         {
             OnLevelUp();
         }
-    }
+    }*/ // TODO: REMOVE PLAYER LEVEL SYSTEM
 
     private void Dash()
     {
-        dashDirection = Vector3.Scale(lastDirection, new Vector3(playerSpeed * dashSpeed, playerSpeed * dashSpeed, 0));
+        dashDirection = Vector3.Scale(lastMoveDirection, new Vector3(playerSpeed * dashSpeed, playerSpeed * dashSpeed, 0));
         
         Debug.Log("DASH");
         // DASH!
@@ -243,10 +333,8 @@ public class Player : Mover
     protected virtual void UpdateMotor(Vector3 input, bool dashing)
     {
         swapSpriteDirection = false; // TODO: Remove this for optimization
-        UpdateMotor(input*CalculateSpeed()); // Base update motor from mover.
+        base.UpdateMotor(input*CalculateSpeed()); // Base update motor from mover.
 
-        
-        
         if (dashing)
         {
 
@@ -256,7 +344,7 @@ public class Player : Mover
             dashDirection = Vector3.Lerp(dashDirection, Vector3.zero, (Time.time-lastDash)/dashDuration);
 
             // Make sure we can move in this direction by casting a box there first, if the box returns nul, we're free to move
-            //y
+            // 
             hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(0, moveDelta.y), Mathf.Abs(moveDelta.y * Time.deltaTime), LayerMask.GetMask("Actor",/*"Enemy",*/ "Blocking"));
             if (hit.collider == null)
             {
@@ -328,7 +416,6 @@ public class Player : Mover
             GameManager.instance.deathMenuAnim.SetTrigger("Show");
         }
     }
-
     public void Respawn()
     {
         Heal(maxHitpoint);
@@ -343,5 +430,4 @@ public class Player : Mover
     {
 
     }
-
 }
