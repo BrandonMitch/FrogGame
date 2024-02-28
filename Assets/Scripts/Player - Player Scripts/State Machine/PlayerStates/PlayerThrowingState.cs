@@ -10,10 +10,11 @@ public class PlayerThrowingState : PlayerState
 {
     
     [SerializeField] private float _timeWhenEnteringThrowingState;
-    [SerializeField] private float _bufferTimeToStartReading = 0.2f; // how long it takes after the tongue was thrown to read buffer inputs
+    [SerializeField] private float _bufferTimeToStartReading = 0.1f; // how long it takes after the tongue was thrown to read buffer inputs
     [SerializeField] public Vector2 bufferedMovementInput;
     public PlayerThrowingState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
+
     }
 
     public override void AnimationTriggerEvent(Player.AnimationTriggerType triggerType)
@@ -24,9 +25,9 @@ public class PlayerThrowingState : PlayerState
     public override void EnterState()
     {
         Debug.Log("entered throwing state");
+        player.tongueStateMachine.ChangeState(player.tongueThrowState);
         // Save the current time when we enter the state
         _timeWhenEnteringThrowingState = Time.time;
-
         // Reset the buffered input to zero vector
         bufferedMovementInput = Vector2.zero;
     }
@@ -47,12 +48,17 @@ public class PlayerThrowingState : PlayerState
         // read inputs and buffer them
         if(Time.time > (_timeWhenEnteringThrowingState + _bufferTimeToStartReading))
         {
-            Debug.Log("reading buffered inputs");
-            bufferedMovementInput = GetCurrentMovementInputs();
+            //Debug.Log("reading buffered inputs");
+            Vector2 currentMovmentInputs = GetCurrentMovementInputs();
+            if (currentMovmentInputs != Vector2.zero)
+            {
+                bufferedMovementInput = GetCurrentMovementInputs();
+                Debug.Log("we should be saving this input:" + bufferedMovementInput);
+            }
         }
         else
         {
-            Debug.Log("not reading buffered inputs");
+            //Debug.Log("not reading buffered inputs");
         }
 
     }

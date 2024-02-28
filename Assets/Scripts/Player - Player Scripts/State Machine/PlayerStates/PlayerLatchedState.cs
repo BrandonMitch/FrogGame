@@ -18,26 +18,40 @@ public class PlayerLatchedState : PlayerState
 
     public override void EnterState()
     {
+        Debug.Log("entered latched state");
         _playerInput = GetCurrentMovementInputs();
         // First check if the buffered movement input isn't equal to zero;
         if (_bufferedMovementInput != Vector2.zero)
         {
-            // Next check if the currented movement input is not zero so that you can override the buffer at anytime
-            if(_playerInput != Vector2.zero)
+            // Next check we check if there are no inputs at this time, if there are, then override them with the buffered input
+            if (_playerInput == Vector2.zero)
             {
-                
+                Debug.Log("we are saving the buffered input on entry");
+                _playerInput = _bufferedMovementInput;
             }
         }
     }
 
     public override void ExitState()
     {
+        Debug.Log("left latched state");
         _playerInput = Vector2.zero;
     }
 
     public override void FrameUpdate()
     {
-
+        _playerInput = GetCurrentMovementInputs();
+        // First check if the buffered movement input isn't equal to zero;
+        if (_bufferedMovementInput != Vector2.zero)
+        {
+            //Debug.Log("buffered movement input is not equal to the zero v");
+            // Next check we check if there are no inputs at this time, if there are, then override them with the buffered input
+            if (_playerInput == Vector2.zero)
+            {
+                //Debug.Log("we are saving the buffered input on frame update");
+                _playerInput = _bufferedMovementInput;
+            }
+        }
     }
 
     public override void PhysicsUpdate()
@@ -52,6 +66,7 @@ public class PlayerLatchedState : PlayerState
 
     public Vector2 getPlayerInput()
     {
+
         return _playerInput;
     }
 }

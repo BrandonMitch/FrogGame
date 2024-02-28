@@ -12,7 +12,6 @@ public class Player : Mover, IDamageable
     // Movement Varaibles
     public float playerSpeed = 1.0f;
     public float playerSpeedModifier = 0.0f;
-    public float attackSpeedModifer = -0.8f;
     // TODO: Come up with better way to do this
     public float attackSpeedModiferTime = 2f;
     public bool attackSpeedModiferActive = false;
@@ -28,12 +27,9 @@ public class Player : Mover, IDamageable
     private float xInput { get; set; }
     private float yInput { get; set; }
     private float speedForAnimation;
-    public float quikRunMultiplier=1.2f;
-    public float quikRunToActivateTime=3f;
 
-    float runT0 = 0;
-    public bool quikRunActive = false;
-    bool RunningInSameDirection = false;
+
+
     [Space]
     [Header("misc")]
     public bool Unkillable = true;
@@ -78,6 +74,17 @@ public class Player : Mover, IDamageable
     public PlayerThrowingState throwingState { get; set; }
     public PlayerLungingState lungingState { get; set; }
     public PlayerLatchedState latchedState { get; set; }
+
+ 
+
+    public TongueStateMachine tongueStateMachine { get; set; }
+
+    [SerializeField] private TongueData tongueData;
+    public TongueOffState tongueOffState { get; set; }
+    public TongueAimState tongueAimState { get; set; }
+    public TongueThrowState tongueThrowState { get; set; }
+    public TongueLatchedState tongueLatchedState { get; set; }
+    public TongueLungeState tongueLungeState { get; set; }
     #endregion
     private void Awake()
     {
@@ -90,6 +97,15 @@ public class Player : Mover, IDamageable
         throwingState = new PlayerThrowingState(this, stateMachine);
         lungingState = new PlayerLungingState(this, stateMachine);
         latchedState = new PlayerLatchedState(this, stateMachine);
+
+
+        tongueStateMachine = new TongueStateMachine(tongueData);
+        // Intialize all of the tongue states
+        tongueOffState = new TongueOffState(this, tongueStateMachine);
+        tongueAimState = new TongueAimState(this, tongueStateMachine);
+        tongueThrowState = new TongueThrowState(this, tongueStateMachine);
+        tongueLatchedState = new TongueLatchedState(this, tongueStateMachine);
+        tongueLungeState = new TongueLungeState(this, tongueStateMachine);
     }
     private void AnimationTriggerEvent(AnimationTriggerType triggerType)
     {
@@ -132,12 +148,16 @@ public class Player : Mover, IDamageable
     {
         lastMoveDirection = direction;
     }
-
+    public Vector3 GetPosition()
+    {
+        return transform.position;
+    }
     /***********************************---END---*********************************/
     protected override void Start()
     {
         base.Start();
         stateMachine.Intialize(idleState);
+        tongueStateMachine.Intialize(tongueOffState);
         swapSpriteDirection = false;
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -145,7 +165,8 @@ public class Player : Mover, IDamageable
     private void FixedUpdate()
     {
         //*******STATE MACHINE******//
-        stateMachine.CurrentPlayerState.FrameUpdate();
+        stateMachine.CurrentPlayerState.PhysicsUpdate();
+        tongueStateMachine.CurrentTongueState.PhysicsUpdate();
         // Update movement. Every update motor with dashing will check if we are dashing
         if (isAlive)
         {
@@ -156,6 +177,8 @@ public class Player : Mover, IDamageable
     {
         //*******STATE MACHINE******//
         stateMachine.CurrentPlayerState.FrameUpdate();
+        tongueStateMachine.CurrentTongueState.FrameUpdate();
+
         ProcessInputs();
 
         Animate();
@@ -166,64 +189,14 @@ public class Player : Mover, IDamageable
         // negative is left, positive is right. CLAMP MOVEMENT SPEED IF CONTROLLERS ARE A PROBLEM
         //Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         speedForAnimation = Mathf.Clamp(new Vector2(xInput,yInput).magnitude,0.0f,1.0f);
-        //xInput = movVec.x;
-        //yInput = movVec.y;
-
         
         // Save the last player Direction, only when moving. 
         if (xInput != 0 || yInput != 0)
         {
-            // Check if we are running in the same direction 
-            
-            if (lastMoveDirection.x == xInput && lastMoveDirection.y == yInput)
-            {
-                if (!RunningInSameDirection)  // If it is the first time, then record the time.
-                {
-                    runT0 = Time.time;
-                }
-                RunningInSameDirection = true;
-            }
-            else
-            {
-                RunningInSameDirection = false;
-                quikRunActive = false;
-            }
-            // if the time to activate has passsed and you are still running in the same direction, then increasse player speed.
-            if (RunningInSameDirection && (Time.time - runT0 > quikRunToActivateTime))
-            {
-                speedForAnimation = 2.0f; // increasing animation speed will automatically play the quik run animation
-                quikRunActive = true;
-            }
-
             // Save the last direction after going through the checks
             lastMoveDirection = new Vector3(xInput, yInput, 0);
         } 
-        else if (quikRunActive) // if the input vector is zero, disable quik running
-        {
-            RunningInSameDirection = false;
-            quikRunActive = false;
-        }
 
-        // Check for dash, then dash
-        /**
-        if (Input.GetKeyDown(KeyCode.LeftShift))
-        {
-            if (Time.time - lastDash > dashCoolDown)
-            {
-                lastDash = Time.time;
-                dashing = true;
-                Dash();
-            }
-            else
-            {
-                Debug.Log("DASH on cooldown ..." + (Time.time - lastDash));
-            }
-        }
-        if (dashing && Time.time - lastDash >= dashDuration)
-        {
-            dashing = false; // Set Dashing to false when the dash duration has elapsed.
-        }
-        **/
         // BackSlashTest
         if (Input.GetButtonDown("Fire1"))
         {
@@ -232,30 +205,24 @@ public class Player : Mover, IDamageable
             {
                 //Debug.Log("swing now");
                 BackSwordSwing();
-
             }
             else
             {
                 Debug.Log("Attack on Cooldown ..." + (Time.time - lastAttack));
             }
         }
-        // Aiming the tongue
-        /*8if (Input.GetButtonDown("Fire2"))
-        {
-            AimTongueCrossHair();
-        }
-        // Spitting out the tongue on release
-        if (Input.GetButtonUp("Fire2"))
-        {
-            SpitOutTongueOnRelease();
-        }**/
-
     }
     public void AimTongueCrossHair()
     {
         crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
         crossHair.setCrossHairDistance(1);
-        tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+
+        //tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+        tongueAimState.AimTongue(GetCrossHairPosition());
+    }
+    public Vector3 GetCrossHairPosition()
+    {
+        return crossHair.getCrossHairPosition();
     }
     public void SpitOutTongueOnRelease()
     {
@@ -371,21 +338,9 @@ public class Player : Mover, IDamageable
     }
     float CalculateSpeed()
     {
-        // TODO: Fixx this, very inefficient
-        if(Time.time - lastAttack < 2.0f)
-        {
-            attackSpeedModiferActive = true;
-        }
-        else
-        {
-            attackSpeedModiferActive = false;
-        }
+        attackSpeedModiferActive = false;
         //TODO: Fix this
-        float speed = Mathf.Clamp(playerSpeed * Mathf.Clamp(1.0f + playerSpeedModifier,0,20),0,20)*(1 + attackSpeedModifer*(attackSpeedModiferActive ? 1 : 0));
-        if (quikRunActive)
-        {
-            speed *= quikRunMultiplier;
-        }
+        float speed = Mathf.Clamp(playerSpeed * Mathf.Clamp(1.0f + playerSpeedModifier, 0, 20), 0, 20);
         return speed;
         
     }

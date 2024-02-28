@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerAimingTongueState : PlayerState
 {
+    private Vector3 _lookDirectionForAnimation;
     public PlayerAimingTongueState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
     }
@@ -15,13 +16,18 @@ public class PlayerAimingTongueState : PlayerState
 
     public override void EnterState()
     {
-        player.SetMovementInputs(Vector2.zero);
-        Debug.Log("in aimingState");
+        player.tongueStateMachine.ChangeState(player.tongueAimState);
+        
+        // these lines make frog look in the direction of the mouse
+        _lookDirectionForAnimation = (player.GetCrossHairPosition()-player.GetPosition()).normalized;
+        player.SetLastMoveDirection(_lookDirectionForAnimation);
+
+        Debug.Log("in player aimingState");
     }
 
     public override void ExitState()
     {
-
+        Debug.Log("exit aiming state");
     }
 
     public override void FrameUpdate()
@@ -32,6 +38,10 @@ public class PlayerAimingTongueState : PlayerState
         {
             //Debug.Log("aiming");
             player.AimTongueCrossHair();
+
+            // these lines make frog look in the direction of the mouse
+            _lookDirectionForAnimation = (player.GetCrossHairPosition() - player.GetPosition()).normalized;
+            player.SetLastMoveDirection(_lookDirectionForAnimation.normalized);
             return;
         } else if (rightMouseUp) {
             //Debug.Log("change state to throwing tongue");

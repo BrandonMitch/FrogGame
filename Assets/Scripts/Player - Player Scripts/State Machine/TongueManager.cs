@@ -13,6 +13,7 @@ public class TongueManager : MonoBehaviour
     [SerializeField] private Vector3 aimLocation;
     [SerializeField] private Transform endOfTongueTransform;
     [SerializeField] private Player player;
+
     public enum TongueState{
         StartShutOff,
         Off,
@@ -39,7 +40,7 @@ public class TongueManager : MonoBehaviour
     };
     [SerializeField] private TongueState tongueState;
     [SerializeField] private LatchMovementType movementType;
-    [SerializeField] private EndOfTongueScript endOfTongue;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -53,7 +54,7 @@ public class TongueManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        manageTongueState();
+        //manageTongueState();
     }
     public void moveEndOfTongue(Vector3 location)
     {
@@ -131,6 +132,7 @@ public class TongueManager : MonoBehaviour
                 break;
             case TongueState.PlayerHit:
                 playerRB.velocity = Vector2.zero;
+                player.stateMachine.ChangeState(player.idleState);
                 tongueState = TongueState.StartShutOff;
                 break;
             default:
@@ -201,14 +203,19 @@ public class TongueManager : MonoBehaviour
             {
                 if ((hit.collider.gameObject.GetComponent("Colliad") as Colliad) != null)
                 {
-                    // TODO: Special Case for collider objects where we check their mass and if it is less than ours,
+                   // TODO: Special Case for collider objects where we check their mass and if it is less than ours,
                 }  // We pull the object towards us, otherwise, go towards it
+                
                 else { 
-             
-                } 
-                Vector2 Latch_location = hit.point;
-                Debug.Log("try to latch called");
-                isLatched = TryToLatch(Latch_location, hit);
+                    
+                }
+                Debug.Log(hit.collider.tag);
+                if (hit.collider.tag != "Fighter") // TODO: Change this to the player tag
+                {
+                    Vector2 Latch_location = hit.point;
+                    Debug.Log("try to latch called");
+                    isLatched = TryToLatch(Latch_location, hit);
+                }
                 
             }
         }
@@ -301,6 +308,7 @@ public class TongueManager : MonoBehaviour
         {
             case LatchMovementType.LungeForward:
                 LungeForward();
+                player.stateMachine.ChangeState(player.lungingState);
                 tongueState = TongueState.LungeForward;
                 break;
             case LatchMovementType.LungeBack:
@@ -319,7 +327,6 @@ public class TongueManager : MonoBehaviour
                 Debug.LogError("Not implemented yet for " + movementType);
                 return;
         }
-        
     }
     public void LungeForward()
     {
