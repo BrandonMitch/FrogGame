@@ -10,6 +10,13 @@ public class PlayerState
     protected bool leftMouseUp = false;
     protected bool rightMouseDown = false;
     protected bool rightMouseUp = false;
+
+    protected float playerSpeed;
+    protected float playerMaxSpeed;
+    protected float playerRestingDrag;
+    protected float playerRunningDrag;
+    protected float playerDragSlowDownTime;
+    protected float playerRunForceModifier;
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
         this.player = player;
@@ -98,6 +105,14 @@ public class PlayerState
         }
     }
 
-
-
+    protected void getMovementVaraibles()
+    {
+        float[] vars = player.getMovementVaraibles();
+        playerSpeed = vars[0];
+        playerMaxSpeed = vars[1];
+        playerRestingDrag = vars[2];
+        playerRunningDrag = vars[3];
+        playerDragSlowDownTime = vars[4];
+        playerRunForceModifier = vars[5];
+    }
 }

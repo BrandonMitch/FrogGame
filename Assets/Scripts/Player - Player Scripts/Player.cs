@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : Mover, IDamageable
+public class Player : Mover
 {
     private SpriteRenderer spriteRenderer;
     private bool isAlive = true;
@@ -10,23 +10,23 @@ public class Player : Mover, IDamageable
     [Space]
     [Header("Movement Variables")]
     // Movement Varaibles
-    public float playerSpeed = 1.0f;
-    public float playerSpeedModifier = 0.0f;
+    private float mass;
+    [SerializeField] private float playerSpeed = 1.0f;
+    [SerializeField] private float playerMaxSpeed = 2.0f;
+    [SerializeField] private float playerRestingDrag = 5.0f;
+    [SerializeField] private float playerRunningDrag = 1.0f;
+    [SerializeField] private float playerDragSlowDownTime = 0.2f;
+    [SerializeField] private float playerRunForceModifier = 10f;
+   
     // TODO: Come up with better way to do this
-    public float attackSpeedModiferTime = 2f;
-    public bool attackSpeedModiferActive = false;
-    public float dashSpeed = 3.0f;
-    public float dashRecoverySpeed = 0.5f;
-    public float dashCoolDown = 3.0f;
-    public float dashDuration = 0.5f;
-    private float lastDash;
-    private bool dashing;
+
     [SerializeField] private Vector3 lastMoveDirection = new Vector3(0, 0, 0);
 
     private Vector3 dashDirection;
     private float xInput { get; set; }
     private float yInput { get; set; }
     private float speedForAnimation;
+    private Rigidbody2D playerRB;
 
 
 
@@ -75,7 +75,6 @@ public class Player : Mover, IDamageable
     public PlayerLungingState lungingState { get; set; }
     public PlayerLatchedState latchedState { get; set; }
 
- 
 
     public TongueStateMachine tongueStateMachine { get; set; }
 
@@ -85,9 +84,13 @@ public class Player : Mover, IDamageable
     public TongueThrowState tongueThrowState { get; set; }
     public TongueLatchedState tongueLatchedState { get; set; }
     public TongueLungeState tongueLungeState { get; set; }
+    public float PlayerSpeed { get => playerSpeed; set => playerSpeed = value; }
     #endregion
     private void Awake()
     {
+        playerRB = GetComponent<Rigidbody2D>();
+        mass = playerRB.mass;
+
         stateMachine = new PlayerStateMachine();
         // Intialize all of the player states
         idleState = new PlayerIdleState(this, stateMachine);
@@ -107,6 +110,18 @@ public class Player : Mover, IDamageable
         tongueLatchedState = new TongueLatchedState(this, tongueStateMachine);
         tongueLungeState = new TongueLungeState(this, tongueStateMachine);
     }
+    public float[] getMovementVaraibles()
+    {
+        float[] returnVals  = {
+            playerSpeed,                // 0
+            playerMaxSpeed,             // 1
+            playerRestingDrag,          // 2
+            playerRunningDrag,          // 3
+            playerDragSlowDownTime,     // 4
+            playerRunForceModifier };   // 5
+
+        return returnVals;
+    }
     private void AnimationTriggerEvent(AnimationTriggerType triggerType)
     {
         //TODO: Fill this in once we made player state machine, watch video to fill this part in
@@ -115,17 +130,6 @@ public class Player : Mover, IDamageable
     {
         PlayerDamaged,
         PlayerIdle,
-    }
-
-    // IMPLEMENT
-    public void Damage(float amount)
-    {
-        throw new System.NotImplementedException();
-    }
-    //IMPLEMENT
-    public void Die()
-    {
-        throw new System.NotImplementedException();
     }
 
     public void SetMovementInputs(Vector2 moveVec)
@@ -144,6 +148,11 @@ public class Player : Mover, IDamageable
     {
         return lastMoveDirection;
     }
+    public Rigidbody2D GetPlayerRigidBody()
+    {
+        return playerRB;
+    }
+
     public void SetLastMoveDirection(Vector2 direction)
     {
         lastMoveDirection = direction;
@@ -152,6 +161,7 @@ public class Player : Mover, IDamageable
     {
         return transform.position;
     }
+
     /***********************************---END---*********************************/
     protected override void Start()
     {
@@ -161,16 +171,18 @@ public class Player : Mover, IDamageable
         swapSpriteDirection = false;
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+
     }
     private void FixedUpdate()
     {
         //*******STATE MACHINE******//
         stateMachine.CurrentPlayerState.PhysicsUpdate();
         tongueStateMachine.CurrentTongueState.PhysicsUpdate();
+
         // Update movement. Every update motor with dashing will check if we are dashing
         if (isAlive)
         {
-            UpdateMotor(new Vector3(xInput, yInput, 0), dashing);
+            //UpdateMotor(new Vector3(xInput, yInput, 0));
         }
     }
     private void Update()
@@ -267,19 +279,18 @@ public class Player : Mover, IDamageable
         }
     }*/ // TODO: REMOVE PLAYER LEVEL SYSTEM
 
-    private void Dash()
+    /*private void Dash()
     {
         dashDirection = Vector3.Scale(lastMoveDirection, new Vector3(playerSpeed * dashSpeed, playerSpeed * dashSpeed, 0));
         
         Debug.Log("DASH");
         // DASH!
 
-    }
+    }*/
     private void BackSwordSwing()
     {
         // TODO: Sort out if we want to slow movement after a swing;
         animator.SetTrigger("QuickBackSlash");
-        attackSpeedModiferActive = true;
     }
 
     private void externalCall() // This method is used to call external events during an animation. If we want to spawn a slash then we set the enum to the correct value and then make a new event in the attack
@@ -296,12 +307,12 @@ public class Player : Mover, IDamageable
         }
     } 
     // Overloaded UpdateMotor() to include dashing.
-    protected virtual void UpdateMotor(Vector3 input, bool dashing)
+    protected virtual void UpdateMotor(Vector3 input)
     {
         swapSpriteDirection = false; // TODO: Remove this for optimization
-        base.UpdateMotor(input*CalculateSpeed()); // Base update motor from mover.
+        base.UpdateMotor(input*1); // Base update motor from mover.
 
-        if (dashing)
+        /**if (dashing)
         {
             // Update moveDelta to the push direction 
             moveDelta = dashDirection;
@@ -310,7 +321,7 @@ public class Player : Mover, IDamageable
 
             // Make sure we can move in this direction by casting a box there first, if the box returns nul, we're free to move
             // 
-            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(0, moveDelta.y), Mathf.Abs(moveDelta.y * Time.deltaTime), LayerMask.GetMask("Actor",/*"Enemy",*/ "Blocking"));
+            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(0, moveDelta.y), Mathf.Abs(moveDelta.y * Time.deltaTime), LayerMask.GetMask("Actor",/*"Enemy", "Blocking"));
             if (hit.collider == null)
             {
                 // move this thang
@@ -322,7 +333,7 @@ public class Player : Mover, IDamageable
                 dashDirection = Vector3.zero;
             }
             //xs
-            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(moveDelta.x, 0), Mathf.Abs(moveDelta.x * Time.deltaTime), LayerMask.GetMask("Actor",/*"Enemy",*/"Blocking"));
+            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(moveDelta.x, 0), Mathf.Abs(moveDelta.x * Time.deltaTime), LayerMask.GetMask("Actor","Enemy","Blocking"));
             if (hit.collider == null)
             {
                 // move this thang
@@ -333,18 +344,9 @@ public class Player : Mover, IDamageable
                 // If we hit an object then stop the dash
                 dashDirection = Vector3.zero;
             }
-        }
+        } **/
 
     }
-    float CalculateSpeed()
-    {
-        attackSpeedModiferActive = false;
-        //TODO: Fix this
-        float speed = Mathf.Clamp(playerSpeed * Mathf.Clamp(1.0f + playerSpeedModifier, 0, 20), 0, 20);
-        return speed;
-        
-    }
-
     public void Heal(int healingAmount)
     {
         if (hitpoint == maxHitpoint)
