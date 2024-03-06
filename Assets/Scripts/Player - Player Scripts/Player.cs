@@ -28,7 +28,8 @@ public class Player : Mover
     private float speedForAnimation;
     private Rigidbody2D playerRB;
 
-
+    [Space]
+    [Header("Attack Variables")]
 
     [Space]
     [Header("misc")]
@@ -51,7 +52,7 @@ public class Player : Mover
 
     [Space]
     [Header("Attack Varialbes")]
-    private float lastAttack;
+    private float lastAttack;// TODO: Remove these
     public float attackCoolDown = 1.2f;
     [Space]
     [Header("Inventory Related")]
@@ -74,7 +75,10 @@ public class Player : Mover
     public PlayerThrowingState throwingState { get; set; }
     public PlayerLungingState lungingState { get; set; }
     public PlayerLatchedState latchedState { get; set; }
-
+    public PlayerAttackChargingState attackChargingState { get; set; }
+    public PlayerAttackingState attackingState { get; set; }
+    public PlayerComboState comboState { get; set; }
+    public PlayerDeadState deadState { get; set; }
 
     public TongueStateMachine tongueStateMachine { get; set; }
 
@@ -100,7 +104,9 @@ public class Player : Mover
         throwingState = new PlayerThrowingState(this, stateMachine);
         lungingState = new PlayerLungingState(this, stateMachine);
         latchedState = new PlayerLatchedState(this, stateMachine);
-
+        attackChargingState = new PlayerAttackChargingState(this, stateMachine);
+        attackingState = new PlayerAttackingState(this, stateMachine);
+        comboState = new PlayerComboState(this, stateMachine);
 
         tongueStateMachine = new TongueStateMachine(tongueData);
         // Intialize all of the tongue states
@@ -178,12 +184,6 @@ public class Player : Mover
         //*******STATE MACHINE******//
         stateMachine.CurrentPlayerState.PhysicsUpdate();
         tongueStateMachine.CurrentTongueState.PhysicsUpdate();
-
-        // Update movement. Every update motor with dashing will check if we are dashing
-        if (isAlive)
-        {
-            //UpdateMotor(new Vector3(xInput, yInput, 0));
-        }
     }
     private void Update()
     {
@@ -210,7 +210,7 @@ public class Player : Mover
         } 
 
         // BackSlashTest
-        if (Input.GetButtonDown("Fire1"))
+        /*if (Input.GetButtonDown("Fire1"))
         {
             //Debug.Log("pressed t");
             if (Time.time - lastAttack > attackCoolDown)
@@ -222,7 +222,7 @@ public class Player : Mover
             {
                 Debug.Log("Attack on Cooldown ..." + (Time.time - lastAttack));
             }
-        }
+        }*/
     }
     public void AimTongueCrossHair()
     {
@@ -307,6 +307,7 @@ public class Player : Mover
         }
     } 
     // Overloaded UpdateMotor() to include dashing.
+    /*
     protected virtual void UpdateMotor(Vector3 input)
     {
         swapSpriteDirection = false; // TODO: Remove this for optimization
@@ -344,9 +345,9 @@ public class Player : Mover
                 // If we hit an object then stop the dash
                 dashDirection = Vector3.zero;
             }
-        } **/
-
-    }
+        } 
+    
+    }*/
     public void Heal(int healingAmount)
     {
         if (hitpoint == maxHitpoint)
@@ -367,9 +368,17 @@ public class Player : Mover
     {
         if (!Unkillable)
         {
+            deadState = new PlayerDeadState(this, stateMachine);
+            stateMachine.ChangeState(deadState);
+            deadState = null;
+        }
+        /*
+        if (!Unkillable)
+        {
             isAlive = false;
             GameManager.instance.deathMenuAnim.SetTrigger("Show");
         }
+        */
     }
     public void Respawn()
     {

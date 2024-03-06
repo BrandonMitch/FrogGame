@@ -58,26 +58,6 @@ public class Weapon : Colliad
         // Null is passed as the attack type for basic functionality
         // Colliad is passed for specific behavior in objects like ArcAttack where we need to make an arc shaped collider
         filterAttacks(coll, null); 
-        /**
-        if (coll.tag == "Fighter")
-        {
-            if (coll.name == "Player")
-            {
-                return;
-            }
-            // Create a damage object, then we'll send it to the fighter we've hit
-            Damage dmg = new Damage
-            {
-                damageAmount = damagePoint[weaponLevel],
-                origin = transform.position,
-                pushForce = pushForce[weaponLevel]
-            };
-
-            coll.SendMessage("ReceiveDamage", dmg);
-
-            //Debug.Log(coll.name);
-
-        }**/
     }
     public void AttackBehavior(Collider2D coll, Colliad attackType)
     {
@@ -156,7 +136,7 @@ public class Weapon : Colliad
             case AttacksWho.enemys: // Attacks Enemys
                 if (coll.tag == "Fighter")
                 {
-                    if (coll.name == "Player")
+                    if (coll.tag != "Player")
                     {
                         return;
                     }
@@ -165,7 +145,7 @@ public class Weapon : Colliad
                 }
                 break;
             case AttacksWho.players: // Attacks Players
-                if (coll.name == "Player")
+                if (coll.tag == "Player")
                 {
                     //Debug.Log(coll.name);
                     AttackBehavior(coll, attackType);

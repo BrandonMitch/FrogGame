@@ -6,7 +6,7 @@ public class Colliad : MonoBehaviour
 {
     [Header("FILTER")]
     public ContactFilter2D filter;
-    protected BoxCollider2D boxCollider;
+    protected Collider2D boxCollider;
     protected Collider2D[] hits = new Collider2D[10];
     public bool isUpdating = true;
 
@@ -38,7 +38,7 @@ public class Colliad : MonoBehaviour
     }
     protected virtual void OnCollide(Collider2D coll)
     {
-            Debug.Log("OnCollide WAS NOT IMPLEMENTED IN " + this.name + "\n");
+            Debug.Log("OnCollide WAS NOT IMPLEMENTED IN " + this.name );
             Debug.Log("PLEASE implement this method");
     }
     /**

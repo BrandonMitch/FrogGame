@@ -11,12 +11,6 @@ public class PlayerState
     protected bool rightMouseDown = false;
     protected bool rightMouseUp = false;
 
-    protected float playerSpeed;
-    protected float playerMaxSpeed;
-    protected float playerRestingDrag;
-    protected float playerRunningDrag;
-    protected float playerDragSlowDownTime;
-    protected float playerRunForceModifier;
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
         this.player = player;
@@ -36,7 +30,7 @@ public class PlayerState
         // Check movements;
         // set direction to x,y
         // set speedforanim to anim
-        player.Animate();
+        // player.Animate();
     }
     public virtual void PhysicsUpdate()
     {
@@ -57,7 +51,7 @@ public class PlayerState
     protected Vector2 GetCurrentMovementInputs()
     {
         // Check x/y movement, normalize vector
-        Vector2 moveVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
+        Vector2 moveVec = Vector2.ClampMagnitude(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")),1.0f);
         return moveVec;
     }
     protected void SetMovementInputs(Vector2 moveVec)
@@ -103,16 +97,5 @@ public class PlayerState
         } else {
             rightMouseUp = false;
         }
-    }
-
-    protected void getMovementVaraibles()
-    {
-        float[] vars = player.getMovementVaraibles();
-        playerSpeed = vars[0];
-        playerMaxSpeed = vars[1];
-        playerRestingDrag = vars[2];
-        playerRunningDrag = vars[3];
-        playerDragSlowDownTime = vars[4];
-        playerRunForceModifier = vars[5];
     }
 }

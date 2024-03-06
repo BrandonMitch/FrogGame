@@ -8,6 +8,25 @@ public class PlayerSlowingState : PlayerState
     private float enterTime;
     private float dT;
     private float error = 0.1f;
+
+    #region Movement Variables
+    protected float playerSpeed;
+    protected float playerMaxSpeed;
+    protected float playerRestingDrag;
+    protected float playerRunningDrag;
+    protected float playerDragSlowDownTime;
+    protected float playerRunForceModifier;
+    protected void getMovementVaraibles()
+    {
+        float[] vars = player.getMovementVaraibles();
+        playerSpeed = vars[0];
+        playerMaxSpeed = vars[1];
+        playerRestingDrag = vars[2];
+        playerRunningDrag = vars[3];
+        playerDragSlowDownTime = vars[4];
+        playerRunForceModifier = vars[5];
+    }
+    #endregion
     public PlayerSlowingState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
         playerRB = player.GetPlayerRigidBody();

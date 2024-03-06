@@ -6,6 +6,25 @@ public class PlayerMovingState : PlayerState
 {
     private Vector2 moveVec;
     private Rigidbody2D playerRB;
+
+    #region Movement Variables
+    protected float playerSpeed;
+    protected float playerMaxSpeed;
+    protected float playerRestingDrag;
+    protected float playerRunningDrag;
+    protected float playerDragSlowDownTime;
+    protected float playerRunForceModifier;
+    protected void getMovementVaraibles()
+    {
+        float[] vars = player.getMovementVaraibles();
+        playerSpeed = vars[0];
+        playerMaxSpeed = vars[1];
+        playerRestingDrag = vars[2];
+        playerRunningDrag = vars[3];
+        playerDragSlowDownTime = vars[4];
+        playerRunForceModifier = vars[5];
+    }
+    #endregion
     public PlayerMovingState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
         playerRB = player.GetPlayerRigidBody();
@@ -63,4 +82,6 @@ public class PlayerMovingState : PlayerState
     {
         this.moveVec = firstMoveDiretion;
     }
+
+
 }
