@@ -84,6 +84,7 @@ public class Player : Mover
 
     [SerializeField] private TongueData tongueData;
     public TongueOffState tongueOffState { get; set; }
+    public TongueRetractingState tongueRetractingState { get; set; }
     public TongueAimState tongueAimState { get; set; }
     public TongueThrowState tongueThrowState { get; set; }
     public TongueLatchedState tongueLatchedState { get; set; }
@@ -111,6 +112,7 @@ public class Player : Mover
         tongueStateMachine = new TongueStateMachine(tongueData);
         // Intialize all of the tongue states
         tongueOffState = new TongueOffState(this, tongueStateMachine);
+        tongueRetractingState = new TongueRetractingState(this, tongueStateMachine);
         tongueAimState = new TongueAimState(this, tongueStateMachine);
         tongueThrowState = new TongueThrowState(this, tongueStateMachine);
         tongueLatchedState = new TongueLatchedState(this, tongueStateMachine);
@@ -171,9 +173,16 @@ public class Player : Mover
     /***********************************---END---*********************************/
     protected override void Start()
     {
+ 
         base.Start();
+
         stateMachine.Intialize(idleState);
         tongueStateMachine.Intialize(tongueOffState);
+
+        // This is called for getting the line render componet and certain transforms that only need to be found one time
+        TongueState[] intilizedTongueStates = { tongueRetractingState };
+        tongueStateMachine.IntializeTongueStates(intilizedTongueStates);
+
         swapSpriteDirection = false;
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();

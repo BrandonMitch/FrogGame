@@ -58,5 +58,34 @@ public class TongueStateMachine
             Debug.Log("Line renderer null, try again");
         }
     }
+
+    public void TurnOffEndOfTongueRB()
+    {
+        endOfTongueRB.simulated = false;
+    }
+    public void DestroyEndOfTongue()
+    {
+        GameObject.Destroy(endOfTongue);
+    }
+    public Transform GetEndOfTongueTransform()
+    {
+        return endOfTongue.transform;
+    }
+    public bool isTongueRetracting()
+    {
+        return CurrentTongueState.isRetracting();
+    }
+
+    /* IntializeTongueStates is used for intializing tongue states that need certain transforms on the start call instead of the awake call. Typically used to grab transforms and lineRenderer
+     *  @param states : is a list of tongue states that you want to be intialized
+     *  Intialize() must be implemented in the tonguestate
+     */
+    public void IntializeTongueStates(TongueState[] states)
+    {
+        foreach (TongueState state in states)
+        {
+            state.Intialize();
+        }
+    }
 }
 

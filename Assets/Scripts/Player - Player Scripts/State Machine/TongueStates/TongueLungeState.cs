@@ -10,14 +10,13 @@ public class TongueLungeState : TongueState
 
     public override void EnterState()
     {
-        tongueStateMachine.ChangeState(player.tongueOffState);
+        tongueStateMachine.ChangeState(player.tongueRetractingState);
         player.stateMachine.ChangeState(player.idleState);
     }
 
     public override void ExitState()
     {
-        GameObject.Destroy(tongueStateMachine.endOfTongue);
-        Debug.Log("destroyed end of tongue");
+        Debug.Log("Left lunging state");
     }
 
     public override void FrameUpdate()

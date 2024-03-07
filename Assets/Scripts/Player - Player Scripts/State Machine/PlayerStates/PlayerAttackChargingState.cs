@@ -17,7 +17,8 @@ public class PlayerAttackChargingState : PlayerState
 
     public override void EnterState()
     {
-        attackEntryTime = Time.time;
+        Debug.Log("entered attack charging state");
+        SetAttackEntryTime();
     }
 
     public override void ExitState()
@@ -39,7 +40,7 @@ public class PlayerAttackChargingState : PlayerState
             playerStateMachine.ChangeState(player.attackingState);
             return;
         }
-        if (rightMouseDown)
+        if (rightMouseButton)
         {
             playerStateMachine.ChangeState(player.aimingTongueState);
             return;
@@ -49,5 +50,24 @@ public class PlayerAttackChargingState : PlayerState
     public override void PhysicsUpdate()
     {
 
+    }
+
+    public void SetAttackEntryTime()
+    {
+        string[] previousStateData = playerStateMachine.GetPreviousStateData();
+        foreach (string s in previousStateData)
+        {
+            Debug.Log("contents:" + s);
+        }
+        int i = ParsePreviousStateDataFor(previousStateData, "startChargingTime");
+        if (i != -1)
+        {
+            attackEntryTime = parseDataForFloat(previousStateData[i]);
+        }
+        else
+        {
+            Debug.Log("FAILED TO READ STARTCHARGING TIME");
+            attackEntryTime = Time.time;
+        }
     }
 }

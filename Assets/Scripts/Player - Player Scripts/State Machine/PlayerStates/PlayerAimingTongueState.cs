@@ -34,7 +34,7 @@ public class PlayerAimingTongueState : PlayerState
     {
 
         FindRightMouseInputs();
-        if (rightMouseDown)
+        if (rightMouseButton)
         {
             //Debug.Log("aiming");
             player.AimTongueCrossHair();

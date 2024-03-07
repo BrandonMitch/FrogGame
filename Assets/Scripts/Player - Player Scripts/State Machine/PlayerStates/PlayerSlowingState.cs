@@ -7,7 +7,7 @@ public class PlayerSlowingState : PlayerState
     private Rigidbody2D playerRB;
     private float enterTime;
     private float dT;
-    private float error = 0.1f;
+    private const float ERROR = 0.1f;
 
     #region Movement Variables
     protected float playerSpeed;
@@ -62,7 +62,7 @@ public class PlayerSlowingState : PlayerState
     public override void PhysicsUpdate()
     {
         float velocityMagnitude = playerRB.velocity.magnitude;
-        if ( velocityMagnitude < error )
+        if ( velocityMagnitude < ERROR )
         {
             playerRB.velocity = Vector2.zero;
             playerStateMachine.ChangeState(player.idleState);

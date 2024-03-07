@@ -90,7 +90,7 @@ public class TongueThrowState : TongueState
             }
         }
         if (needToCalculateVel == false)
-        {
+        {   // TODO: I dont think raycast hit2d is working in this
             Vector2 currentPos = endOfTongueRB.position;
             Vector2 nextPos = currentPos + TongueVelocity * Time.fixedDeltaTime;
             RaycastHit2D[] hits = Physics2D.CircleCastAll(currentPos, 0.02f, TongueVelocity, (nextPos - currentPos).magnitude);

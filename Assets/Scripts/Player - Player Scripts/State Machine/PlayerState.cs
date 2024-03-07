@@ -1,16 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerState
 {
     protected Player player;
     protected PlayerStateMachine playerStateMachine;
-    protected bool leftMouseDown = false;
-    protected bool leftMouseUp = false;
-    protected bool rightMouseDown = false;
-    protected bool rightMouseUp = false;
-
+    static protected bool leftMouseDown = false;
+    static protected bool leftMouseUp = false;
+    static protected bool leftMouseButton = false;
+    static protected bool rightMouseDown = false;
+    static protected bool rightMouseUp = false;
+    static protected bool rightMouseButton = false;
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
         this.player = player;
@@ -42,7 +41,7 @@ public class PlayerState
 
     }
 
-    // IMPLEMENT
+    // TODO: IMPLEMENT
     public virtual float CalculateSpeed()
     {
         return 1.0f;
@@ -69,33 +68,112 @@ public class PlayerState
     }
     protected void FindLeftMouseInputs()
     {
+        // Trying to charge
+        leftMouseButton = Input.GetButton("Fire1");
         // Attack is started
-        if (Input.GetButtonDown("Fire1")) {
-            leftMouseDown = true;
-        } else {
-            leftMouseDown = false;
-        }
-
+        leftMouseDown = Input.GetButtonDown("Fire1");
         // Attack is released
-        if (Input.GetButtonUp("Fire1")) {
-            leftMouseUp = true;
-        } else {
-            leftMouseUp = false;
-        }
+        leftMouseUp = Input.GetButtonUp("Fire1");
+       
     }
     protected void FindRightMouseInputs()
     {
         // Aiming the tongue
-        if (Input.GetButton("Fire2")) {
-            rightMouseDown = true;
-        } else {
-            rightMouseDown = false;
-        }
+        rightMouseButton = Input.GetButton("Fire2");
+        // Start aiming the tongue
+        rightMouseDown = Input.GetButtonDown("Fire2");
         // Spitting out the tongue on release
-        if (Input.GetButtonUp("Fire2")) {
-            rightMouseUp = true;
-        } else {
-            rightMouseUp = false;
+        rightMouseUp = Input.GetButtonUp("Fire2");
+    }
+
+    public virtual string[] previousStateData()
+    {
+        string[] s = { "NULL" };
+        return s;
+    }
+
+
+    /** Reads state data in search of a string.
+    *  @return : If the term is found, it returns the index of the term and stores int an array.
+    *  The position of the int[] array corresponds to the position of the term array
+    *   parse( {hi,NULL,NULL,time} , {hi,time,DNE} ) would return {0,3,-1}
+    */
+    protected int[] ParsePreviousStateDataFor(string[] data, string[] terms)
+    {
+        int[] containsTermArray = new int[terms.Length];
+        
+        int termIndex = 0;
+        foreach (string term in terms) // for each term, search through the data array
+        {
+            containsTermArray[termIndex] = -1; // Intialize to -1 indicating term not found
+
+            int dataindex = 0;
+            foreach (string lineOfData in data) // searching line by line
+            {
+                if ( (lineOfData != null) && (lineOfData != "NULL") && (lineOfData.Contains(term)))
+                {
+                    containsTermArray[termIndex] = dataindex; // store the index where the term is found
+                    break; // exit the loop once the term is found
+                }
+                dataindex++;
+            }
+            termIndex++;
         }
+        return containsTermArray;
+    }
+    /** TEST CASE 
+    int[] result = ParsePreviousStateDataFor(new string[] { "hi", "NULL", "___ dog", "yolo", "NULL" }, new string[] { "hi", "dog", "yolo", "DNE" });
+
+    int r2 = ParsePreviousStateDataFor(new string[] { "" }, "hi");
+    string s = "result = {";
+        foreach (int n in result)
+        {
+            s += n + ", ";
+        }
+    Debug.Log(s + "}");
+    Debug.Log("result2= " + r2);
+    */
+
+/** Reads state data in search of a string, usuually a variable name.
+ *  @return : If the term is found, it returns the index of the term. If it is not found it returns -1
+ *  parse( {NULL,hi,NULL} , hi ) returns 1
+ */
+    protected int ParsePreviousStateDataFor(string[] data, string term)
+    {
+        int dataIndex = 0;
+        foreach (string lineOfData in data)
+        {
+            if ((lineOfData != null) && (lineOfData != "NULL") && (lineOfData.Contains(term)) ) {
+                return dataIndex; 
+            }
+            dataIndex++;
+        }
+        return -1;
+    }
+
+    protected float parseDataForFloat(string input)
+    {
+        // Your parsing logic here
+        string[] parts = input.Split('=');
+
+        if (parts.Length >= 2)
+        {
+            string variable = parts[0].Trim();
+            float nextFloat;
+
+            if (float.TryParse(parts[1], out nextFloat))
+            {
+                return nextFloat;
+            }
+            else
+            {
+                Debug.LogError("Failed to parse the next float.");
+            }
+        }
+        else
+        {
+            Debug.LogError("Invalid input string format.");
+        }
+        return 0;
     }
 }

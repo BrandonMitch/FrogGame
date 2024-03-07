@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerStateMachine 
 {
     public PlayerState CurrentPlayerState { get; set; }
+    private PlayerState PreviousPlayerState;
 
     private List<AttackInputData> attackBuffer;
 
@@ -17,9 +18,10 @@ public class PlayerStateMachine
 
     public void ChangeState(PlayerState newState)
     {
+        PreviousPlayerState = CurrentPlayerState;
         CurrentPlayerState.ExitState();
         CurrentPlayerState = newState;
-        CurrentPlayerState.EnterState();
+        CurrentPlayerState.EnterState(); 
     }
     public AttackInputData GetEarliestInAttackBuffer()
     {
@@ -53,5 +55,10 @@ public class PlayerStateMachine
         {
             Debug.LogError("FAILED TO REMOVE ATTACK FROM BUFFER");
         }
+    }
+
+    public string[] GetPreviousStateData()
+    {
+        return PreviousPlayerState.previousStateData();
     }
 }

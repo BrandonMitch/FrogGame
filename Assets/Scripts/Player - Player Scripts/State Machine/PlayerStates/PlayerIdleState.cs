@@ -35,14 +35,14 @@ public class PlayerIdleState : PlayerState
 
     public override void EnterState()
     {
-        SetMovementInputs(Vector2.zero, 0.0f);   
+        SetMovementInputs(Vector2.zero, 0.0f);
+        ClearStateData();
     }
 
     public override void ExitState()
     {
-
     }
-
+    private float startChargingTime = 0;
     public override void FrameUpdate()
     {
         Vector2 moveVec = GetCurrentMovementInputs();
@@ -50,16 +50,22 @@ public class PlayerIdleState : PlayerState
         FindRightMouseInputs();
         FindLeftMouseInputs();
         //Debug.Log("Right mouse inputs: up " + rightMouseUp + " down " + rightMouseDown);
-        if (rightMouseDown) {
-            player.stateMachine.ChangeState(player.aimingTongueState);
-            return;
-        }
-        // Then check attack inputs
-        if (leftMouseDown)
+        
+        
+        if (rightMouseButton)
         {
-            player.stateMachine.ChangeState(player.attackChargingState);
-            return;
+            if (TryChangingToTongueAimingState()) return;
         }
+        // Save the time when the player starts charging
+        if (leftMouseDown) {
+            SaveStateData(0,"startChargingTime = " + Time.time); ;
+        }
+
+        if (leftMouseButton) // while the button is being held down, we want to save the time
+        {
+            if (TryChangingToAttackChargingState()) return;
+        }
+
         // Then check movement
         if(moveVec != Vector2.zero)
         {
@@ -72,5 +78,44 @@ public class PlayerIdleState : PlayerState
     public override void PhysicsUpdate()
     {
 
+    }
+
+    private bool TryChangingToTongueAimingState()
+    {
+        bool tongueIsNotRetracting = !player.tongueStateMachine.isTongueRetracting();
+        if (tongueIsNotRetracting)
+        {
+            playerStateMachine.ChangeState(player.aimingTongueState);
+            return true;
+        }
+        return false;
+    }
+
+    private bool TryChangingToAttackChargingState()
+    {
+        bool tongueIsNotRetracting = !player.tongueStateMachine.isTongueRetracting();
+        if (tongueIsNotRetracting)
+        {
+            playerStateMachine.ChangeState(player.attackChargingState);
+            return true;
+        }
+        return false;
+    }
+
+    private string[] stateData = new string[1];
+    public void SaveStateData(int index,string s)
+    {
+        stateData[index] = s; 
+    }
+    public void ClearStateData()
+    {
+        for (int i = 0; i < stateData.Length; i++)
+        {
+            stateData[i] = "";
+        }
+    }
+    public override string[] previousStateData()
+    {
+        return stateData;
     }
 }
