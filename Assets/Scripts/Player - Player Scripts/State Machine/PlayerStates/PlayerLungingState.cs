@@ -17,13 +17,17 @@ public class PlayerLungingState : PlayerState
     private float lateralForceModifer;
     private float minimumLateralDuration;
     private float lateralDragCoefficient;
+    private ContactFilter2D tongeContactFilter;
+
     protected void getLungeVariables()
     {
-        float[] vars = player.getLungeVaraiables();
-        lateralForceModifer = vars[0];
-        minimumLateralDuration = vars[1];
-        lateralDragCoefficient = vars[2];
+        ArrayList vars = player.getLungeVaraiables();
+        lateralForceModifer = (float)vars[0];
+        minimumLateralDuration = (float)vars[1];
+        lateralDragCoefficient = (float)vars[2];
+        tongeContactFilter = (ContactFilter2D)vars[3];
     }
+    private float v0;
     #endregion
 
     /*End of Tongue Variables*/
@@ -64,10 +68,14 @@ public class PlayerLungingState : PlayerState
             case LatchMovementType.LungeLeft:
                 playerRB.drag = lateralDragCoefficient;
                 playerRB.AddForce(-ihat*lateralForceModifer);
+                v0 = /* dT Fmultiplier / m */ Time.fixedDeltaTime * lateralForceModifer / playerRB.mass;
+                Debug.Log("V_0 " + v0);
                 break;
             case LatchMovementType.LungeRight:
                 playerRB.drag = lateralDragCoefficient;
                 playerRB.AddForce(ihat*lateralForceModifer);
+                v0 = /* dT Fmultiplier / m */ Time.fixedDeltaTime * lateralForceModifer / playerRB.mass;
+                Debug.Log("V_0 = " + v0);
                 break;
             case LatchMovementType.LungeBack:
                 break;
@@ -151,7 +159,7 @@ public class PlayerLungingState : PlayerState
 
     private void LateralLunge(LatchMovementType direction)
     {
-
+        
         switch (direction)
         {
             case LatchMovementType.LungeLeft:
@@ -162,6 +170,35 @@ public class PlayerLungingState : PlayerState
                 Debug.LogError("Error in player lateral lunge state, should not be waiting or invalid state");
                 return;
         }
+        Vector2 playerPos = playerRB.position;
+        Vector2 tongePos = endOfTongueTransform.position;
+        {
+            RaycastHit2D[] collisions = new RaycastHit2D[3];
+            int result = Physics2D.Linecast(tongePos, playerPos, tongeContactFilter, collisions);
+            foreach (RaycastHit2D col in collisions)
+            {
+                Collider2D collision = col.collider;
+                if (collision != null) // Check if the collision is not null
+                {
+                    if (collision.tag != "Player")
+                    {
+                        Debug.Log("Collision Name: " + collision.name);
+                        DrawCircle(col.point, 0.03f, 10, Color.red);
+                        ShutOffTongueForLateral();
+                    }
+                }
+            }
+        }
+
+        Vector2 forceDirection = (tongePos - playerPos);
+
+        Debug.DrawLine(tongePos, forceDirection, Color.blue);
+        float radius = forceDirection.magnitude;
+        DrawCircle(endOfTongueTransform.position, radius, 50, Color.blue);
+        float mass = playerRB.mass;
+        forceDirection.Normalize();
+        playerRB.AddForce(forceDirection * (mass * v0 * v0) / (radius)); // Fc = m v0^2 / r
+
     }
     private void ForwardLunge()
     {
@@ -173,13 +210,17 @@ public class PlayerLungingState : PlayerState
     }
     private void TryShutOffForLateralLunge()
     {
-        Debug.Log("trying to shut off lateral lunge");
+        //Debug.Log("trying to shut off lateral lunge");
         if (Time.time > minimumLateralDuration + entryTime)
         {
             Debug.Log("sucess!");
-            playerStateMachine.ChangeState(player.slowingState);
-            player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+            ShutOffTongueForLateral();
         }
+    }
+    private void ShutOffTongueForLateral()
+    {
+        playerStateMachine.ChangeState(player.slowingState);
+        player.tongueStateMachine.ChangeState(player.tongueRetractingState);
     }
     private void TryShutOffForForwardsLunge()
     {
