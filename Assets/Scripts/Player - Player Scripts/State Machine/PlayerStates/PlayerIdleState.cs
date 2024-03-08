@@ -41,6 +41,7 @@ public class PlayerIdleState : PlayerState
 
     public override void ExitState()
     {
+
     }
     private float startChargingTime = 0;
     public override void FrameUpdate()

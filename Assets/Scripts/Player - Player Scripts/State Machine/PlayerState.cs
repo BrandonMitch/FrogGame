@@ -15,26 +15,10 @@ public class PlayerState
         this.player = player;
         this.playerStateMachine = playerStateMachine;
     }
-
-    public virtual void EnterState()
-    {
-
-    }
-    public virtual void ExitState()
-    {
-
-    }
-    public virtual void FrameUpdate()
-    {
-        // Check movements;
-        // set direction to x,y
-        // set speedforanim to anim
-        // player.Animate();
-    }
-    public virtual void PhysicsUpdate()
-    {
-
-    }
+    public virtual void EnterState() { }
+    public virtual void ExitState() { }
+    public virtual void FrameUpdate() { }
+    public virtual void PhysicsUpdate() { }
 
     public virtual void AnimationTriggerEvent(Player.AnimationTriggerType triggerType) 
     {
@@ -92,7 +76,6 @@ public class PlayerState
         return s;
     }
 
-
     /** Reads state data in search of a string.
     *  @return : If the term is found, it returns the index of the term and stores int an array.
     *  The position of the int[] array corresponds to the position of the term array
@@ -134,7 +117,7 @@ public class PlayerState
     Debug.Log("result2= " + r2);
     */
 
-/** Reads state data in search of a string, usuually a variable name.
+    /** Reads state data in search of a string, usuually a variable name.
  *  @return : If the term is found, it returns the index of the term. If it is not found it returns -1
  *  parse( {NULL,hi,NULL} , hi ) returns 1
  */

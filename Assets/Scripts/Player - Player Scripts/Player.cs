@@ -17,7 +17,16 @@ public class Player : Mover
     [SerializeField] private float playerRunningDrag = 1.0f;
     [SerializeField] private float playerDragSlowDownTime = 0.2f;
     [SerializeField] private float playerRunForceModifier = 10f;
-   
+    [Space]
+    [Header("Lunge Variables")]
+    [SerializeField] private float lateralForceModifer = 10f;
+    [SerializeField] private float minimumLateralDuration = 1.0f;
+    [SerializeField] private float lateralDragCoefficient = 1.0f;
+
+
+    private Rigidbody2D playerRB;
+    private Collider2D playerCollider;
+
     // TODO: Come up with better way to do this
 
     [SerializeField] private Vector3 lastMoveDirection = new Vector3(0, 0, 0);
@@ -26,7 +35,8 @@ public class Player : Mover
     private float xInput { get; set; }
     private float yInput { get; set; }
     private float speedForAnimation;
-    private Rigidbody2D playerRB;
+
+
 
     [Space]
     [Header("Attack Variables")]
@@ -52,8 +62,7 @@ public class Player : Mover
 
     [Space]
     [Header("Attack Varialbes")]
-    private float lastAttack;// TODO: Remove these
-    public float attackCoolDown = 1.2f;
+
     [Space]
     [Header("Inventory Related")]
     public Item[] inventory;
@@ -94,6 +103,7 @@ public class Player : Mover
     private void Awake()
     {
         playerRB = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<Collider2D>();
         mass = playerRB.mass;
 
         stateMachine = new PlayerStateMachine();
@@ -118,18 +128,6 @@ public class Player : Mover
         tongueLatchedState = new TongueLatchedState(this, tongueStateMachine);
         tongueLungeState = new TongueLungeState(this, tongueStateMachine);
     }
-    public float[] getMovementVaraibles()
-    {
-        float[] returnVals  = {
-            playerSpeed,                // 0
-            playerMaxSpeed,             // 1
-            playerRestingDrag,          // 2
-            playerRunningDrag,          // 3
-            playerDragSlowDownTime,     // 4
-            playerRunForceModifier };   // 5
-
-        return returnVals;
-    }
     private void AnimationTriggerEvent(AnimationTriggerType triggerType)
     {
         //TODO: Fill this in once we made player state machine, watch video to fill this part in
@@ -152,6 +150,7 @@ public class Player : Mover
         xInput = moveVec.x;
         yInput = moveVec.y;
     }
+    #region ---Getter's---
     public Vector2 GetLastMoveDirection()
     {
         return lastMoveDirection;
@@ -160,15 +159,45 @@ public class Player : Mover
     {
         return playerRB;
     }
-
-    public void SetLastMoveDirection(Vector2 direction)
-    {
-        lastMoveDirection = direction;
-    }
     public Vector3 GetPosition()
     {
         return transform.position;
     }
+    public Collider2D GetCollider()
+    {
+        return playerCollider;
+    }
+    public Vector3 GetCrossHairPosition()
+    {
+        return crossHair.getCrossHairPosition();
+    }
+    public float[] getMovementVaraibles()
+    {
+        float[] returnVals = {
+            playerSpeed,                // 0
+            playerMaxSpeed,             // 1
+            playerRestingDrag,          // 2
+            playerRunningDrag,          // 3
+            playerDragSlowDownTime,     // 4
+            playerRunForceModifier };   // 5
+
+        return returnVals;
+    }
+    public float[] getLungeVaraiables()
+    {
+        float[] returnVals = {
+            lateralForceModifer,
+            minimumLateralDuration,
+            lateralDragCoefficient,
+        };
+        return returnVals;
+    }
+    #endregion
+    public void SetLastMoveDirection(Vector2 direction)
+    {
+        lastMoveDirection = direction;
+    }
+
 
     /***********************************---END---*********************************/
     protected override void Start()
@@ -180,10 +209,9 @@ public class Player : Mover
         tongueStateMachine.Intialize(tongueOffState);
 
         // This is called for getting the line render componet and certain transforms that only need to be found one time
-        TongueState[] intilizedTongueStates = { tongueRetractingState };
+        TongueState[] intilizedTongueStates = { tongueRetractingState, tongueLatchedState, tongueLungeState, tongueThrowState };
         tongueStateMachine.IntializeTongueStates(intilizedTongueStates);
 
-        swapSpriteDirection = false;
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -218,20 +246,6 @@ public class Player : Mover
             lastMoveDirection = new Vector3(xInput, yInput, 0);
         } 
 
-        // BackSlashTest
-        /*if (Input.GetButtonDown("Fire1"))
-        {
-            //Debug.Log("pressed t");
-            if (Time.time - lastAttack > attackCoolDown)
-            {
-                //Debug.Log("swing now");
-                BackSwordSwing();
-            }
-            else
-            {
-                Debug.Log("Attack on Cooldown ..." + (Time.time - lastAttack));
-            }
-        }*/
     }
     public void AimTongueCrossHair()
     {
@@ -240,10 +254,6 @@ public class Player : Mover
 
         //tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
         tongueAimState.AimTongue(GetCrossHairPosition());
-    }
-    public Vector3 GetCrossHairPosition()
-    {
-        return crossHair.getCrossHairPosition();
     }
     public void SpitOutTongueOnRelease()
     {

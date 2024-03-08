@@ -8,12 +8,12 @@ public class PlayerMovingState : PlayerState
     private Rigidbody2D playerRB;
 
     #region Movement Variables
-    protected float playerSpeed;
-    protected float playerMaxSpeed;
-    protected float playerRestingDrag;
-    protected float playerRunningDrag;
-    protected float playerDragSlowDownTime;
-    protected float playerRunForceModifier;
+    static protected float playerSpeed;
+    static protected float playerMaxSpeed;
+    static protected float playerRestingDrag;
+    static protected float playerRunningDrag;
+    static protected float playerDragSlowDownTime;
+    static protected float playerRunForceModifier;
     protected void getMovementVaraibles()
     {
         float[] vars = player.getMovementVaraibles();

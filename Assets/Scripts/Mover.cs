@@ -9,17 +9,9 @@ public abstract class Mover : Fighter
     protected RaycastHit2D hit;
     public float ySpeed = 0.75f;
     public float xSpeed = 1.0f;
-    protected bool swapSpriteDirection = false;
-  
 
-    // Filter For collider?
-    public ContactFilter2D overlayContactFilter;
 
-    // Empty Colliders 
-    public bool enableOverlaySprite = false;
-    private Collider2D[] overlayhits = new Collider2D[10];
     //private bool stopRunning = false;
-    private bool lastState = false;
 
 
     protected virtual void Start()
@@ -34,20 +26,16 @@ public abstract class Mover : Fighter
         moveDelta = new Vector3(input.x * xSpeed, input.y * ySpeed, 0);
 
         // Swap Sprite Direction, Wether you're going right or left
-        if (swapSpriteDirection)
-        { 
-            if (moveDelta.x > 0)
-            {
-                transform.localScale = Vector3.one;
-            }
-            else if (moveDelta.x < 0)
-            {
-                transform.localScale = new Vector3(-1, 1, 1);
-            }
-        
+
+        if (moveDelta.x > 0)
+        {
+            transform.localScale = Vector3.one;
         }
-        //if (pushDirection != Vector3.zero) { 
-        //Debug.Log(pushDirection.ToString()); }
+        else if (moveDelta.x < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+        
 
         // Add Push Vetor, if any
         moveDelta += pushDirection;
@@ -73,27 +61,4 @@ public abstract class Mover : Fighter
         
     }
 
-    protected virtual bool OverlayCheck()
-    {
-        if (enableOverlaySprite)
-        {
-            boxCollider.OverlapCollider(overlayContactFilter, overlayhits /*outputs a list of collisions*/);
-
-            for (int i = 0; i < overlayhits.Length; i++)
-            {
-                if (overlayhits[i] == null)
-                    continue;
-
-                //The array is not cleaned up, so we do it ourself
-                overlayhits[i] = null;
-
-                return true; // we are behind something
-            }
-            return false;
-        }
-        else
-        {
-            return lastState;
-        }
-    }
 }

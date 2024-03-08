@@ -66,7 +66,6 @@ public class PlayerLatchedState : PlayerState
 
     public Vector2 getPlayerInput()
     {
-
         return _playerInput;
     }
 }

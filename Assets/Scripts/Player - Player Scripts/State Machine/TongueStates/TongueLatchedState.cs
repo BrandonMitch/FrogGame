@@ -1,18 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MovementNameSpace;
 
 public class TongueLatchedState : TongueState
 {
-    public enum LatchMovementType
-    {
-        None,
-        Waiting,
-        LungeForward,
-        LungeLeft,
-        LungeRight,
-        LungeBack,
-    };
     private LatchMovementType movementType;
     private Transform endOfTongueTransform;
     private Transform parentTransform;
@@ -20,14 +12,16 @@ public class TongueLatchedState : TongueState
     public TongueLatchedState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
     }
-
+    public override void Intialize()
+    {
+        parentTransform = tongueStateMachine.parentTransform;
+    }
     public override void EnterState()
     {
         Debug.Log("made it to latched state");
         movementType = LatchMovementType.Waiting;
         player.stateMachine.ChangeState(player.latchedState);
         endOfTongueTransform = tongueStateMachine.endOfTongue.transform;
-        parentTransform = tongueStateMachine.parentTransform;
     }
 
     public override void ExitState()
@@ -45,29 +39,23 @@ public class TongueLatchedState : TongueState
     {
         switch (movementType)
         {
-            case LatchMovementType.None:
-                break;
             case LatchMovementType.Waiting:
                 break;
             case LatchMovementType.LungeForward:
                 Debug.Log("LUNGE FORWARD");
-                player.stateMachine.ChangeState(player.lungingState);
-                player.tongueStateMachine.ChangeState(player.tongueLungeState);
+                ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeLeft:
                 Debug.Log("lunge left");
-                player.stateMachine.ChangeState(player.lungingState);
-                player.tongueStateMachine.ChangeState(player.tongueLungeState);
+                ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeRight:
                 Debug.Log("lunge right");
-                player.stateMachine.ChangeState(player.lungingState);
-                player.tongueStateMachine.ChangeState(player.tongueLungeState);
+                ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeBack:
                 Debug.Log("Lunge back");
-                player.stateMachine.ChangeState(player.lungingState);
-                player.tongueStateMachine.ChangeState(player.tongueLungeState);
+                ChangeToLungingState(movementType);
                 break;
             default:
                 Debug.LogError("invalid state of movement type in TongueLatchedState");
@@ -75,6 +63,8 @@ public class TongueLatchedState : TongueState
         }
     }
 
+    private Vector2 ihat;
+    private Vector2 jhat;
     public LatchMovementType readInput()
     {
 
@@ -110,18 +100,22 @@ public class TongueLatchedState : TongueState
             float max = Mathf.Max(f, Mathf.Max(d, Mathf.Max(r, l))); // Now the max value will correspond to the action the player is trying to preform
             if (max == f)
             {
+                this.ihat = ihat; this.jhat = jhat;
                 return LatchMovementType.LungeForward;
             }
             else if (max == d)
             {
+                this.ihat = ihat; this.jhat = jhat;
                 return LatchMovementType.LungeBack;
             }
             else if (max == r)
             {
+                this.ihat = ihat; this.jhat = jhat;
                 return LatchMovementType.LungeRight;
             }
             else if (max == l)
             {
+                this.ihat = ihat; this.jhat = jhat;
                 return LatchMovementType.LungeLeft;
             }
             else
@@ -133,8 +127,23 @@ public class TongueLatchedState : TongueState
         //Debug.LogError("can't detect state");
         return LatchMovementType.Waiting;
     }
-    /** public void RecieveBufferedMovementFromThrowingState(Vector2 bufferedMovementInput)
+
+
+    private void ChangeToLungingState(LatchMovementType m)
     {
-        this.bufferedInput = bufferedMovementInput;
-    }**/
+        player.lungingState.SetLatchMovementType(m);
+        player.tongueLungeState.SetLatchMovementType(m);
+        
+        player.stateMachine.ChangeState(player.lungingState);
+        player.tongueStateMachine.ChangeState(player.tongueLungeState);
+    }
+    public Vector2 GetIhat()
+    {
+        return ihat;
+    }
+    public Vector2 GetJhat()
+    {
+        return jhat;
+    }
+
 }

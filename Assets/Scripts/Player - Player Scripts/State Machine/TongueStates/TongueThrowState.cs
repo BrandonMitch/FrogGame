@@ -6,7 +6,7 @@ public class TongueThrowState : TongueState
 {
     private LineRenderer lineRenderer;
     private Transform parentTransform;
-    private GameObject endOfTongue;
+
     private Transform endOfTongueTransform;
     private Rigidbody2D endOfTongueRB;
     private bool needToCalculateVel = true;
@@ -18,29 +18,30 @@ public class TongueThrowState : TongueState
     public TongueThrowState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
     }
+    public override void Intialize()
+    {
+        lineRenderer = tongueStateMachine.lineRenderer;
+        parentTransform = tongueStateMachine.parentTransform;
+    }
 
     public override void EnterState()
     {
-
         // Declare variables (just for readability so  I don't have to write tongueStatemachine.linerenderer
-        lineRenderer = tongueStateMachine.lineRenderer;
-        parentTransform = tongueStateMachine.parentTransform;
-        endOfTongue = tongueStateMachine.endOfTongue;
+        GameObject endOfTongue = tongueStateMachine.endOfTongue;
         endOfTongueTransform = endOfTongue.transform;
         endOfTongueRB = tongueStateMachine.endOfTongueRB;
 
-        // Set start of tongue a the parent transform position
-        lineRenderer.SetPosition(0, parentTransform.position);
-        // Set end of tongue at the end of the tongue game object that we instiated 
-        lineRenderer.SetPosition(1, endOfTongueTransform.position);
-
-       
         endOfTongueTransform.position = parentTransform.position;
         endOfTongueRB.simulated = true; // Enable physics for tongue
         TongueVelocity = Vector2.zero;
         moveTongueTowards(tongueStateMachine.aimLocation);
+
+        // turn on rendering for tongue
+        lineRenderer.enabled = true; 
+        // Set start of tongue a the parent transform position
         lineRenderer.SetPosition(0, parentTransform.position);
-        lineRenderer.enabled = true; // turn on rendering for tongue
+        // Set end of tongue at the end of the tongue game object that we instiated 
+        lineRenderer.SetPosition(1, endOfTongueTransform.position);
     }
 
     public override void ExitState()
@@ -48,10 +49,8 @@ public class TongueThrowState : TongueState
         needToCalculateVel = true;
         willNotHitNextFrame = true;
     }
-
     public override void FrameUpdate()
     {
-
     }
 
     public override void PhysicsUpdate()
