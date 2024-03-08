@@ -19,9 +19,10 @@ public class Player : Mover
     [SerializeField] private float playerRunForceModifier = 10f;
     [Space]
     [Header("Lunge Variables")]
-    [SerializeField] private float lateralForceModifer = 10f;
+    [SerializeField] private float lateralForceModifer = 100f;
     [SerializeField] private float minimumLateralDuration = 1.0f;
-    [SerializeField] private float lateralDragCoefficient = 1.0f;
+    [SerializeField] private float lateralDragCoefficient = 0f;
+    [SerializeField] private ContactFilter2D tongueContactFilter;
 
 
     private Rigidbody2D playerRB;
@@ -183,12 +184,14 @@ public class Player : Mover
 
         return returnVals;
     }
-    public float[] getLungeVaraiables()
+    public ArrayList getLungeVaraiables()
     {
-        float[] returnVals = {
+        ArrayList returnVals = new()
+        {
             lateralForceModifer,
             minimumLateralDuration,
             lateralDragCoefficient,
+            tongueContactFilter,
         };
         return returnVals;
     }
