@@ -60588,6 +60588,10 @@ PrefabInstance:
       propertyPath: endOfTongueTransform
       value: 
       objectReference: {fileID: 1908620313}
+    - target: {fileID: 568737985, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
+      propertyPath: tongueHitCollisionPrefab
+      value: 
+      objectReference: {fileID: 9103127342489721855, guid: 3ad6b3e3beda65441be3d0b28523f850, type: 3}
     - target: {fileID: 639816385, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -60653,12 +60657,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
+      propertyPath: dampingCoefficient
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
       propertyPath: lateralForceModifer
-      value: 100
+      value: 150
       objectReference: {fileID: 0}
     - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
       propertyPath: lateralDragCoefficient
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
+      propertyPath: minimumLateralDuration
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
+      propertyPath: minimumTimeToSpawnANewPoint
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
+      propertyPath: minimumDistanceToSpawnANewPoint
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 6207452951197764871, guid: ee3826aabed627c46b81b4388e0819e1, type: 3}
       propertyPath: tongueContactFilter.layerMask.m_Bits

@@ -27,7 +27,7 @@ public class TongueLungeState : TongueState
 
     public override void ExitState()
     {
-        Debug.Log("Left lunging tongue state");
+        //Debug.Log("Left lunging tongue state");
     }
 
     public override void FrameUpdate()
@@ -37,7 +37,16 @@ public class TongueLungeState : TongueState
 
     public override void PhysicsUpdate()
     {
-        UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
+        switch(tongueStateMachine.tongueSwingingMode){
+            case TongueSwingingMode.TwoBody:
+                UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
+                break;
+            case TongueSwingingMode.nBody:
+                tongueStateMachine.MultiPointTongueRenderer();
+                break;
+        }
+       
+
     }
     public void SetLatchMovementType(LatchMovementType m)
     {

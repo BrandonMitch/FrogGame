@@ -13,14 +13,7 @@ public class TongueAimState : TongueState
     public override void EnterState()
     {
         // Instatiate new end of tongue
-        tongueStateMachine.endOfTongue = GameObject.Instantiate(tongueStateMachine.tongueEndPrefab, tongueStateMachine.parentTransform.position, Quaternion.identity);
-        endOfTongue = tongueStateMachine.endOfTongue;
-
-        // get the rigid body of the tongue end and shut it off
-        Rigidbody2D endOfTongueRB = endOfTongue.GetComponent<Rigidbody2D>();
-        tongueStateMachine.endOfTongueRB = endOfTongueRB;
-        endOfTongueRB.simulated = false;
-        
+        endOfTongue = tongueStateMachine.IntializeEndOfTongue();
     }
 
     public override void ExitState()

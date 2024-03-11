@@ -22,6 +22,9 @@ public class Player : Mover
     [SerializeField] private float lateralForceModifer = 100f;
     [SerializeField] private float minimumLateralDuration = 1.0f;
     [SerializeField] private float lateralDragCoefficient = 0f;
+    [SerializeField] private float dampingCoefficient = 0.95f;
+    [SerializeField] private float minimumDistanceToSpawnANewPoint = 0.05f;
+    [SerializeField] private float minimumTimeToSpawnANewPoint = 0.1f;
     [SerializeField] private ContactFilter2D tongueContactFilter;
 
 
@@ -188,10 +191,14 @@ public class Player : Mover
     {
         ArrayList returnVals = new()
         {
-            lateralForceModifer,
-            minimumLateralDuration,
-            lateralDragCoefficient,
-            tongueContactFilter,
+            lateralForceModifer, // 0 
+            minimumLateralDuration, // 1
+            lateralDragCoefficient, // 2
+            tongueContactFilter, // 3
+            dampingCoefficient, // 4
+            minimumDistanceToSpawnANewPoint, // 5
+            minimumTimeToSpawnANewPoint, // 6
+
         };
         return returnVals;
     }
@@ -262,7 +269,7 @@ public class Player : Mover
     {
         if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
         {
-            Debug.Log("Sucessfully Thrown Tongue");
+            //Debug.Log("Sucessfully Thrown Tongue");
         };
         crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
         crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
@@ -328,48 +335,6 @@ public class Player : Mover
                 break;
         }
     } 
-    // Overloaded UpdateMotor() to include dashing.
-    /*
-    protected virtual void UpdateMotor(Vector3 input)
-    {
-        swapSpriteDirection = false; // TODO: Remove this for optimization
-        base.UpdateMotor(input*1); // Base update motor from mover.
-
-        /**if (dashing)
-        {
-            // Update moveDelta to the push direction 
-            moveDelta = dashDirection;
-            // Reduce dash speed every frame.
-            dashDirection = Vector3.Lerp(dashDirection, Vector3.zero, (Time.time-lastDash)/dashDuration);
-
-            // Make sure we can move in this direction by casting a box there first, if the box returns nul, we're free to move
-            // 
-            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(0, moveDelta.y), Mathf.Abs(moveDelta.y * Time.deltaTime), LayerMask.GetMask("Actor",/*"Enemy", "Blocking"));
-            if (hit.collider == null)
-            {
-                // move this thang
-                transform.Translate(0, moveDelta.y * Time.deltaTime, 0);
-            }
-            else
-            {
-                // If we hit an object then stop the dash
-                dashDirection = Vector3.zero;
-            }
-            //xs
-            hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, new Vector2(moveDelta.x, 0), Mathf.Abs(moveDelta.x * Time.deltaTime), LayerMask.GetMask("Actor","Enemy","Blocking"));
-            if (hit.collider == null)
-            {
-                // move this thang
-                transform.Translate(moveDelta.x * Time.deltaTime, 0, 0);
-            }
-            else
-            {
-                // If we hit an object then stop the dash
-                dashDirection = Vector3.zero;
-            }
-        } 
-    
-    }*/
     public void Heal(int healingAmount)
     {
         if (hitpoint == maxHitpoint)

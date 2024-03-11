@@ -51,4 +51,8 @@ public class TongueState
         UpdateBaseOfTongueRenderer(LR, parentTransform);
         UpdateEndOfTongueRenderer(LR, endOfTongueTransform);
     }
+    public void changeModeToCollision()
+    {
+
+    }
 }

@@ -8,5 +8,15 @@ namespace MovementNameSpace
         LungeRight,
         LungeBack,
     };
-
+    public enum TongueSwingingMode
+    {
+        TwoBody,
+        nBody,
+    }
+    public enum TonguePointType
+    {
+        baseOfTongue,
+        tongueHitPoint,
+        endOfTongue,
+    }
 }

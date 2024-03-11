@@ -44,7 +44,7 @@ public class PlayerAttackingState : PlayerState
         {
             AddToAttackBuffer();
         }
-        if (Time.time > (lastAttackTime + 3.0f) )
+        if (Time.time > (lastAttackTime + 0f) )
         {
             ExecuteAttack();
         }

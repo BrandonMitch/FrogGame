@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MovementNameSpace;
 
 public class TongueRetractingState : TongueState
 {
@@ -34,9 +35,13 @@ public class TongueRetractingState : TongueState
     }
 
     private Vector2 lastMovement;
+    private TongueHitData nextPoint;
     public override void FrameUpdate()
     {
-        Vector2 tonguePlayerDifferenceVec = parentTransform.position - endOfTongueTransform.position;
+        nextPoint = tongueStateMachine.GetPointBeforeEndOfTongue();
+
+        Vector2 NextNode = nextPoint.getPos();
+        Vector2 tonguePlayerDifferenceVec = NextNode - (Vector2)endOfTongueTransform.position;
         float dis = tonguePlayerDifferenceVec.magnitude;
         bool shouldShutOff = ShouldTheTongueShutOff_DistanceCheck(dis);
 
@@ -47,7 +52,15 @@ public class TongueRetractingState : TongueState
         }
         Vector2 tongeMoveDirection = tonguePlayerDifferenceVec.normalized;
         this.lastMovement = UpdateTongue(tongeMoveDirection, dis, lastMovement);
-        UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
+        switch (tongueStateMachine.tongueSwingingMode)
+        {
+            case TongueSwingingMode.TwoBody:
+                UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
+                break;
+            case TongueSwingingMode.nBody:
+                tongueStateMachine.MultiPointTongueRenderer();
+                break;
+        }
     }
 
     public override void PhysicsUpdate()
@@ -61,11 +74,23 @@ public class TongueRetractingState : TongueState
     }
     private bool ShouldTheTongueShutOff_DistanceCheck(float dis)
     {
-        if(dis >= TONGUE_SHUTOFF_DISTANCE)
+        if (nextPoint.type == TonguePointType.baseOfTongue)
         {
-            return false;
+            if (dis >= TONGUE_SHUTOFF_DISTANCE)
+            {
+                return false;
+            }
+            return true;
         }
-        return true;
+        if (nextPoint.type == TonguePointType.tongueHitPoint)
+        {
+            if (dis <= TONGUE_SHUTOFF_DISTANCE)
+            {
+                tongueStateMachine.DestroyTongueMidPoint(0);
+                return false;
+            }
+        }
+        return false;
     }
     private Vector2 UpdateTongue(Vector2 movVec, float maxDistance, Vector2 lastMovement)
     {
