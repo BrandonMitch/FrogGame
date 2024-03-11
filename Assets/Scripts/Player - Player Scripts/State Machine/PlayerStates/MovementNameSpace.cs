@@ -1,5 +1,6 @@
 namespace MovementNameSpace
 {
+    // 
     public enum LatchMovementType
     {
         Waiting,
