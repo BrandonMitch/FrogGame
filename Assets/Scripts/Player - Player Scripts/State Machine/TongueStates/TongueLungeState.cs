@@ -56,5 +56,15 @@ public class TongueLungeState : TongueState
     {
         latchMovementType = m;
     }
+    public void HelperMethodForPushingPulling()
+    {
+        GameObject endOfTongue = tongueStateMachine.endOfTongue;
+        endOfTongueTransform = endOfTongue.transform;
+    }
+    public void UpdateEndOfTongueForPushingPulling(Vector3 distancefromHit, IPushable_Pullable pushPullObject)
+    {
+        Vector3 objectLocation = pushPullObject.GetPosition();
+        endOfTongueTransform.position = objectLocation + distancefromHit;
+    }
 
 }

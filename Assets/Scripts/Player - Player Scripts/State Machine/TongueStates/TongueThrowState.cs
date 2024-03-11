@@ -114,7 +114,7 @@ public class TongueThrowState : TongueState
     private bool TryToLatch(Vector3 latchLocation, RaycastHit2D hit)
     {
         bool returnVal = true;
-        pushPullInterface = hit.rigidbody.GetComponent<IPushable_Pullable>();
+        pushPullInterface = hit.collider.GetComponent<IPushable_Pullable>();
         if(pushPullInterface != null)
         {
             Debug.Log("THIS IS PUSHABLE/PULLABLE");

@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
 {
-    private Rigidbody2D RB;
+    protected Rigidbody2D RB;
     [Space]
     [Header("|-----Is pushable/pullable?-----|")]
-    [SerializeField] private bool isPushable;
-    [SerializeField] private bool isPullable;
-    [SerializeField] private float restingDrag;
-    [SerializeField] private float movingDrag;
-    private bool enterSwitch = true;
-    private bool slowDownEnterSwitch = true;
-    private float enterTime;
-    private float slowDownEnterTime;
-    private bool decelerateSwitch = true;
-    [SerializeField] private float ERROR = 0.1f;
-    [SerializeField] private float slowDownTime = 1.0f;
-    private void Start()
+    [SerializeField] protected bool isPushable;
+    [SerializeField] protected bool isPullable;
+    [SerializeField] protected float restingDrag;
+    [SerializeField] protected float movingDrag;
+    protected bool enterSwitch = true;
+    protected bool slowDownEnterSwitch = true;
+    protected float enterTime;
+    protected float slowDownEnterTime;
+    protected bool decelerateSwitch = true;
+    //[SerializeField] protected float ERROR = 0.1f;
+    [SerializeField] protected float slowDownTime = 1.0f;
+    protected virtual void Start()
     {
         RB = gameObject.GetComponent<Rigidbody2D>();
     }
@@ -47,13 +47,13 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
         return isPushable;
     }
     #endregion
-    public void OnLatchedTo()
+    public virtual void OnLatchedTo()
     {
         RB.drag = restingDrag*10.0f;
         Debug.Log("OnLatchedTo() Not Implemented For: " + gameObject.name);
     }
 
-    public void WhileBeingPulled()
+    public virtual void WhileBeingPulled()
     {
         if (enterSwitch)
         {
@@ -64,7 +64,7 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
         }
     }
 
-    public void WhileBeingPushed()
+    public virtual void WhileBeingPushed()
     {
         if (enterSwitch)
         {
@@ -75,12 +75,13 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
         }
     }
 
-    public void OnRetract()
+    public virtual void OnRetract()
     {
-        throw new System.NotImplementedException();
+        Debug.Log("OnRetract() Not implemented yet for " + gameObject.name);
+        //throw new System.NotImplementedException();
     }
 
-    public void OnStopBeingPulled()
+    public virtual void OnStopBeingPulled()
     {
         if (slowDownEnterSwitch)
         {
@@ -92,7 +93,7 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
         decelerate();
     }
 
-    public void OnStopBeingPushed()
+    public virtual void OnStopBeingPushed()
     {
         if (slowDownEnterSwitch)
         {
@@ -103,7 +104,7 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
         }
         decelerate();
     }
-    private void decelerate()
+    protected virtual void decelerate()
     {
         if (!decelerateSwitch) return;
         float dT = (Time.time - slowDownEnterTime) / (slowDownTime);

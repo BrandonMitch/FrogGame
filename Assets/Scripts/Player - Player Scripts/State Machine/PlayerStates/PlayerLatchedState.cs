@@ -9,6 +9,7 @@ public class PlayerLatchedState : PlayerState
     private IPushable_Pullable push_pullable;
     private LatchLogicType latchLogicType;
     private Rigidbody2D push_pullRB;
+    private Vector3 distanceFromHit;
 
     public PlayerLatchedState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
@@ -40,11 +41,18 @@ public class PlayerLatchedState : PlayerState
 
             bool pull = push_pullable.isPullableQ();
             bool push = push_pullable.isPushableQ();
-            if (push || pull) push_pullRB = push_pullable.GetRigidBody();
+            if (push || pull) 
+            {
+                push_pullRB = push_pullable.GetRigidBody();
+                player.tongueLungeState.HelperMethodForPushingPulling();
+                Transform endOfTongueTransform = player.tongueStateMachine.GetEndOfTongueTransform();
+                distanceFromHit = push_pullable.GetPosition() - (Vector2)endOfTongueTransform.position;
+            }
 
             if (pull)
             {
                 latchLogicType = LatchLogicType.pullLogic;
+
             }
             else if (push)
             {
@@ -156,15 +164,20 @@ public class PlayerLatchedState : PlayerState
         {
             push_pullable.OnStopBeingPulled();
             player.slowingState.setRestingDrag();
+
+            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
+            player.tongueLungeState.UpdateTongueRenderer();
         }
         else
         {
             push_pullable.WhileBeingPulled();
+
             Transform endOfTongueTransform = player.tongueStateMachine.GetEndOfTongueTransform();
             Vector2 forceDirection = player.GetPosition() - endOfTongueTransform.position;
             forceDirection.Normalize();
             push_pullRB.AddForce(forceDirection * 5.0f);
 
+            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
             player.tongueLungeState.UpdateTongueRenderer();
             player.movingState.setRunningDrag();
             player.movingState.movementCode(_playerInput);
