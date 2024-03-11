@@ -48,6 +48,7 @@ public class PlayerSlowingState : PlayerState
     {
         //Debug.Log("Left Slowing State");
         dT = 0;
+        setRestingDrag();
     }
 
     public override void FrameUpdate()
@@ -76,5 +77,9 @@ public class PlayerSlowingState : PlayerState
     {
         dT = (Time.time - enterTime) / (playerDragSlowDownTime);
         playerRB.drag = Mathf.Lerp(playerRunningDrag, playerRestingDrag, dT);
+    }
+    public void setRestingDrag()
+    {
+        playerRB.drag = playerRestingDrag;
     }
 }

@@ -8,7 +8,7 @@ public class Player : Mover
     private bool isAlive = true;
 
     [Space]
-    [Header("Movement Variables")]
+    [Header("|-----Movement Variables-----|")]
     // Movement Varaibles
     private float mass;
     [SerializeField] private float playerSpeed = 1.0f;
@@ -18,13 +18,14 @@ public class Player : Mover
     [SerializeField] private float playerDragSlowDownTime = 0.2f;
     [SerializeField] private float playerRunForceModifier = 10f;
     [Space]
-    [Header("Lunge Variables")]
+    [Header("|-----Lunge Variables-----|")]
     [SerializeField] private float lateralForceModifer = 100f;
     [SerializeField] private float minimumLateralDuration = 1.0f;
     [SerializeField] private float lateralDragCoefficient = 0f;
     [SerializeField] private float dampingCoefficient = 0.95f;
     [SerializeField] private float minimumDistanceToSpawnANewPoint = 0.05f;
     [SerializeField] private float minimumTimeToSpawnANewPoint = 0.1f;
+    [Space]
     [SerializeField] private ContactFilter2D tongueContactFilter;
 
 

@@ -14,7 +14,7 @@ public class TongueThrowState : TongueState
     private bool willNotHitNextFrame = true;
     private Vector3 latchLocation;
     private RaycastHit2D collisionHit;
-     
+    private IPushable_Pullable pushPullInterface;
     public TongueThrowState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
     }
@@ -26,6 +26,7 @@ public class TongueThrowState : TongueState
 
     public override void EnterState()
     {
+        pushPullInterface = null;
         // Declare variables (just for readability so  I don't have to write tongueStatemachine.linerenderer
         GameObject endOfTongue = tongueStateMachine.endOfTongue;
         endOfTongueTransform = endOfTongue.transform;
@@ -113,6 +114,13 @@ public class TongueThrowState : TongueState
     private bool TryToLatch(Vector3 latchLocation, RaycastHit2D hit)
     {
         bool returnVal = true;
+        pushPullInterface = hit.rigidbody.GetComponent<IPushable_Pullable>();
+        if(pushPullInterface != null)
+        {
+            Debug.Log("THIS IS PUSHABLE/PULLABLE");
+            Debug.Log("Is this pulllable?" + pushPullInterface.isPullableQ());
+
+        }
         if (returnVal)
         {
             // We will hit next frame;
@@ -128,9 +136,20 @@ public class TongueThrowState : TongueState
     {
         endOfTongueRB.simulated = false;
         moveEndOfTongue(latchLocation);
+        if (pushPullInterface != null)
+        {
+            pushPullInterface.OnLatchedTo();
+            SendInfoToLatchState();
+
+        }
         tongueStateMachine.ChangeState(player.tongueLatchedState);
     }
 
+    private void SendInfoToLatchState()
+    {
+        player.tongueLatchedState.SetPushPullable(pushPullInterface);
+        player.latchedState.SetPushPullable(pushPullInterface);
+    }
     private void moveEndOfTongue(Vector3 location)
     {
         endOfTongueTransform.position = location;

@@ -38,7 +38,7 @@ public class PlayerMovingState : PlayerState
     public override void EnterState()
     {
         getMovementVaraibles(); // TODO: Remove this, only needed for testing
-        playerRB.drag = playerRunningDrag;
+        setRunningDrag();
         SetMovementInputs(moveVec);
         SetLastMovementDirection(moveVec);
     }
@@ -64,17 +64,21 @@ public class PlayerMovingState : PlayerState
 
     public override void PhysicsUpdate()
     {
+        movementCode(moveVec);
+    }
+    public void movementCode(Vector2 moveVec)
+    {
         Vector2 velocity = playerRB.velocity;
 
         float velocityMagnitude = velocity.magnitude;
 
-        if(velocityMagnitude > playerMaxSpeed)
+        if (velocityMagnitude > playerMaxSpeed)
         {
             playerRB.velocity = Vector2.ClampMagnitude(velocity, playerMaxSpeed);
         }
         else
         {
-            playerRB.AddForce(playerRunForceModifier*moveVec);
+            playerRB.AddForce(playerRunForceModifier * moveVec);
         }
     }
     // This is only ccalled when we leave the idle state
@@ -83,5 +87,8 @@ public class PlayerMovingState : PlayerState
         this.moveVec = firstMoveDiretion;
     }
 
-
+    public void setRunningDrag()
+    {
+        playerRB.drag = playerRunningDrag;
+    }
 }

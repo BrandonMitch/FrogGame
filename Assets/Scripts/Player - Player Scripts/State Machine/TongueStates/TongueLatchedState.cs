@@ -9,6 +9,9 @@ public class TongueLatchedState : TongueState
     private Transform endOfTongueTransform;
     private Transform parentTransform;
     private Vector2 bufferedInput;
+    private IPushable_Pullable push_pullable;
+    private LatchLogicType latchLogicType;
+    private Rigidbody2D push_pullRB;
     public TongueLatchedState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
     }
@@ -18,21 +21,51 @@ public class TongueLatchedState : TongueState
     }
     public override void EnterState()
     {
-        Debug.Log("made it to latched state");
+        
+        //Debug.Log("made it to latched state");
         movementType = LatchMovementType.Waiting;
         player.stateMachine.ChangeState(player.latchedState);
         endOfTongueTransform = tongueStateMachine.endOfTongue.transform;
+
+        // Check if the object is pushable or pullable that we latched onto
+        if (push_pullable != null)
+        {
+
+            bool pull = push_pullable.isPullableQ();
+            bool push = push_pullable.isPushableQ();
+            if (push || pull) push_pullRB = push_pullable.GetRigidBody();
+
+            if (pull)
+            {
+                latchLogicType = LatchLogicType.pullLogic;
+            }
+            else if (push)
+            {
+                latchLogicType = LatchLogicType.pushLogic;
+            }
+            else { latchLogicType = LatchLogicType.baseLogic; }
+
+        }
+        else
+        {
+            latchLogicType = LatchLogicType.baseLogic;
+        }
     }
 
     public override void ExitState()
     {
+        push_pullable = null;
         bufferedInput = Vector2.zero;
-        Debug.Log("left latched state");
+        //Debug.Log("left latched state");
     }
-
+    private bool needToReadLatchInputs;
+    
     public override void FrameUpdate()
     {
-        movementType = readInput();
+        if (latchLogicType == LatchLogicType.baseLogic)
+        {
+            movementType = readInput();
+        }
     }
 
     public override void PhysicsUpdate()
@@ -146,4 +179,8 @@ public class TongueLatchedState : TongueState
         return jhat;
     }
 
+    public void SetPushPullable(IPushable_Pullable pushable_Pullable)
+    {
+        this.push_pullable = pushable_Pullable;
+    }
 }

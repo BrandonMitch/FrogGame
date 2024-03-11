@@ -39,7 +39,7 @@ public class TongueLungeState : TongueState
     {
         switch(tongueStateMachine.tongueSwingingMode){
             case TongueSwingingMode.TwoBody:
-                UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
+                UpdateTongueRenderer();
                 break;
             case TongueSwingingMode.nBody:
                 tongueStateMachine.MultiPointTongueRenderer();
@@ -47,6 +47,10 @@ public class TongueLungeState : TongueState
         }
        
 
+    }
+    public void UpdateTongueRenderer()
+    {
+        UpdateTongueRenderer(lineRenderer, parentTransform, endOfTongueTransform);
     }
     public void SetLatchMovementType(LatchMovementType m)
     {

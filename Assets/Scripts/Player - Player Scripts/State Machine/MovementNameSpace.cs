@@ -20,4 +20,10 @@ namespace MovementNameSpace
         tongueHitPoint,
         endOfTongue,
     }
+    public enum LatchLogicType
+    {
+        baseLogic,
+        pushLogic,
+        pullLogic,
+    }
 }

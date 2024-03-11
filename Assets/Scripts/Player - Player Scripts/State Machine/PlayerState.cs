@@ -10,6 +10,8 @@ public class PlayerState
     static protected bool rightMouseDown = false;
     static protected bool rightMouseUp = false;
     static protected bool rightMouseButton = false;
+
+    static protected bool fKeyDown = false;
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
         this.player = player;
@@ -160,8 +162,6 @@ public class PlayerState
         return 0;
     }
 
-
-
     public static void DrawCircle(Vector3 position, float radius, int segments, Color color)
     {
         // If either radius or number of segments are less or equal to 0, skip drawing
@@ -204,4 +204,10 @@ public class PlayerState
             Debug.DrawLine(lineStart, lineEnd, color);
         }
     }
+
+    protected void GetFKeyInputs()
+    {
+        Input.GetKeyDown(KeyCode.K);
+    }
+
 }
