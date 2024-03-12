@@ -54,6 +54,7 @@ public class PlayerLatchedState : PlayerState
             {
                 latchLogicType = LatchLogicType.pullLogic;
                 tongeRope = player.tongueStateMachine.getRope();
+                tongeRope.NoHault();
                 tongeRope.SetParent(player.GetPlayerRigidBody());
                 tongeRope.SetAttched(push_pullRB);
             }
@@ -172,7 +173,7 @@ public class PlayerLatchedState : PlayerState
             push_pullable.OnStopBeingPulled();
             player.slowingState.setRestingDrag(0.2f);
 
-            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
+            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(-distanceFromHit, push_pullable);
             player.tongueLungeState.UpdateTongueRenderer();
         }
         else
@@ -185,7 +186,7 @@ public class PlayerLatchedState : PlayerState
             forceDirection.Normalize();
             push_pullRB.AddForce(forceDirection * 1.0f);
 
-            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
+            player.tongueLungeState.UpdateEndOfTongueForPushingPulling(-distanceFromHit, push_pullable);
             player.tongueLungeState.UpdateTongueRenderer();
             player.movingState.setRunningDrag();
             player.movingState.movementCode(_playerInput);

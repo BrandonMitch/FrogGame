@@ -17,11 +17,17 @@ public abstract class RopeBase : MonoBehaviour, IRope
     protected SpringJoint2D spring;
     [Space]
     [SerializeField] float sFrequency = 0.1f;
-    [SerializeField] float sDampening = 2;
+    [SerializeField] float sDampening = 0.9f;
     [SerializeField] float minSpringTime = 0.3f;
 
-    public float SDampening { get => sDampening; }
-    public float SFrequency { get => sFrequency; }
+    public float GetSDampenng()
+    {
+        return sDampening;
+    }
+    public float GetSFrequency() 
+    {
+        return sDampening;
+    }
 
     public virtual float GetMaxLength()
     {
@@ -80,7 +86,6 @@ public abstract class RopeBase : MonoBehaviour, IRope
     }
     public SpringJoint2D AddSpringJoint()
     {
-        forceManager.NoHault();
         Rigidbody2D parentRB = parent;
         Rigidbody2D attachedRB = attachedTo;
         if(parentRB == null || attachedRB == null) { Debug.LogError("NEEDS RB"); return null; }
@@ -99,6 +104,10 @@ public abstract class RopeBase : MonoBehaviour, IRope
         {
             return spring;
         }
+    }
+    public void NoHault()
+    {
+        forceManager.NoHault();
     }
     public void DestroySpringJoint()
     {
@@ -167,8 +176,8 @@ public abstract class RopeBase : MonoBehaviour, IRope
             lengthMax = rope.GetMaxLength();
             springCoefficent = rope.GetSpringCoefficient();
             spring = rope.AddSpringJoint();
-            spring.frequency = rope.SFrequency;
-            spring.dampingRatio = rope.SDampening;
+            spring.frequency = rope.GetSFrequency();
+            spring.dampingRatio = rope.GetSDampenng();
             spring.distance = lengthMax;
             rope.StartCoroutine(WaitForNextPhysicsUpdate());
         }
@@ -192,6 +201,10 @@ public abstract class RopeBase : MonoBehaviour, IRope
         {
             if (hault) return;
             lengthCurrent = rope.GetCurrentLength();
+            // Makes the spring stronger the further you are away from the max distnace.
+            // The formula is f = frequency * (L/Lmax)^2
+            float f = rope.GetSFrequency();
+            spring.frequency = Mathf.Clamp(f * Mathf.Pow(lengthCurrent / lengthMax, 2), (0.5f * f), (f * 5));
         }
         IEnumerator WaitForNextPhysicsUpdate()
         {
