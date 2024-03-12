@@ -82,4 +82,8 @@ public class PlayerSlowingState : PlayerState
     {
         playerRB.drag = playerRestingDrag;
     }
+    public void setRestingDrag(float modifier)
+    {
+        playerRB.drag = Mathf.Clamp(modifier*playerRestingDrag, playerRunningDrag,modifier*playerRestingDrag); ;
+    }
 }

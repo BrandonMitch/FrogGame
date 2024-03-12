@@ -11,6 +11,7 @@ public class PlayerLatchedState : PlayerState
     private Rigidbody2D push_pullRB;
     private Vector3 distanceFromHit;
 
+    private RopeBase tongeRope;
     public PlayerLatchedState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
     }
@@ -52,7 +53,9 @@ public class PlayerLatchedState : PlayerState
             if (pull)
             {
                 latchLogicType = LatchLogicType.pullLogic;
-
+                tongeRope = player.tongueStateMachine.getRope();
+                tongeRope.SetParent(player.GetPlayerRigidBody());
+                tongeRope.SetAttched(push_pullRB);
             }
             else if (push)
             {
@@ -111,7 +114,11 @@ public class PlayerLatchedState : PlayerState
     {
         if (CheckIfPlayerWantsToRetractTongue())
         {
-            push_pullable.OnRetract();
+            tongeRope.EndRope();
+            if (push_pullable != null)
+            {
+                push_pullable.OnRetract();
+            }
             return;
         }
         _playerInput = GetCurrentMovementInputs();
@@ -163,7 +170,7 @@ public class PlayerLatchedState : PlayerState
         if (_playerInput == Vector2.zero)
         {
             push_pullable.OnStopBeingPulled();
-            player.slowingState.setRestingDrag();
+            player.slowingState.setRestingDrag(0.2f);
 
             player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
             player.tongueLungeState.UpdateTongueRenderer();
@@ -171,11 +178,12 @@ public class PlayerLatchedState : PlayerState
         else
         {
             push_pullable.WhileBeingPulled();
+            tongeRope.WhenSpringEnabled();
 
             Transform endOfTongueTransform = player.tongueStateMachine.GetEndOfTongueTransform();
             Vector2 forceDirection = player.GetPosition() - endOfTongueTransform.position;
             forceDirection.Normalize();
-            push_pullRB.AddForce(forceDirection * 5.0f);
+            push_pullRB.AddForce(forceDirection * 1.0f);
 
             player.tongueLungeState.UpdateEndOfTongueForPushingPulling(distanceFromHit, push_pullable);
             player.tongueLungeState.UpdateTongueRenderer();

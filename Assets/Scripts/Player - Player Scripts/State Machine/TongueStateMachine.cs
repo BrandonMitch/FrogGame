@@ -184,6 +184,10 @@ public class TongueStateMachine
         TongueHitData p = (TongueHitData)tonguePoints[tonguePoints.Count - 2];
         return p;
     }
+    public RopeBase getRope()
+    {
+        return (RopeBase)tongueData;
+    }
     #endregion
 }
 

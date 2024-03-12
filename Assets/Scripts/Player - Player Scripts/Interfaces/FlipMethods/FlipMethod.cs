@@ -2,32 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FlipMethod : FlipMethodInterface
+public abstract class FlipMethod : FlipMethodInterface
 {
 		public bool notEnteredYet = true;
+		
 		public FlipMethod()
 		{
 			notEnteredYet = true;
 		}
-		public void EntryLogic()
-		{
-			Debug.Log("Entered");
-			return;
-		}
-
-		public void ExitLogic()
-		{
-			Debug.Log("Exited");
-			return;
-		}
-
-		public bool ExitCondition()
+		public virtual bool EntryCondition()
 		{
 			return true;
 		}
-
-		public void UpdateLogic()
+		public virtual void EntryLogic()
 		{
+			//Debug.Log("Entered");
+			return;
+		}
+
+		public virtual void ExitLogic()
+		{
+			//Debug.Log("Exited");
+			notEnteredYet = true;
+			return;
+		}
+
+		public virtual bool ExitCondition()
+		{
+			return true;
+		}
+		public virtual void UpdateLogic()
+		{
+			if (notEnteredYet)
+			{
+				if (EntryCondition() == false)
+				{
+					return;
+				}
+			}
+
 			if (notEnteredYet)
 			{
 				EntryLogic();
@@ -39,23 +52,21 @@ public class FlipMethod : FlipMethodInterface
 			{
 				ExitLogic();
 			}
-			return;
 		}
 
-		public void Logic()
+		public virtual void Logic()
 		{
-			return;
-		}
-	
-	// a nested namespace
 
-		public class Sclass
+		}
+
+
+		/**public class Sclass
 		{
 			public static void SayHello()
 			{
 				Debug.Log("Hello");
 			}
-		}
+		}*/
 
 }
 

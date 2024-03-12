@@ -207,7 +207,7 @@ public class PlayerState
 
     protected void GetFKeyInputs()
     {
-        Input.GetKeyDown(KeyCode.K);
+        fKeyDown = Input.GetKeyDown(KeyCode.F);
     }
 
 }
