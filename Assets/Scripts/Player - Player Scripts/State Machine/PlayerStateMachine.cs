@@ -59,6 +59,6 @@ public class PlayerStateMachine
 
     public string[] GetPreviousStateData()
     {
-        return PreviousPlayerState.previousStateData();
+        return PreviousPlayerState.PreviousStateData();
     }
 }

@@ -16,7 +16,7 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
     protected float enterTime;
     protected float slowDownEnterTime;
     protected bool decelerateSwitch = true;
-    //[SerializeField] protected float ERROR = 0.1f;
+    private Vector3 latchLocation;
     [SerializeField] protected float slowDownTime = 1.0f;
     protected virtual void Start()
     {
@@ -46,11 +46,24 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
     {
         return isPushable;
     }
-    #endregion
-    public virtual void OnLatchedTo()
+    public Vector3 GetLatchLocation()
     {
-        RB.drag = restingDrag*10.0f;
-        Debug.Log("OnLatchedTo() Not Implemented For: " + gameObject.name);
+        return latchLocation;
+    }
+    #endregion
+    public virtual void OnLatchedTo(Vector3 latchLocation)
+    {
+        if (isPullable)
+        {
+            RB.drag = restingDrag * 10.0f;
+            this.latchLocation = latchLocation;
+            return;
+        }
+        if (isPushable)
+        {
+            this.latchLocation = latchLocation;
+            RB.drag = movingDrag;
+        }
     }
 
     public virtual void WhileBeingPulled()

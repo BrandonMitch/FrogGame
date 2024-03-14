@@ -12,6 +12,7 @@ public class TongueLatchedState : TongueState
     private IPushable_Pullable push_pullable;
     private LatchLogicType latchLogicType;
     private Rigidbody2D push_pullRB;
+    private Vector2 tongueVelocity;
     public TongueLatchedState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
     }
@@ -42,6 +43,10 @@ public class TongueLatchedState : TongueState
             else if (push)
             {
                 latchLogicType = LatchLogicType.pushLogic;
+                Vector3 latchlocation = push_pullable.GetLatchLocation();
+                push_pullRB = push_pullable.GetRigidBody();
+                float tongueForceModifier = 100f;
+                push_pullRB.AddForceAtPosition(tongueForceModifier*(tongueVelocity.normalized), latchlocation);
             }
             else { latchLogicType = LatchLogicType.baseLogic; }
 
@@ -58,7 +63,7 @@ public class TongueLatchedState : TongueState
         bufferedInput = Vector2.zero;
         //Debug.Log("left latched state");
     }
-    private bool needToReadLatchInputs;
+    //private bool needToReadLatchInputs;
     
     public override void FrameUpdate()
     {
@@ -70,24 +75,35 @@ public class TongueLatchedState : TongueState
 
     public override void PhysicsUpdate()
     {
+        switch (latchLogicType)
+        {
+            case (LatchLogicType.baseLogic):
+                break;
+            case (LatchLogicType.pullLogic):
+                break;
+            case (LatchLogicType.pushLogic):
+                player.stateMachine.ChangeState(player.idleState);
+                tongueStateMachine.ChangeState(player.tongueRetractingState);
+                break;
+        }
         switch (movementType)
         {
             case LatchMovementType.Waiting:
                 break;
             case LatchMovementType.LungeForward:
-                Debug.Log("LUNGE FORWARD");
+                //Debug.Log("lunge forward");
                 ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeLeft:
-                Debug.Log("lunge left");
+                //Debug.Log("lunge left");
                 ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeRight:
-                Debug.Log("lunge right");
+                //Debug.Log("lunge right");
                 ChangeToLungingState(movementType);
                 break;
             case LatchMovementType.LungeBack:
-                Debug.Log("Lunge back");
+                //Debug.Log("Lunge back");
                 ChangeToLungingState(movementType);
                 break;
             default:
@@ -178,9 +194,12 @@ public class TongueLatchedState : TongueState
     {
         return jhat;
     }
-
     public void SetPushPullable(IPushable_Pullable pushable_Pullable)
     {
         this.push_pullable = pushable_Pullable;
+    }
+    public void SetTongueVelocityDirection(Vector2 vel)
+    {
+        tongueVelocity = vel;
     }
 }

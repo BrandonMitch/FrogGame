@@ -117,8 +117,9 @@ public class TongueThrowState : TongueState
         pushPullInterface = hit.collider.GetComponent<IPushable_Pullable>();
         if(pushPullInterface != null)
         {
-            Debug.Log("THIS IS PUSHABLE/PULLABLE");
-            Debug.Log("Is this pulllable?" + pushPullInterface.isPullableQ());
+
+            //Debug.Log("THIS IS PUSHABLE/PULLABLE");
+            //Debug.Log("Is this pulllable?" + pushPullInterface.isPullableQ());
 
         }
         if (returnVal)
@@ -138,7 +139,7 @@ public class TongueThrowState : TongueState
         moveEndOfTongue(latchLocation);
         if (pushPullInterface != null)
         {
-            pushPullInterface.OnLatchedTo();
+            pushPullInterface.OnLatchedTo(latchlocation);
             SendInfoToLatchState();
 
         }
@@ -148,6 +149,7 @@ public class TongueThrowState : TongueState
     private void SendInfoToLatchState()
     {
         player.tongueLatchedState.SetPushPullable(pushPullInterface);
+        player.tongueLatchedState.SetTongueVelocityDirection(TongueVelocity);
         player.latchedState.SetPushPullable(pushPullInterface);
     }
     private void moveEndOfTongue(Vector3 location)

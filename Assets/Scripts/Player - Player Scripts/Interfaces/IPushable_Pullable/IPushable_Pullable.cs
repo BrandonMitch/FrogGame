@@ -8,7 +8,9 @@ public interface IPushable_Pullable
     public Vector2 GetPosition();
     public Rigidbody2D GetRigidBody();
     public Transform GetTransform();
-    public void OnLatchedTo();
+    public void OnLatchedTo(Vector3 latchLocation);
+    public Vector3 GetLatchLocation();
+
     public void OnRetract();
 
     public void WhileBeingPulled();
@@ -18,5 +20,5 @@ public interface IPushable_Pullable
 
     public bool isPullableQ();
     public bool isPushableQ();
-
+    
 }

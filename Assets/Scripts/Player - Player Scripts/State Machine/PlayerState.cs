@@ -72,7 +72,7 @@ public class PlayerState
         rightMouseUp = Input.GetButtonUp("Fire2");
     }
 
-    public virtual string[] previousStateData()
+    public virtual string[] PreviousStateData()
     {
         string[] s = { "NULL" };
         return s;
@@ -207,7 +207,11 @@ public class PlayerState
 
     protected void GetFKeyInputs()
     {
-        fKeyDown = Input.GetKeyDown(KeyCode.F);
+        fKeyDown = (Input.GetKeyDown(KeyCode.F));
+        if (fKeyDown) return;
+        var a = Input.GetAxis("Retract");
+        fKeyDown = (Mathf.Abs(a) > 0.01f);
+
     }
 
 }

@@ -93,6 +93,10 @@ public class DebugGrapherGUI : MonoBehaviour
     }
     private void Update()
     {
+        var a = Input.GetAxis("Retract");
+        DebugGUI.LogPersistent("key1","Retract:" + a);
+        a = Input.GetAxis("Fire2");
+        DebugGUI.LogPersistent("key2", "Aim:");
         // Update the fields our attributes are graphing
         SinField = Mathf.Sin(Time.time * 6);
 

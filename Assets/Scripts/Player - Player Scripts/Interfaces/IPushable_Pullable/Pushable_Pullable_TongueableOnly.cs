@@ -9,10 +9,10 @@ public class Pushable_Pullable_TongueableOnly : Pushable_Pullable, IPushable_Pul
         base.Start();
         RB.bodyType = RigidbodyType2D.Static; 
     }
-    public override void OnLatchedTo()
+    public override void OnLatchedTo(Vector3 latchLocation)
     {
         RB.bodyType = RigidbodyType2D.Dynamic;
-        base.OnLatchedTo();
+        base.OnLatchedTo(latchLocation);
     }
 
     public override void OnRetract()

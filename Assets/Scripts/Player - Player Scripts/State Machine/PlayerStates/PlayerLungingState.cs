@@ -22,6 +22,9 @@ public class PlayerLungingState : PlayerState
     private float minimumDistanceToSpawnANewPoint;
     private float minimumTimeToSpawnANewPoint;
     private ContactFilter2D tongeContactFilter;
+    private float forwardLungeDragCoefficient;
+    private float forwardForceModifer;
+    private ContactFilter2D playerContactFilter;
 
     protected void getLungeVariables()
     {
@@ -33,6 +36,9 @@ public class PlayerLungingState : PlayerState
         dampingCoefficient = (float)vars[4];
         minimumDistanceToSpawnANewPoint = (float)vars[5];
         minimumTimeToSpawnANewPoint = (float)vars[6];
+        forwardLungeDragCoefficient = (float)vars[7];
+        forwardForceModifer = (float)vars[8];
+        playerContactFilter = (ContactFilter2D)vars[9];
     }
     private float v0;
     #endregion
@@ -60,8 +66,8 @@ public class PlayerLungingState : PlayerState
     {
         getLungeVariables(); // TODO: Remove so this is only called once, just used for updating vars
     
-        ihat = player.tongueLatchedState.GetIhat();
-        jhat = player.tongueLatchedState.GetJhat();
+        ihat = player.tongueLatchedState.GetIhat(); // right
+        jhat = player.tongueLatchedState.GetJhat(); // forward
         tongueSwingingMode = TongueSwingingMode.TwoBody;
         dampingCounter = 0;
         entryTime = Time.time;
@@ -72,6 +78,9 @@ public class PlayerLungingState : PlayerState
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
+                playerRB.drag = forwardLungeDragCoefficient;
+                playerRB.AddForce(jhat * forwardForceModifer);
+                v0 = Time.fixedDeltaTime * forwardForceModifer / playerRB.mass;
                 break;
             case LatchMovementType.LungeLeft:
                 playerRB.drag = lateralDragCoefficient;
@@ -105,6 +114,13 @@ public class PlayerLungingState : PlayerState
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
+                {
+                    GetFKeyInputs();
+                    if (fKeyDown)
+                    {
+                        TryShutOffForForwardsLunge();
+                    }
+                }
                 return; 
             case LatchMovementType.LungeLeft:
                 {
@@ -334,7 +350,31 @@ public class PlayerLungingState : PlayerState
 
     private void ForwardLunge()
     {
-        TryShutOffForForwardsLunge();
+        // We need to cast the player's collider forward to check if we hit something.
+        RaycastHit2D[] collisions = new RaycastHit2D[3];
+        int result = Physics2D.CircleCast(playerRB.position, 0.05f,  jhat, playerContactFilter, collisions, (Time.fixedDeltaTime * v0));
+        Debug.DrawLine(playerRB.position, playerRB.position + (Time.fixedDeltaTime * v0 * jhat), Color.green);
+        DrawCircle(playerRB.position, 0.05f, 8, Color.green);
+        DrawCircle(playerRB.position + (Time.fixedDeltaTime * v0 * jhat), 0.05f, 8,Color.cyan);
+        //Debug.Break();
+        foreach (RaycastHit2D col in collisions) 
+        {
+            Collider2D collision = col.collider;
+            if(collision != null)
+            {
+                if (collision.tag != "Player")
+                {
+                    Debug.Log("Collision's name in forward lunge:" + collision.name);
+                    DrawCircle(col.point, 0.03f, 8, Color.red);
+                    TryShutOffForForwardsLunge();
+                    return;
+                }
+            }
+        }
+        bool shutOff = DistanceCheckForForwardLunge();
+        if (shutOff) { TryShutOffForForwardsLunge(); return; }
+        shutOff = VelocityCheckForForwardLunge();
+        if (shutOff) { TryShutOffForForwardsLunge(); return; }
     }
     private void BackwardsLunge()
     {
@@ -357,13 +397,33 @@ public class PlayerLungingState : PlayerState
     private void TryShutOffForForwardsLunge()
     {
         Debug.Log("Trying to shut off forward lunge");
-        playerStateMachine.ChangeState(player.idleState);
+        playerStateMachine.ChangeState(player.slowingState);
         player.tongueStateMachine.ChangeState(player.tongueRetractingState);
     }
     private void TryShutOffFOrBackwardsLunge()
     {
         Debug.Log("Trying to shut off for backwards lunge");
-        playerStateMachine.ChangeState(player.idleState);
+        playerStateMachine.ChangeState(player.slowingState);
         player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+    }
+    private bool DistanceCheckForForwardLunge()
+    {
+        Vector3 endOfTonguePos = endOfTongueTransform.position;
+        Vector3 playerPos = playerRB.position;
+        float distance = (endOfTonguePos - playerPos).magnitude;
+        if(distance < 0.1f)
+        {
+            return true;
+        }
+        return false;
+    }
+    private bool VelocityCheckForForwardLunge()
+    {
+        float velocityMagnitude = playerRB.velocity.magnitude;
+        if (velocityMagnitude < 0.1f)
+        {
+            return true;
+        }
+        return false;
     }
 }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerIdleState : PlayerState
@@ -115,7 +113,7 @@ public class PlayerIdleState : PlayerState
             stateData[i] = "";
         }
     }
-    public override string[] previousStateData()
+    public override string[] PreviousStateData()
     {
         return stateData;
     }

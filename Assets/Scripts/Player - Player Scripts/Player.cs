@@ -25,9 +25,11 @@ public class Player : Mover
     [SerializeField] private float dampingCoefficient = 0.95f;
     [SerializeField] private float minimumDistanceToSpawnANewPoint = 0.05f;
     [SerializeField] private float minimumTimeToSpawnANewPoint = 0.1f;
+    [SerializeField] private float forwardLungeCoefficient = 0f;
+    [SerializeField] private float forwardLungeForceModifer = 100f;
     [Space]
     [SerializeField] private ContactFilter2D tongueContactFilter;
-
+    [SerializeField] private ContactFilter2D playerContactFilter;
 
     private Rigidbody2D playerRB;
     private Collider2D playerCollider;
@@ -199,7 +201,9 @@ public class Player : Mover
             dampingCoefficient, // 4
             minimumDistanceToSpawnANewPoint, // 5
             minimumTimeToSpawnANewPoint, // 6
-
+            forwardLungeCoefficient, // 7 
+            forwardLungeForceModifer,  // 8 
+            playerContactFilter, // 9
         };
         return returnVals;
     }
