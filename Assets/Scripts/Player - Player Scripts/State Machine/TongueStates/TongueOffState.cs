@@ -27,4 +27,8 @@ public class TongueOffState : TongueState
     public override void PhysicsUpdate()
     {
     }
+    public override bool isOff()
+    {
+        return true;
+    }
 }

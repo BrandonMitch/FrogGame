@@ -121,7 +121,7 @@ public class PlayerLungingState : PlayerState
                         TryShutOffForForwardsLunge();
                     }
                 }
-                return; 
+                return;
             case LatchMovementType.LungeLeft:
                 {
                     Vector2 input = GetCurrentMovementInputs();
@@ -131,7 +131,7 @@ public class PlayerLungingState : PlayerState
                     }
                     TryShutOffForLateralLunge();
                 }
-                return; 
+                return;
             case LatchMovementType.LungeRight:
                 {
                     Vector2 input = GetCurrentMovementInputs();
@@ -141,12 +141,12 @@ public class PlayerLungingState : PlayerState
                     }
                     TryShutOffForLateralLunge();
                 }
-                return; 
+                return;
             case LatchMovementType.LungeBack:
-                return; 
+                return;
             case LatchMovementType.Waiting:
                 Debug.LogError("ERROR in player lunging state, state should not be waiting");
-                return; 
+                return;
             default:
                 Debug.LogError("ERROR in player lunging state, invalid state");
                 return;

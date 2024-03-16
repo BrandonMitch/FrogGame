@@ -57,7 +57,6 @@ public class Player : Mover
     public Animator animator;
     public GameObject customizableWeaponOjbect;
     private WeaponCustomizable customizableWeapon;
-    [SerializeField] private TongueManager tongue;
     [SerializeField] private CrossHairScript crossHair;
     
     public enum ExternalCall
@@ -212,7 +211,10 @@ public class Player : Mover
     {
         lastMoveDirection = direction;
     }
-
+    public bool isTongueOff()
+    {
+        return tongueStateMachine.isTongueOff();
+    }
 
     /***********************************---END---*********************************/
     protected override void Start()
@@ -272,10 +274,10 @@ public class Player : Mover
     }
     public void SpitOutTongueOnRelease()
     {
-        if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
+       /* if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
         {
             //Debug.Log("Sucessfully Thrown Tongue");
-        };
+        };*/
         crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
         crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
     }

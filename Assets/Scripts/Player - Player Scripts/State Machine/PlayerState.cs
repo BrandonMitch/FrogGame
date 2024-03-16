@@ -214,4 +214,15 @@ public class PlayerState
 
     }
 
+    public bool CheckIfPlayerWantsToRetractTongue()
+    {
+        GetFKeyInputs();
+        if (fKeyDown)
+        {
+            playerStateMachine.ChangeState(player.slowingState);
+            player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+            return true;
+        }
+        return false;
+    }
 }

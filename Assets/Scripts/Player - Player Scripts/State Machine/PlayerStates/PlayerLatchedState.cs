@@ -198,17 +198,6 @@ public class PlayerLatchedState : PlayerState
     {
         _bufferedMovementInput = bufferedMovement;
     }
-    public bool CheckIfPlayerWantsToRetractTongue()
-    {
-        GetFKeyInputs();
-        if (fKeyDown)
-        {
-            playerStateMachine.ChangeState(player.slowingState);
-            player.tongueStateMachine.ChangeState(player.tongueRetractingState);
-            return true;
-        }
-        return false;
-    }
     public Vector2 getPlayerInput()
     {
         return _playerInput;

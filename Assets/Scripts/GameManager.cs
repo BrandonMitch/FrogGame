@@ -19,8 +19,10 @@ public class GameManager : MonoBehaviour
         }
 
         instance = this;
+        /*
         SceneManager.sceneLoaded += LoadState;
         SceneManager.sceneLoaded += onSceneLoaded;
+        */
     }
     // Resources
     public List<Sprite> playerSprites;
@@ -120,11 +122,12 @@ public class GameManager : MonoBehaviour
 
 
     // On Scene Loaded
+    /*
     public void onSceneLoaded(Scene s, LoadSceneMode mode)
     {
         player.transform.position = GameObject.Find("SpawnPoint").transform.position;
     }
-
+    */
     // Save State
     /*
      * INT preferedSkin
@@ -146,6 +149,7 @@ public class GameManager : MonoBehaviour
 
     // Load State
     // TODO: REFACTOR OR DELETE
+    /***
     public void LoadState(Scene s, LoadSceneMode mode) 
     {
         SceneManager.sceneLoaded -= LoadState;
@@ -165,7 +169,7 @@ public class GameManager : MonoBehaviour
             experience = int.Parse(data[2]);
             if (GetCurrentLevel() != 1)
             {
-                /*player.SetLevel(GetCurrentLevel());*/
+                player.SetLevel(GetCurrentLevel());
             }
 
             // Change weapon level
@@ -181,7 +185,8 @@ public class GameManager : MonoBehaviour
         //Debug.Log("we should teleport right now");
         player.transform.position = GameObject.Find("SpawnPoint").transform.position;
 
-    }    
+    }    **/
+    
     /*public void OnLevelUp()
     {
         Debug.Log("Level Up!");

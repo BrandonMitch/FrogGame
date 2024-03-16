@@ -33,6 +33,10 @@ public class TongueState
     {
         return false;
     }
+    public virtual bool isOff()
+    {
+        return false;
+    }
     public virtual void Intialize()
     {
 

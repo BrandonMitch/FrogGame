@@ -87,7 +87,10 @@ public class TongueStateMachine
     {
         return CurrentTongueState.isRetracting();
     }
-
+    public bool isTongueOff()
+    {
+        return CurrentTongueState.isOff();
+    }
     /* IntializeTongueStates is used for intializing tongue states that need certain transforms on the start call instead of the awake call. Typically used to grab transforms and lineRenderer
      *  @param states : is a list of tongue states that you want to be intialized
      *  Intialize() must be implemented in the tonguestate

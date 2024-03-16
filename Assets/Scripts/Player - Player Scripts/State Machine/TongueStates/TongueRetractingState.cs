@@ -26,6 +26,8 @@ public class TongueRetractingState : TongueState
         endOfTongueTransform = tongueStateMachine.GetEndOfTongueTransform();
         tongueStateMachine.TurnOffEndOfTongueRB();
         lastMovement = Vector2.zero;
+
+
     }
 
     public override void ExitState()

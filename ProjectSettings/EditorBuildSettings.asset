@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/SampleScene.unity
+    path: Assets/Settings/Scenes/URP2DSceneTemplate.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
     path: Assets/Scenes/Main.unity
@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Dungeon1.unity
     guid: c2d69c47e533b8847ad4ac7e34786238
+  - enabled: 1
+    path: Assets/Scenes/LoadingScene.unity
+    guid: c1ab18fde04024b4ba1947d802aedc7d
+  - enabled: 1
+    path: Assets/Scenes/Jake_Test_Scene.unity
+    guid: 10b3f911a99db4d40bf0d8ab81fee64f
   m_configObjects: {}

@@ -43,8 +43,8 @@ public class PlayerThrowingState : PlayerState
 
     public override void FrameUpdate()
     {
-        // only thing we want avalible is to be able to cancel out of the throw with a sword attack
-        
+        // only thing we want avalible is to be able to cancel out of the throw with a sword attack, or by pressing retract button
+        if (CheckIfPlayerWantsToRetractTongue()) { return; }
         // read inputs and buffer them
         if(Time.time > (_timeWhenEnteringThrowingState + _bufferTimeToStartReading))
         {
