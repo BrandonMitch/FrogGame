@@ -7,6 +7,7 @@ public class PlayerStateMachine
     public PlayerState CurrentPlayerState { get; set; }
     private PlayerState PreviousPlayerState;
 
+    public PlayerInputManager playerInputManager;
     private List<AttackInputData> attackBuffer;
 
     public void Intialize(PlayerState startingState)

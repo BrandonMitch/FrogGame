@@ -6,7 +6,7 @@ public class Player : Mover
 {
     private SpriteRenderer spriteRenderer;
     private bool isAlive = true;
-
+    [Space]
     [Space]
     [Header("|-----Movement Variables-----|")]
     // Movement Varaibles
@@ -53,7 +53,8 @@ public class Player : Mover
     public bool Unkillable = true;
 
     [Space]
-    [Header("Refernces")]
+    [Header("|-----References-----|")]
+    public PlayerInputManager inputManager;
     public Animator animator;
     public GameObject customizableWeaponOjbect;
     private WeaponCustomizable customizableWeapon;

@@ -32,8 +32,8 @@ public class PlayerAttackChargingState : PlayerState
 
     public override void FrameUpdate()
     {
-        FindLeftMouseInputs();
-        FindRightMouseInputs();
+       // FindLeftMouseInputs();
+       // FindRightMouseInputs();
         if (leftMouseUp)
         {
             //playerStateMachine.ChangeState(playerAttackState);

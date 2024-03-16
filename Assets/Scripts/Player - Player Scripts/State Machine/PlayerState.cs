@@ -1,17 +1,17 @@
 using UnityEngine;
 
-public class PlayerState
+public abstract class PlayerState
 {
     protected Player player;
     protected PlayerStateMachine playerStateMachine;
-    static protected bool leftMouseDown = false;
-    static protected bool leftMouseUp = false;
-    static protected bool leftMouseButton = false;
-    static protected bool rightMouseDown = false;
-    static protected bool rightMouseUp = false;
-    static protected bool rightMouseButton = false;
+    protected bool leftMouseDown    {get{return player.inputManager.LeftMouseDown;}}
+    protected bool leftMouseUp      {get{return player.inputManager.LeftMouseUp;}}
+    protected bool leftMouseButton  {get{return player.inputManager.LeftMouseButton;}}
+    protected bool rightMouseDown   {get{return player.inputManager.RightMouseDown;}}
+    protected bool rightMouseUp     {get{return player.inputManager.RightMouseUp;}}
+    protected bool rightMouseButton {get{return player.inputManager.RightMouseButton;}}
+    protected bool fKeyDown         {get{return player.inputManager.ReleaseKeyDown;}}
 
-    static protected bool fKeyDown = false;
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
         this.player = player;
@@ -35,9 +35,10 @@ public class PlayerState
 
     protected Vector2 GetCurrentMovementInputs()
     {
-        // Check x/y movement, normalize vector
+        /*// Check x/y movement, normalize vector
         Vector2 moveVec = Vector2.ClampMagnitude(new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")),1.0f);
-        return moveVec;
+        return moveVec;*/
+        return player.inputManager.CurrentMovementInputs;
     }
     protected void SetMovementInputs(Vector2 moveVec)
     { 
@@ -52,25 +53,7 @@ public class PlayerState
     {
         player.SetLastMoveDirection(LastMovementDirection);
     }
-    protected void FindLeftMouseInputs()
-    {
-        // Trying to charge
-        leftMouseButton = Input.GetButton("Fire1");
-        // Attack is started
-        leftMouseDown = Input.GetButtonDown("Fire1");
-        // Attack is released
-        leftMouseUp = Input.GetButtonUp("Fire1");
-       
-    }
-    protected void FindRightMouseInputs()
-    {
-        // Aiming the tongue
-        rightMouseButton = Input.GetButton("Fire2");
-        // Start aiming the tongue
-        rightMouseDown = Input.GetButtonDown("Fire2");
-        // Spitting out the tongue on release
-        rightMouseUp = Input.GetButtonUp("Fire2");
-    }
+
 
     public virtual string[] PreviousStateData()
     {
@@ -205,18 +188,9 @@ public class PlayerState
         }
     }
 
-    protected void GetFKeyInputs()
-    {
-        fKeyDown = (Input.GetKeyDown(KeyCode.F));
-        if (fKeyDown) return;
-        var a = Input.GetAxis("Retract");
-        fKeyDown = (Mathf.Abs(a) > 0.01f);
-
-    }
-
     public bool CheckIfPlayerWantsToRetractTongue()
     {
-        GetFKeyInputs();
+        //GetFKeyInputs();
         if (fKeyDown)
         {
             playerStateMachine.ChangeState(player.slowingState);
@@ -224,5 +198,35 @@ public class PlayerState
             return true;
         }
         return false;
+    }
+
+    protected void FindLeftMouseInputs()
+    {
+        /*
+                // Trying to charge
+                leftMouseButton = Input.GetButton("Fire1");
+                // Attack is started
+                leftMouseDown = Input.GetButtonDown("Fire1");
+                // Attack is released
+                leftMouseUp = Input.GetButtonUp("Fire1");
+               */
+    }
+    protected void FindRightMouseInputs()
+    {
+        /*
+                // Aiming the tongue
+                rightMouseButton = Input.GetButton("Fire2");
+                // Start aiming the tongue
+                rightMouseDown = Input.GetButtonDown("Fire2");
+                // Spitting out the tongue on release
+                rightMouseUp = Input.GetButtonUp("Fire2");*/
+    }
+    protected void GetFKeyInputs()
+    {
+        /*        fKeyDown = (Input.GetKeyDown(KeyCode.F));
+                if (fKeyDown) return;
+                var a = Input.GetAxis("Retract");
+                fKeyDown = (Mathf.Abs(a) > 0.01f);*/
+
     }
 }

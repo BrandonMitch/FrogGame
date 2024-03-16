@@ -46,8 +46,8 @@ public class PlayerIdleState : PlayerState
     {
         Vector2 moveVec = GetCurrentMovementInputs();
         // Check tongue first
-        FindRightMouseInputs();
-        FindLeftMouseInputs();
+        //FindRightMouseInputs();
+        //FindLeftMouseInputs();
         //Debug.Log("Right mouse inputs: up " + rightMouseUp + " down " + rightMouseDown);
         
         

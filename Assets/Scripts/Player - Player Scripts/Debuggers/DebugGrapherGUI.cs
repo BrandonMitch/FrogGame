@@ -93,7 +93,7 @@ public class DebugGrapherGUI : MonoBehaviour
     }
     private void Update()
     {
-        var a = Input.GetAxis("Retract");
+        var a = Input.GetAxis("Retractc1");
         DebugGUI.LogPersistent("key1","Retract:" + a);
         a = Input.GetAxis("Fire2");
         DebugGUI.LogPersistent("key2", "Aim:");

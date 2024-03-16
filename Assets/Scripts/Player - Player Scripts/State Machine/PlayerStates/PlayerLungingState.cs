@@ -115,7 +115,7 @@ public class PlayerLungingState : PlayerState
         {
             case LatchMovementType.LungeForward:
                 {
-                    GetFKeyInputs();
+                    //GetFKeyInputs();
                     if (fKeyDown)
                     {
                         TryShutOffForForwardsLunge();

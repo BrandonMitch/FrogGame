@@ -33,7 +33,7 @@ public class PlayerAimingTongueState : PlayerState
     public override void FrameUpdate()
     {
 
-        FindRightMouseInputs();
+        //FindRightMouseInputs();
         if (rightMouseButton)
         {
             //Debug.Log("aiming");

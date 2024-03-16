@@ -33,7 +33,7 @@ public class PlayerAttackingState : PlayerState
 
     public override void FrameUpdate()
     {
-        FindLeftMouseInputs();
+        //FindLeftMouseInputs();
         if (leftMouseDown) // once the mouse is pressed down for the first time, record the time
         {
             chargeStartedTime = Time.time;
