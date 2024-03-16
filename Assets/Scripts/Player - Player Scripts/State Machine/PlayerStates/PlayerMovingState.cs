@@ -49,6 +49,11 @@ public class PlayerMovingState : PlayerState
 
     public override void FrameUpdate()
     {
+        if (rightMouseButton)
+        {
+            playerStateMachine.ChangeState(player.aimingTongueState);
+            return;
+        }
         moveVec = GetCurrentMovementInputs();
         if(moveVec != Vector2.zero)
         {
