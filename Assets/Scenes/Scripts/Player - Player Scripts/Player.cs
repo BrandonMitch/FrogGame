@@ -28,6 +28,10 @@ public class Player : Mover
     [SerializeField] private float forwardLungeCoefficient = 0f;
     [SerializeField] private float forwardLungeForceModifer = 100f;
     [Space]
+    [SerializeField] private float lateralLungeEaseInFrames = 10;
+    [SerializeField] private float lateralLungeEaseOutFrames = 30;
+    [SerializeField] private float lateralLungeDesiredVEL = 2;
+    [Space]
     [SerializeField] private ContactFilter2D tongueContactFilter;
     [SerializeField] private ContactFilter2D playerContactFilter;
 
@@ -204,7 +208,10 @@ public class Player : Mover
             forwardLungeCoefficient, // 7 
             forwardLungeForceModifer,  // 8 
             playerContactFilter, // 9
-        };
+            lateralLungeEaseInFrames, // 10
+            lateralLungeEaseOutFrames, // 11
+            lateralLungeDesiredVEL, // 12
+};
         return returnVals;
     }
     #endregion

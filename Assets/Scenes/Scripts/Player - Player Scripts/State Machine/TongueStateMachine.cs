@@ -104,12 +104,15 @@ public class TongueStateMachine
     }
 
     #region Tongue Collision Point Managment
+    // the base of the tongue is point 0 on the line renderer,
+    // the rotation point of the tongue is always point 0 on the line renderer.
     private void InitializeBaseOfTongue()
     { 
         tonguePoints.Add(new TongueHitData(parentTransform, TonguePointType.baseOfTongue)); // the base of the tongue is point 0 on the line renderer,
     }
     public GameObject IntializeEndOfTongue()
     {
+        if (isTongueRetracting()) { return null; } // TODO: remove this is useless
         if (endOfTongue != null) Debug.LogError("problem in trying to make new end of tongue, this object should be null");
 
         // Instantiate new end of tongue.
@@ -185,6 +188,12 @@ public class TongueStateMachine
     public TongueHitData GetPointBeforeEndOfTongue()
     {
         TongueHitData p = (TongueHitData)tonguePoints[tonguePoints.Count - 2];
+        return p;
+    }
+
+    public TongueHitData GetRotationPoint()
+    {
+        TongueHitData p = (TongueHitData)tonguePoints[1];
         return p;
     }
     public RopeBase getRope()
