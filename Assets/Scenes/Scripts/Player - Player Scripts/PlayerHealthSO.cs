@@ -6,14 +6,21 @@ using UnityEngine;
 public class PlayerHealthSO : ScriptableObject
 {
     public List<HeartContainer> heartContainers = new List<HeartContainer>();
-    [SerializeField] private PlayerHealth playerHealth;
-
+    [Header("------REFERENCES------")]
+    [SerializeField] private IntegerVariable maxHealthContainers;
+    [SerializeField] private FloatVariable Player_InvincibilityTime;
+/*    [Header(
+        "  Player Health Script Reference... used for updating contents of the SO\n" +
+        "    WARNING: Don't set player script in editor, use method within SO"
+        )]
+    [SerializeField] private PlayerHealth playerHealth;*/
+    [Space]
+    [Header("Game Events")]
     [SerializeField] private GameEvent onPlayerHealthChange;
     [SerializeField] private GameEvent onPlayerHeartContainerBreak;
     [SerializeField] private GameEvent onPlayerDamaged;
-    [SerializeField] private IntegerVariable maxHealthContainers;
+
     private float lastTimeDamageTaken = 0;
-    private float invincibilityTime = 1;
     const int DEFAULT_MAX_HEART_CONTAINERS = 3;
 
     private int maxHealthContainersVal = DEFAULT_MAX_HEART_CONTAINERS;
@@ -61,7 +68,7 @@ public class PlayerHealthSO : ScriptableObject
     }
     public void SetPlayerHealthScript(PlayerHealth playerHealthScript)
     {
-        playerHealth = playerHealthScript;
+        //playerHealth = playerHealthScript;
     }
 
     public bool TakeDamage(float damage)
@@ -72,7 +79,7 @@ public class PlayerHealthSO : ScriptableObject
                 }
                 return false;*/
 
-        if (Time.time > lastTimeDamageTaken + invincibilityTime) // if i frames
+        if (Time.time > lastTimeDamageTaken + Player_InvincibilityTime.value) //  i frames
         {
             OnPlayerDamaged();
             OnPlayerHealthChange();
@@ -120,10 +127,10 @@ public class PlayerHealthSO : ScriptableObject
     }
     public int GetCurrentHeartContainersCount()
     {
-        if (playerHealth != null)
+/*        if (playerHealth != null)
         {
             return playerHealth.GetCurrentHeartContainersCount();
-        }
+        }*/
         return heartContainers.Count;
     }
     public void ChangeOrderOfHealth(int oldIndex, int newIndex)

@@ -18,3 +18,4 @@ MonoBehaviour:
   stackable: 0
   maxHealthValue: 100
   currentHealth: 0
+  UIBackgroundFillColor: {r: 0.26666668, g: 0.4666667, b: 0.20000002, a: 1}

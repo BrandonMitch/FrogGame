@@ -8,6 +8,10 @@ public class HeartContainer : Item
     [Header("Health Related")]
     [SerializeField] private float maxHealthValue;
     [HideInInspector] public float currentHealth;
+    [Space]
+    [Header("UI Related")]
+    [SerializeField] public Color UIBackgroundFillColor;
+
     public float GetMaxHealthValue()
     {
         return maxHealthValue;
@@ -20,5 +24,9 @@ public class HeartContainer : Item
     {
         string s = this.name + ", Max HP:  " + maxHealthValue + ", Current HP: " + currentHealth;
         return s;
+    }
+    public float PercentFull()
+    {
+        return currentHealth / maxHealthValue;
     }
 }

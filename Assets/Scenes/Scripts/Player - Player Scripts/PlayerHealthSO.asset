@@ -16,8 +16,8 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  playerHealth: {fileID: 0}
-  onPlayerHealthChange: {fileID: 0}
-  onPlayerHeartContainerBreak: {fileID: 0}
-  onPlayerDamaged: {fileID: 0}
-  maxHealthContainers: {fileID: 0}
+  maxHealthContainers: {fileID: 11400000, guid: 75f0ef03fc9a73b44abd3bfeeb4a6360, type: 2}
+  Player_InvincibilityTime: {fileID: 11400000, guid: 53a40cf8c7ee89841843f6d66643fb43, type: 2}
+  onPlayerHealthChange: {fileID: 11400000, guid: a976e3d662c5a8d44b06e43a06ba5034, type: 2}
+  onPlayerHeartContainerBreak: {fileID: 11400000, guid: e75f7def9e75c9347b90036f86b3a2fe, type: 2}
+  onPlayerDamaged: {fileID: 11400000, guid: 14ce6a5e4eaef8d4d82f243d8139ef38, type: 2}

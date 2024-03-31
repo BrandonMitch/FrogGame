@@ -17,3 +17,5 @@ MonoBehaviour:
   image: {fileID: -475129144, guid: 8e5349de3ddff904c9540a3e956e2638, type: 3}
   stackable: 0
   maxHealthValue: 50
+  currentHealth: 0
+  UIBackgroundFillColor: {r: 0.7725491, g: 0.227451, b: 0.23529413, a: 1}
