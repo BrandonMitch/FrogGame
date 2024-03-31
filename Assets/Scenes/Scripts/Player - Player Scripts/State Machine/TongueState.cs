@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using MovementNameSpace;
 public class TongueState 
 {
     protected Player player;
     protected TongueStateMachine tongueStateMachine;
-    //protected GameObject endOfTongue;
     public TongueState(Player player, TongueStateMachine tongueStateMachine)
     {
         this.player = player;
@@ -37,11 +36,16 @@ public class TongueState
     {
         return false;
     }
+    public virtual bool isAiming()
+    {
+        return false;
+    }
     public virtual void Intialize()
     {
 
     }
-
+  
+/*
     static void UpdateBaseOfTongueRenderer(LineRenderer LR, Transform parentTransform)
     {
         LR.SetPosition(0, parentTransform.position);
@@ -54,9 +58,5 @@ public class TongueState
     {
         UpdateBaseOfTongueRenderer(LR, parentTransform);
         UpdateEndOfTongueRenderer(LR, endOfTongueTransform);
-    }
-    public void changeModeToCollision()
-    {
-
-    }
+    }*/
 }

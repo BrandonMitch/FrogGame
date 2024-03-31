@@ -7,7 +7,6 @@ public class Player : Mover
     private SpriteRenderer spriteRenderer;
     private bool isAlive = true;
     [Space]
-    [Space]
     [Header("|-----Movement Variables-----|")]
     // Movement Varaibles
     private float mass;
@@ -32,7 +31,7 @@ public class Player : Mover
     [SerializeField] private float lateralLungeEaseOutFrames = 30;
     [SerializeField] private float lateralLungeDesiredVEL = 2;
     [Space]
-    [SerializeField] private ContactFilter2D tongueContactFilter;
+    [SerializeField] public ContactFilter2D tongueContactFilter;
     [SerializeField] private ContactFilter2D playerContactFilter;
 
     private Rigidbody2D playerRB;
@@ -41,8 +40,6 @@ public class Player : Mover
     // TODO: Come up with better way to do this
 
     [SerializeField] private Vector3 lastMoveDirection = new Vector3(0, 0, 0);
-
-    private Vector3 dashDirection;
     private float xInput { get; set; }
     private float yInput { get; set; }
     private float speedForAnimation;
@@ -234,8 +231,8 @@ public class Player : Mover
         tongueStateMachine.Intialize(tongueOffState);
 
         // This is called for getting the line render componet and certain transforms that only need to be found one time
-        TongueState[] intilizedTongueStates = { tongueRetractingState, tongueLatchedState, tongueLungeState, tongueThrowState };
-        tongueStateMachine.IntializeTongueStates(intilizedTongueStates);
+        //TongueState[] intilizedTongueStates = { };
+        //tongueStateMachine.IntializeTongueStates(intilizedTongueStates);
 
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
         spriteRenderer = GetComponent<SpriteRenderer>();

@@ -72,9 +72,10 @@ public class NonLinearRadialAccelerator
         ApplyCentripetalForce(RB, cp, jhat);
         if (DebugOn)
         {
-            Tracer(lastPosition, RB.position);
-            Debug.DrawLine(RB.position, (Vector3)RB.position + ihat, Color.blue);
-            Debug.DrawLine(RB.position, (Vector3)RB.position + jhat, Color.green);
+            Tracer.Trace(lastPosition, RB.position, Color.red, 5f);
+            Tracer.DrawTangentalandCentripetal(RB.position, ihat, jhat, Color.blue, Color.green);
+            //Debug.DrawLine(RB.position, (Vector3)RB.position + ihat, Color.blue);
+            //Debug.DrawLine(RB.position, (Vector3)RB.position + jhat, Color.green);
             lastPosition = RB.position;
         }
     }
@@ -153,6 +154,7 @@ public class NonLinearRadialAccelerator
     { 
         RB.AddForce(jhat * forceMagnitude);
     }
+    /*
     private void Tracer(Vector2 lastPosition, Vector2 currentPosition)
     {
         if (lastPosition != Vector2.zero)
@@ -160,7 +162,7 @@ public class NonLinearRadialAccelerator
             Debug.DrawLine(currentPosition, lastPosition, Color.red, 5f);
         }
     }
-
+    */
     private void ClampRBVelocity(Rigidbody2D RB)
     {
         RB.velocity = Vector2.ClampMagnitude(RB.velocity, VEL * 1.5f);
@@ -169,10 +171,5 @@ public class NonLinearRadialAccelerator
     private void IncrementDampingCounter()
     {
         dampingCounter++;
-    }
-
-    private void OnHit()
-    {
-
     }
 }

@@ -62,4 +62,8 @@ public class PlayerStateMachine
     {
         return PreviousPlayerState.PreviousStateData();
     }
+    public void EnterOffStateImmediately(Player player)
+    {
+        player.stateMachine.ChangeState(player.idleState);
+    }
 }

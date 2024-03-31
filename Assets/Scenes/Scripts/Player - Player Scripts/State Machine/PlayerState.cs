@@ -145,49 +145,6 @@ public abstract class PlayerState
         return 0;
     }
 
-    public static void DrawCircle(Vector3 position, float radius, int segments, Color color)
-    {
-        // If either radius or number of segments are less or equal to 0, skip drawing
-        if (radius <= 0.0f || segments <= 0)
-        {
-            return;
-        }
-
-        // Single segment of the circle covers (360 / number of segments) degrees
-        float angleStep = (360.0f / segments);
-
-        // Result is multiplied by Mathf.Deg2Rad constant which transforms degrees to radians
-        // which are required by Unity's Mathf class trigonometry methods
-
-        angleStep *= Mathf.Deg2Rad;
-
-        // lineStart and lineEnd variables are declared outside of the following for loop
-        Vector3 lineStart = Vector3.zero;
-        Vector3 lineEnd = Vector3.zero;
-
-        for (int i = 0; i < segments; i++)
-        {
-            // Line start is defined as starting angle of the current segment (i)
-            lineStart.x = Mathf.Cos(angleStep * i);
-            lineStart.y = Mathf.Sin(angleStep * i);
-
-            // Line end is defined by the angle of the next segment (i+1)
-            lineEnd.x = Mathf.Cos(angleStep * (i + 1));
-            lineEnd.y = Mathf.Sin(angleStep * (i + 1));
-
-            // Results are multiplied so they match the desired radius
-            lineStart *= radius;
-            lineEnd *= radius;
-
-            // Results are offset by the desired position/origin 
-            lineStart += position;
-            lineEnd += position;
-
-            // Points are connected using DrawLine method and using the passed color
-            Debug.DrawLine(lineStart, lineEnd, color);
-        }
-    }
-
     public bool CheckIfPlayerWantsToRetractTongue()
     {
         //GetFKeyInputs();
@@ -227,6 +184,86 @@ public abstract class PlayerState
                 if (fKeyDown) return;
                 var a = Input.GetAxis("Retract");
                 fKeyDown = (Mathf.Abs(a) > 0.01f);*/
+
+    }
+    bool debug = true;
+    public bool LineCastEndOfTongueToRotationPoint()
+    {
+        TongueHitData hitData = player.tongueStateMachine.GetRotationPoint();
+        Vector2 rotationPoint = hitData.getPos();
+        Vector2 parentPosition = player.tongueStateMachine.GetParentTransformPosition(); 
+
+        RaycastHit2D[] collisions = new RaycastHit2D[3];
+        if (debug)
+        {
+            Debug.DrawLine(rotationPoint, parentPosition, Color.magenta);
+        }
+        Physics2D.Linecast(rotationPoint, parentPosition, player.tongueContactFilter, collisions);
+        foreach (RaycastHit2D col in collisions)
+        {
+            Collider2D collision = col.collider;
+            if (collision != null) // Check if the collision is not null
+            {
+                if (!collision.CompareTag("Player"))
+                {
+
+                    // *** Debugs ***
+                    // Yellow is normal
+                    // Red is collision point
+                    ///Debug.Log("Collision Name: " + collision.name);
+                    if (debug)
+                    {
+                        Tracer.DrawCircle(col.point, 0.03f, 10, Color.red);
+                        Vector2 normVector = col.normal;
+                        Debug.DrawLine(col.point, col.point + normVector, Color.yellow, 5f);
+                    }
+                    ///Debug.Break();
+                    // -----------------
+
+                    // Check if the collision can't be swung on
+                    if (CantGoThroughTongueCheck(col))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+    public virtual bool CantGoThroughTongueCheck(RaycastHit2D col)
+    {
+        ICantGoThroughTongue cantGoThroughTongue = col.collider.GetComponent<ICantGoThroughTongue>();
+        if (cantGoThroughTongue == null)
+        {
+            return false;
+        }
+        else
+        {
+            cantGoThroughTongue.OnTongueCollide(col);
+            OnTongueCollisionIntersection();
+            return true;
+        }
+    }
+    public virtual bool CantBeSwungOnCheck(RaycastHit2D col)
+    {
+        ICantBeSwungOn cantBeSwungInterface = col.collider.GetComponent<ICantBeSwungOn>();
+        if (cantBeSwungInterface == null)
+        {
+            return false;
+        }
+        else
+        {
+            cantBeSwungInterface.OnSwungOn(col);
+            OnTongueSwungOnIntersection();
+            return true;
+        }
+    }
+    public virtual void OnTongueCollisionIntersection()
+    {
+
+    }
+    public virtual void OnTongueSwungOnIntersection()
+    {
 
     }
 }

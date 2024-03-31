@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 630498754107504142}
   - component: {fileID: 630498754107504137}
   - component: {fileID: 6816962011063937620}
+  - component: {fileID: 8347307529788624381}
+  - component: {fileID: 3252293133332766952}
   - component: {fileID: 630498754107504136}
   - component: {fileID: 6816962011063937623}
   - component: {fileID: 6816962011063937624}
@@ -124,6 +126,9 @@ MonoBehaviour:
   minimumTimeToSpawnANewPoint: 0.3
   forwardLungeCoefficient: 0.1
   forwardLungeForceModifer: 150
+  lateralLungeEaseInFrames: 5
+  lateralLungeEaseOutFrames: 12
+  lateralLungeDesiredVEL: 3
   tongueContactFilter:
     useTriggers: 0
     useLayerMask: 0
@@ -173,9 +178,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 864f55293f42741419e3e20b2b22c32e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  controllerMode: 0
   leftClickButton: Fire1
   rightClickButton: Fire2
-  releaseKey: Retract
+  horizontalMov: Horizontal
+  verticalMov: Vertical
+  releaseKey: 0
+  leftClickCTRL: Fire1c1
+  rightClickCTRL: Fire2c1
+  horizontalMovCTRL: Horizontalc1
+  verticalMovCTRL: Verticalc1
+  releaseKeyCTRL: Retractc1
+  controllerXName: stick2X
+  controllerYName: stick2Y
+--- !u!114 &8347307529788624381
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 630498754107504139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 920ff0912f7547243af2d865412a2941, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerBaseStats: {fileID: 11400000, guid: f3f44eb01511e234ab0ff418cb886838, type: 2}
+  playerCurrentStats: {fileID: 11400000, guid: 1b58656742ca8fd459a7fffbb2a1c4de, type: 2}
+  playerAddStats: {fileID: 11400000, guid: e016495dab77e784a8bd98ceb6b01478, type: 2}
+  playerMultiplyStats: {fileID: 11400000, guid: 18f6a023c9a200c4e9c90467c25d6eee, type: 2}
+--- !u!114 &3252293133332766952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 630498754107504139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00288a254e429ad40b8011a884ab2e1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Event: {fileID: 11400000, guid: a976e3d662c5a8d44b06e43a06ba5034, type: 2}
+  Response:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!61 &630498754107504136
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -882,12 +929,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bcd1ba3673ba14c8f3c800f56cb966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputManager: {fileID: 0}
   lookat: {x: 1, y: 1, z: 0}
   difference: {x: 1, y: 1, z: 0}
   swordCrossHair: {fileID: 2118868088, guid: 299956419ab87704d9e47a6150ef0788, type: 3}
   tongueCrossHair: {fileID: 337405216, guid: 299956419ab87704d9e47a6150ef0788, type: 3}
-  controller: 0
-  controllerSensitivity: 0.1
 --- !u!1 &6816962009997998687
 GameObject:
   m_ObjectHideFlags: 0
@@ -1034,7 +1080,7 @@ MonoBehaviour:
   - {x: 0.018977925, y: -0.11899213, z: 0}
   m_ShapePathHash: -190875527
   m_Mesh: {fileID: 0}
-  m_InstanceId: -2532
+  m_InstanceId: 43118
   m_LocalBounds:
     m_Center: {x: -0.006605774, y: -0.09673907, z: 0}
     m_Extent: {x: 0.046420626, y: 0.022253055, z: 0}

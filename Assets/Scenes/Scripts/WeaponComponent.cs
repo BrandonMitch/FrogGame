@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName ="New Weapon Component")]
+[CreateAssetMenu(fileName ="New Weapon Component",menuName ="Item/WeaponComponent")]
 public class WeaponComponent : Item
 {
     public enum ComponentType

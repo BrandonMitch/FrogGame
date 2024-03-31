@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d7ef7d90d1df914d9692546358b0552, type: 3}
+  m_Name: Player Add Stats
+  m_EditorClassIdentifier: 
+  playerSpeed: 1
+  playerMaxSpeed: 0
+  playerRestingDrag: 0
+  playerRunningDrag: 0
+  playerDragSlowDownTime: 0
+  playerRunForceModifier: 0
+  lateralForceModifer: 0
+  minimumLateralDuration: 0
+  lateralDragCoefficient: 0
+  dampingCoefficient: 0
+  minimumDistanceToSpawnANewPoint: 0
+  minimumTimeToSpawnANewPoint: 0
+  forwardLungeCoefficient: 0
+  forwardLungeForceModifer: 0
+  lateralLungeEaseInFrames: 0
+  lateralLungeEaseOutFrames: 0
+  lateralLungeDesiredVEL: 0

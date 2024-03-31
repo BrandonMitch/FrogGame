@@ -26,7 +26,7 @@ public abstract class RopeBase : MonoBehaviour, IRope
     }
     public float GetSFrequency() 
     {
-        return sDampening;
+        return sFrequency;
     }
 
     public virtual float GetMaxLength()

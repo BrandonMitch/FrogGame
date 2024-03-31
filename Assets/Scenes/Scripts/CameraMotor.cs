@@ -4,48 +4,58 @@ using UnityEngine;
 
 public class CameraMotor : MonoBehaviour
 {
-    public Transform lookAt;
+    public Transform lookAt = null;
     public float boundX = 0.15f;
     public float boundY = 0.05f;
 
     private void Start()
     {
-        lookAt = GameObject.Find("Player").transform;
+        if (lookAt != null)
+        {
+            GameObject obj = GameObject.Find("Player");
+            if (obj != null)
+            {
+                lookAt = obj.transform;
+            }
+        }
     }
 
     private void LateUpdate()
     {
-        Vector3 delta = Vector3.zero;
-
-        // Check if we are inside the bounds on X axis
-        float deltaX = lookAt.position.x - transform.position.x;
-        if (deltaX > boundX || deltaX < -boundX)
+        if (lookAt != null)
         {
-            if (transform.position.x < lookAt.position.x)
-            {
-                delta.x = deltaX - boundX;
-            }
-            else
-            {
-                delta.x = deltaX + boundX;
-            }
-        }
+            Vector3 delta = Vector3.zero;
 
-        // Check if we are inside the bounds on Y axis
-        float deltaY = lookAt.position.y - transform.position.y;
-        if (deltaY > boundY || deltaY < -boundY)
-        {
-            if (transform.position.y < lookAt.position.y)
+            // Check if we are inside the bounds on X axis
+            float deltaX = lookAt.position.x - transform.position.x;
+            if (deltaX > boundX || deltaX < -boundX)
             {
-                delta.y = deltaY - boundY;
+                if (transform.position.x < lookAt.position.x)
+                {
+                    delta.x = deltaX - boundX;
+                }
+                else
+                {
+                    delta.x = deltaX + boundX;
+                }
             }
-            else
-            {
-                delta.y = deltaY + boundY;
-            }
-        }
 
-        transform.position += new Vector3(delta.x, delta.y, 0);
+            // Check if we are inside the bounds on Y axis
+            float deltaY = lookAt.position.y - transform.position.y;
+            if (deltaY > boundY || deltaY < -boundY)
+            {
+                if (transform.position.y < lookAt.position.y)
+                {
+                    delta.y = deltaY - boundY;
+                }
+                else
+                {
+                    delta.y = deltaY + boundY;
+                }
+            }
+
+            transform.position += new Vector3(delta.x, delta.y, 0);
+        }
     }
 
 

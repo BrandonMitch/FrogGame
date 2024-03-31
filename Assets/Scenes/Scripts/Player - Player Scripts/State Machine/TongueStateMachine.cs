@@ -11,9 +11,8 @@ public class TongueStateMachine
 
     [SerializeField]  private TongueData tongueData;
     [HideInInspector] public LineRenderer lineRenderer;
-    [HideInInspector] public Transform parentTransform;
+    [HideInInspector] public Transform parentTransform = null;
 
-    public TongueSwingingMode tongueSwingingMode;
     public GameObject endOfTongue;
     public Rigidbody2D endOfTongueRB;
 
@@ -57,13 +56,20 @@ public class TongueStateMachine
             Debug.Log("Line renderer null, try again");
         }
     }
-
+    public void TurnOnLineRenderer()
+    {
+        if(lineRenderer != null)
+        {
+            lineRenderer.enabled = true;
+        }
+    }
     public void TurnOffEndOfTongueRB()
     {
         endOfTongueRB.simulated = false;
     }
     public void DestroyEndOfTongue()
     {
+        Debug.Log("Destroy end of tongue called"); 
         if (endOfTongue != null)
         {
             GameObject.Destroy(endOfTongue);
@@ -71,18 +77,29 @@ public class TongueStateMachine
         }
 
 
-        if (tonguePoints.Count > 0 && tonguePoints.Count < 3)
+        if (tonguePoints.Count == 2)
         {
+            Debug.Log("Trying to destryoing the end of the tognue");
             TongueHitData lastElement = (TongueHitData)tonguePoints[1];
             if (lastElement.type != TonguePointType.endOfTongue) { Debug.LogError("End of tongue is not the correct type"); return; }
             tonguePoints.RemoveAt(1); // this clears the tongue points lists
         }
-        else Debug.Log("error in trying to destroy end of tongue"); 
+        else {
+            if (tonguePoints.Count > 2)
+            {
+                Debug.LogError("error in trying to destroy end of tongue, the end is destroyed before all the mid points are removed");
+            }
+            else
+            {
+                if(tonguePoints.Count == 1)
+                {
+                    return; // All tongue points already destroyed
+                }
+            }
+        }
+
     }
-    public Transform GetEndOfTongueTransform()
-    {
-        return endOfTongue.transform;
-    }
+
     public bool isTongueRetracting()
     {
         return CurrentTongueState.isRetracting();
@@ -91,10 +108,15 @@ public class TongueStateMachine
     {
         return CurrentTongueState.isOff();
     }
+    public bool isTongueAiming()
+    {
+        return CurrentTongueState.isAiming();
+    }
     /* IntializeTongueStates is used for intializing tongue states that need certain transforms on the start call instead of the awake call. Typically used to grab transforms and lineRenderer
      *  @param states : is a list of tongue states that you want to be intialized
      *  Intialize() must be implemented in the tonguestate
      */
+    // TODO: make private
     public void IntializeTongueStates(TongueState[] states)
     {
         foreach (TongueState state in states)
@@ -112,10 +134,11 @@ public class TongueStateMachine
     }
     public GameObject IntializeEndOfTongue()
     {
-        if (isTongueRetracting()) { return null; } // TODO: remove this is useless
+        if (isTongueRetracting()) { return null; } 
         if (endOfTongue != null) Debug.LogError("problem in trying to make new end of tongue, this object should be null");
 
         // Instantiate new end of tongue.
+
         endOfTongue = GameObject.Instantiate(tongueEndPrefab, parentTransform.position, Quaternion.identity);
 
         // Now we need to add this to array list containing all of the tongue points.
@@ -124,13 +147,10 @@ public class TongueStateMachine
         // Now we need to set the rigid body to the new end of tongue, and shut it off
         endOfTongueRB = endOfTongue.GetComponent<Rigidbody2D>();
         endOfTongueRB.simulated = false;
-        // switch the mode to 2Body;
-        tongueSwingingMode = TongueSwingingMode.TwoBody;
         return endOfTongue;
     }
     public void AddNewTongueCollisionPoint(TongueHitData newTonguePoint)
     {
-        tongueSwingingMode = TongueSwingingMode.nBody;
         tonguePoints.Insert(1, newTonguePoint);
         lineRenderer.positionCount++;
     }
@@ -174,9 +194,9 @@ public class TongueStateMachine
         }
     }
 
-    public void MultiPointTongueRenderer()
+    private void MultiPointTongueRenderer(int nPoints)
     {
-        int nPoints = tonguePoints.Count;
+        //int nPoints = tonguePoints.Count;
         lineRenderer.SetPosition(0, parentTransform.position);
         lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
         for (int i = 1; (i < (nPoints-1)) && (i < lineRenderer.positionCount); i++)
@@ -184,6 +204,14 @@ public class TongueStateMachine
             TongueHitData point = (TongueHitData)tonguePoints[i];
             lineRenderer.SetPosition(i, point.getPos());
         }
+    }
+    public void TwoPointTongueRenderer()
+    {
+        int nPoints = tonguePoints.Count;
+        if (nPoints == 1) return;
+        if (nPoints > 2) { MultiPointTongueRenderer(nPoints); return; }
+        lineRenderer.SetPosition(0, parentTransform.position);
+        lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
     }
     public TongueHitData GetPointBeforeEndOfTongue()
     {
@@ -199,6 +227,68 @@ public class TongueStateMachine
     public RopeBase getRope()
     {
         return (RopeBase)tongueData;
+    }
+
+    public Vector3 GetParentTransformPosition()
+    {
+        return parentTransform.position;
+    }
+    public Vector3 GetEndOfTongueTransformPosition()
+    {
+        return endOfTongue.transform.position;
+    }
+    public Transform GetEndOfTongueTransform()
+    {
+        return endOfTongue.transform;
+    }
+    public Transform GetParentTransform()
+    {
+        if (parentTransform == null)
+        {
+            return null;
+        }
+        else
+        {
+            return parentTransform;
+        }
+    }
+
+    private void DestroyWholeTongueBesidesBase()
+    {
+        int points = tonguePoints.Count;
+        if(points == 1) { return;  } // don't destroy base of tongue
+        if(points == 2) { DestroyEndOfTongue(); return; } // the only point left should be end of tongue
+        while(TongueMidPointCount() > 0) // Destroy all mid points
+        {
+            DestroyTongueMidPoint(0);
+        }
+        points = tonguePoints.Count;
+        if(points == 2)
+        {
+            DestroyEndOfTongue();
+        }
+    }
+    public void EnterOffStateImmediately(Player player)
+    {
+        DestroyWholeTongueBesidesBase();
+        player.tongueStateMachine.ChangeState(player.tongueOffState);
+    }
+    private int TongueMidPointCount()
+    {
+        int points = tonguePoints.Count;
+        int midPoints = points - 2;
+        if(midPoints < 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return midPoints;
+        }
+    }
+    public int TonguePointCount()
+    {
+        return tonguePoints.Count;
     }
     #endregion
 }
