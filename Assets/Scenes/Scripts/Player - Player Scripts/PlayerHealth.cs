@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerHealth : MonoBehaviour
+public class PlayerHealth : MonoBehaviour, IHealth
 {
     [SerializeField] private List<HeartContainer> defaultStartingHeartContainers = new List<HeartContainer>();
     [SerializeField] private List<HeartContainer> heartContainers = new List<HeartContainer>();
@@ -11,10 +11,8 @@ public class PlayerHealth : MonoBehaviour
     [SerializeField] private GameEvent onPlayerHeartContainerBreak;
     [SerializeField] private GameEvent onPlayerDamaged;
     [SerializeField] private IntegerVariable maxHealthContainers;
-    private float lastTimeDamageTaken = 0;
-    private float invincibilityTime = 1;
     const int DEFAULT_MAX_HEART_CONTAINERS = 3;
-
+    
     private int maxHealthContainersVal = DEFAULT_MAX_HEART_CONTAINERS;
     public int MaxHealthContainersVal
     {
@@ -36,12 +34,13 @@ public class PlayerHealth : MonoBehaviour
             maxHealthContainersVal = value;
         }
     }
+    private bool onAwake = true;
     private void Awake()
     {
-        playerHealthSO.SetPlayerHealthScript(this);
         ResetHeartContainersToDefault();
+        onAwake = false;
     }
-    bool debug2 = true; // print hearts
+    bool debug2 = false; // print hearts
     [ContextMenu("Reset Heart Containers To Default")]
     private void ResetHeartContainersToDefault()
     {
@@ -51,90 +50,99 @@ public class PlayerHealth : MonoBehaviour
         foreach (HeartContainer heart in defaultStartingHeartContainers)
         {
             counter++;
-            if(counter <= DEFAULT_MAX_HEART_CONTAINERS)
+            if (counter <= DEFAULT_MAX_HEART_CONTAINERS)
             {
                 playerHealthSO.ForceAddHeartContainer(heart);
             }
         }
         playerHealthSO.heartContainers = heartContainers;
-        if (debug2) { PrintHearts();  }
+        playerHealthSO.ResetLastTimeTakenDamage();
+        if (debug2) { playerHealthSO.PrintHearts(); }
     }
+    #region Testing in Editor 
+    [Space]
+    [SerializeField] bool printDebugsForHealandDamage = false;
+    [ContextMenu("Take 10 Damage")]
+    public void Take10Damage()
+    {
+        TakeDamage(10f);
+        if (printDebugsForHealandDamage)
+        {
+            Debug.Log("Taking 10 damage");
+            PrintHearts();
+        }
+    }
+    [SerializeField] float xDamage;
+    [ContextMenu("Take x damamge")]
+    public void TakeXDamage()
+    {
+        TakeDamage(xDamage);
+        if (printDebugsForHealandDamage)
+        {
+            Debug.Log("Taking "+ xDamage + " damage");
+            PrintHearts();
+        }
+    }
+    [SerializeField] float xHeal;
+    [ContextMenu("Heal x Health")]
+    public void HealX_HP()
+    {
+        Heal(xDamage);
+        if (printDebugsForHealandDamage)
+        {
+            Debug.Log("Healing " + xHeal + " HP, no overflow ");
+            PrintHearts();
+        }
+    }
+
+    [SerializeField] HeartContainer xHeart;
+    [ContextMenu("Add X Heart Container")]
+    public void AddX_Heart()
+    {
+        playerHealthSO.ForceAddHeartContainer(xHeart);
+    }
+    #endregion
+
+    #region Using SO's Methods
     [ContextMenu("Print Hearts in SO")]
     public void PrintHearts()
     {
-        if (playerHealthSO != null)
-        {
-            playerHealthSO.PrintHearts();
-        }
-        else
-        {
-            Debug.Log("PLAYER HEALTH SO IS NULL");
-        }
+        playerHealthSO.PrintHearts();
     }
     public bool TakeDamage(float damage)
     {
-        if (Time.time > lastTimeDamageTaken + invincibilityTime) // if i frames
-        {
-            OnPlayerDamaged();
-            OnPlayerHealthChange();
-            lastTimeDamageTaken = Time.time;
-            return true;
-        }
-        return false;
+        return playerHealthSO.TakeDamage(damage);
     }
     public void ForceTakeDamage(float damage)
     {
-        OnPlayerHealthChange();
-        lastTimeDamageTaken = Time.time;
+        playerHealthSO.ForceTakeDamage(damage);
     }
-
 
     public bool AddHeartContainer(HeartContainer heartContainer)
     {
-        int currentAmount = GetCurrentHeartContainersCount();
-        if(currentAmount >= MaxHealthContainersVal)
-        {
-            ForceAddHeartContainer(heartContainer);
-            return true;
-        }
-        return false; // if we don't add hearts 
+        return playerHealthSO.AddHeartContainer(heartContainer);
     }
-
-/*    bool debug1 = true;*/
-    private bool ForceAddHeartContainer(HeartContainer heartContainer)
+    private void ForceAddHeartContainer(HeartContainer heartContainer)
     {
-        HeartContainer newHeartContainer = Instantiate(heartContainer);
-/*        if (debug1) { Debug.Log(newHeartContainer); }*/
-        newHeartContainer.ResetHealth();
-
-        heartContainers.Add(newHeartContainer);
-/*        if (debug1) { Debug.Log(newHeartContainer); }*/
-        return true;
+        playerHealthSO.ForceAddHeartContainer(heartContainer);
     }
     public int GetCurrentHeartContainersCount()
     {
-        return heartContainers.Count;
+        return playerHealthSO.GetCurrentHeartContainersCount();
     }
 
     public void ChangeOrderOfHealth(int oldIndex, int newIndex)
     {
-        HeartContainer temp = heartContainers[newIndex];
-        heartContainers[newIndex] = heartContainers[oldIndex];
-        heartContainers[oldIndex] = temp;
-        OnPlayerHealthChange();
+        playerHealthSO.ChangeOrderOfHealth(oldIndex, newIndex);
     }
 
     public void BreakHeart(int index)
     {
-        HeartContainer heartContainer = heartContainers[index];
-        BreakHeart(heartContainer);
+        playerHealthSO.BreakHeart(index);
     }
     public void BreakHeart(HeartContainer heartContainer)
     {
-        heartContainers.Remove(heartContainer);
-        Destroy(heartContainer);
-        OnPlayerHealthChange();
-        OnPlayerHeartContainerBreak();
+        playerHealthSO.BreakHeart(heartContainer);
     }
 
     #region Game Events
@@ -162,5 +170,47 @@ public class PlayerHealth : MonoBehaviour
             onPlayerHealthChange.Raise();
         }
     }
+
+    #endregion
+
+    #region Interface Implmentation
+    public int GetCurrentHealth()
+    {
+        return playerHealthSO.GetCurrentHealth();
+    }
+
+    public int GetMaxHealth()
+    {
+        return playerHealthSO.GetMaxHealth();
+    }
+
+    public void Heal(float amount)
+    {
+        playerHealthSO.Heal(amount);
+    }
+    public float HealWithOverFlow(float amount)
+    {
+        return playerHealthSO.HealWithOverFlow(amount);
+    }
+    public void HealFullHealth()
+    {
+        playerHealthSO.HealFullHealth();
+    }
+
+    public void OnHealthChange()
+    {
+        playerHealthSO.OnHealthChange();
+    }
+
+    // Just for correspondence with interface
+    public void OnDamaged()
+    {
+        playerHealthSO.OnDamaged();
+    }
+    public float GetPercentHealth()
+    {
+        return playerHealthSO.GetPercentHealth();
+    }
+    #endregion
     #endregion
 }

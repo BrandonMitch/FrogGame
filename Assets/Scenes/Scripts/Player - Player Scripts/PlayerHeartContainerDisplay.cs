@@ -38,7 +38,7 @@ public class PlayerHeartContainerDisplay : MonoBehaviour
         UpdateUI();
     }
 
-    bool debug1 = true;
+    [SerializeField] bool debug1 = false;
     private float CalculateTotalHeight(List<HeartContainer> heartContainersSubList)
     {
         int totalPadding = 0;
@@ -99,7 +99,7 @@ public class PlayerHeartContainerDisplay : MonoBehaviour
                 UI_Vertical_HeartDisplay[col].SetActive(true); // enable vertical list
 
                 { // Update height of vertical container
-                    Debug.Log("sublist" + subList.Count);
+                    /*Debug.Log("sublist" + subList.Count);*/
                     RectTransform rect = UI_Vertical_HeartDisplay[col].GetComponent<RectTransform>();
                     float sublistHeight = CalculateTotalHeight(subList);
                     rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, sublistHeight);

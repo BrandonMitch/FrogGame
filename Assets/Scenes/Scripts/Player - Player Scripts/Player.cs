@@ -55,6 +55,7 @@ public class Player : Mover
 
     [Space]
     [Header("|-----References-----|")]
+    public PlayerBaseStatsSO currentStats;
     public PlayerInputManager inputManager;
     public Animator animator;
     public GameObject customizableWeaponOjbect;

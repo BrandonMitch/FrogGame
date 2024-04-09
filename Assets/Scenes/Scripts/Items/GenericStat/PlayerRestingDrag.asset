@@ -9,7 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10153d198865c2f4386703b4b23b17d7, type: 3}
-  m_Name: Player_InvincibilityTime
+  m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
+  m_Name: PlayerRestingDrag
   m_EditorClassIdentifier: 
-  value: 0
+  statType: 0
+  addToAmount: 0
+  multiplyAmount: 0
