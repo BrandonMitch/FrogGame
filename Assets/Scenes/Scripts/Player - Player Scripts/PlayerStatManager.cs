@@ -11,6 +11,7 @@ public class PlayerStatManager : MonoBehaviour
     public PlayerBaseStatsSO playerAddStats;
     public PlayerBaseStatsSO playerMultiplyStats;
     private FieldInfo[] allFields;
+    [SerializeField] private List<GenericStat> stats = new();
 
 /*    [Header("|-----Movement Variables-----|")]
     [SerializeField] private float playerSpeed                          *//*= 1.0f;     *//*;
@@ -126,6 +127,10 @@ public class PlayerStatManager : MonoBehaviour
     {
         GetFields();
         //UpdateIndividualStat(playerBaseStats => playerBaseStats.playerMaxSpeed);
+        foreach (GenericStat stat in stats)
+        {
+            stat.CompleteUpdateValue();
+        }
     }
     #region getters
     /*

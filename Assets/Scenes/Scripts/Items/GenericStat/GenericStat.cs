@@ -16,10 +16,25 @@ public class GenericStat : ScriptableObject
     /// <summary>
     /// List of all registered stats that can modify the generic stat
     /// </summary>
-    [SerializeField] private List<Stat> modifiers = new List<Stat>();
+    [SerializeField] private List<Stat> modifiers = new();
     public float Value { get => value; }
 
-
+    /// <summary>
+    /// Intializes a stat to its base stat values.
+    /// </summary>
+    /// <returns>True if the intialization succeded, false if it failed</returns>
+    public bool IntializeStat()
+    {
+        if (baseStat != null)
+        {
+            addToAmount = baseStat.GetAddToAmount();
+            multiplyAmount = baseStat.GetMultiplyAmount();
+            setAmount = baseStat.GetSetAmount();
+            hasSetValueApplied = baseStat.DoesSetValue();
+            return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// This method registers new modifiers to the generic stat.
@@ -34,20 +49,28 @@ public class GenericStat : ScriptableObject
             Debug.Log("Stat is null");
             return false;
         }
-        if (stat.statType != this) 
+
+        if (modifiers.Contains(stat))
         {
-            Debug.Log("Invalid Stat Type");
+            Debug.LogWarning("Stat is already registered:" + stat.name);
+            return false;
+        }
+        if (stat.statType == null||stat.statType != this) 
+        {
+            Debug.LogWarning("Invalid Stat Type: " + stat.statType.name);
             return false; // if the stat type is invalid, don't add the stat
         } 
-        else
+
+        modifiers.Add(stat);
+        stat.OnRegister();
+
+        if (updateValueOnRegister)
         {
-            modifiers.Add(stat);
-            if (updateValueOnRegister)
-            {
-                QuickUpdateStat(stat);
-            }
-            return true;
+            QuickUpdateStat(stat);
         }
+
+        return true;
+
     }
 
 
@@ -57,14 +80,7 @@ public class GenericStat : ScriptableObject
     /// </summary>
     public void CompleteUpdateValue()
     {
-        if (baseStat != null) 
-        {
-            addToAmount = baseStat.GetAddToAmount();
-            multiplyAmount = baseStat.GetMultiplyAmount();
-            setAmount = baseStat.GetSetAmount();
-            hasSetValueApplied = baseStat.DoesSetValue();
-        }
-        else
+        if(!IntializeStat())
         {
             addToAmount = 0;
             multiplyAmount = 1;
@@ -72,9 +88,17 @@ public class GenericStat : ScriptableObject
             hasSetValueApplied = false;
         }
 
+        // List to store null stats for deregistration
+        List<Stat> nullStats = new List<Stat>();
 
         foreach (Stat stat in modifiers)
         {
+            if (stat == null)
+            {
+                // If stat is null, add it to the list for deregistration
+                nullStats.Add(stat);
+                continue; // Skip further processing for null stats
+            }
             if (stat.DoesSetValue())
             {
                 setAmount = stat.GetSetAmount();
@@ -82,16 +106,17 @@ public class GenericStat : ScriptableObject
                 value = setAmount;
                 return;
             }
-            if(stat != null)
-            {
-                QuickUpdateStat(stat);
-            }
-            else
-            {
-                // Deregister the stat
-                DeregisterStat(stat); // we should send a message to the stat if it's not null
-            }
+
+            QuickUpdateStat(stat);
         }
+
+        // Deregister null stats
+        foreach (Stat nullStat in nullStats)
+        {
+            DeregisterStat(nullStat);
+        }
+
+        // Calculate value based on modifiers
         value = addToAmount * multiplyAmount;
     }
     public void QuickUpdateStat(Stat stat)
@@ -104,52 +129,18 @@ public class GenericStat : ScriptableObject
     }
     public void DeregisterStat(Stat stat)
     {
-        modifiers.Remove(stat);
-        if(stat != null)
+        modifiers.RemoveAll(item => item == null);
+        if (stat != null)
         {
             stat.OnDeregister();
+            modifiers.Remove(stat);
+            stat.OnDeregister();
+        }
+        else
+        {
+            Debug.LogWarning("Attempting to deregister a null stat.");
         }
     }
 
 }
-[CreateAssetMenu(fileName ="Stat",menuName ="Stat")]
-public class Stat : ScriptableObject
-{
-    /// <summary>
-    /// This is the stat type. If it is the base stat, it should reference itself,
-    /// <br>if it belongs to an item, it should reference the player base stat</br>
-    /// </summary>
-    [SerializeField] public GenericStat statType;
-    [SerializeField] private float addToAmount = 0;
-    [SerializeField] private float multiplyAmount;
-    [SerializeField] private bool willSetValue = false;
-    [SerializeField] private float setAmount = 0;
-    public float GetAddToAmount()
-    {
-        return addToAmount;
-    }
-    public float GetMultiplyAmount()
-    {
-        return multiplyAmount;
-    }
-    public float GetSetAmount()
-    {
-        return setAmount;
-    }
-    public GenericStat GetStatType()
-    {
-        return statType;
-    }
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns>True if this stat locks any values to the one that is set</returns>
-    public bool DoesSetValue()
-    {
-        return willSetValue;
-    }
-    public void OnDeregister()
-    {
 
-    }
-}
