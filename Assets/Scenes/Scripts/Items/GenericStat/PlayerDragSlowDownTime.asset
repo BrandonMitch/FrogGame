@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
   m_Name: PlayerDragSlowDownTime
   m_EditorClassIdentifier: 
-  statType: 0
+  value: 0
   addToAmount: 0
   multiplyAmount: 0
+  hasSetValueApplied: 0
+  setAmount: 0
+  baseStat: {fileID: 11400000, guid: d85f1a1dc05fe1144b73e9e70740b840, type: 2}
+  modifiers: []

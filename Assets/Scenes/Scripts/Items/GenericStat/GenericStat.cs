@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName ="Generic Stat",menuName ="Generic Stat")]
+[CreateAssetMenu(fileName ="Generic Stat",menuName ="Generic Stat"), System.Serializable]
 public class GenericStat : ScriptableObject
 {
     [SerializeField] private float value;
@@ -19,6 +19,7 @@ public class GenericStat : ScriptableObject
     [SerializeField] private List<Stat> modifiers = new();
     public float Value { get => value; }
 
+
     /// <summary>
     /// Intializes a stat to its base stat values.
     /// </summary>
@@ -32,6 +33,10 @@ public class GenericStat : ScriptableObject
             setAmount = baseStat.GetSetAmount();
             hasSetValueApplied = baseStat.DoesSetValue();
             return true;
+        }
+        else
+        {
+            Debug.LogWarning("Base stat is null for " + this);
         }
         return false;
     }
@@ -55,7 +60,7 @@ public class GenericStat : ScriptableObject
             Debug.LogWarning("Stat is already registered:" + stat.name);
             return false;
         }
-        if (stat.statType == null||stat.statType != this) 
+        if (stat.statType == null /*|| stat.statType != this*/) // TODO: WE NEED TO CHECK IF stat.Statype == this.statType. But since to use a generic stat we have to clone it we need to save a reference of the type.
         {
             Debug.LogWarning("Invalid Stat Type: " + stat.statType.name);
             return false; // if the stat type is invalid, don't add the stat
@@ -66,13 +71,12 @@ public class GenericStat : ScriptableObject
 
         if (updateValueOnRegister)
         {
-            QuickUpdateStat(stat);
+            QuickUpdateStat(stat, updateValueOnRegister);
         }
 
         return true;
 
     }
-
 
     /// <summary>
     /// Completely recalculates all stat values. 
@@ -119,21 +123,28 @@ public class GenericStat : ScriptableObject
         // Calculate value based on modifiers
         value = addToAmount * multiplyAmount;
     }
-    public void QuickUpdateStat(Stat stat)
+
+    public void QuickUpdateStat(Stat stat, bool recalculateValue = false)
     {
         if (!hasSetValueApplied) // TODO: Might be a bad line of code because now we have to do a complete update value if this switches to true
         {
             addToAmount += stat.GetAddToAmount();
             multiplyAmount += stat.GetMultiplyAmount();
         }
+        if (recalculateValue)
+        {
+            value = addToAmount * multiplyAmount;
+        }
     }
+
     public void DeregisterStat(Stat stat)
     {
         modifiers.RemoveAll(item => item == null);
         if (stat != null)
         {
-            stat.OnDeregister();
             modifiers.Remove(stat);
+            addToAmount -= stat.GetAddToAmount();
+            multiplyAmount -= stat.GetMultiplyAmount();
             stat.OnDeregister();
         }
         else
@@ -141,6 +152,96 @@ public class GenericStat : ScriptableObject
             Debug.LogWarning("Attempting to deregister a null stat.");
         }
     }
+    public static string TypeName(GenericStat stat)
+    {
+        if (stat == null) return "null stat";
+        return stat.name;
+    }
+    public override string ToString()
+    {
+        string s = "";
+        s += string.Format("[GENERIC STAT]: {0}, [VAL]: {1:F1}, [ADD]: {2:F1}, [MULT]: {3:F1}, [SETS?]: {4}", TypeName(this), value, addToAmount, multiplyAmount, hasSetValueApplied ? "True" : "False");
+        if (hasSetValueApplied)
+        {
+            s += string.Format(", [SET]: {0:F1}", setAmount);
+        }
+        s += "\n";
+        
+        if (modifiers?.Count > 0)
+        {
+            s += "Modifiers:\n";
+            foreach (Stat stat in modifiers)
+            {
+                if (stat != null)
+                {
+                    s += string.Format("  {0}\n", stat.ToString());
+                }
+            }
+        }
+        return s;
+    }
+    [ContextMenu("Print Generic Stat")]
+    public void printGenericStat()
+    {
+        Debug.Log(this);
+    }
+    #region Operators (+,-,*,/,++,--, (float) cast)
+    public static float operator *(GenericStat a, GenericStat b)
+    {
+        return a.Value * b.Value;
+    }
+    public static float operator +(GenericStat a, GenericStat b)
+    {
+        return a.Value + b.Value;
+    }
+    public static float operator -(GenericStat a, GenericStat b)
+    {
+        return a.Value - b.Value;
+    }
+    public static float operator /(GenericStat a, GenericStat b)
+    {
+        return a.Value / b.Value;
+    }
+    public static GenericStat operator ++(GenericStat a)
+    {
+        a.value++;
+        return a;
+    }
+    public static GenericStat operator --(GenericStat a)
+    {
+        a.value--;
+        return a;
+    }
+    public static explicit operator float(GenericStat stat)
+    {
+        return stat.Value;
+    }
+
+    /*    public static GenericStat operator *(GenericStat a, GenericStat b)
+        {
+            GenericStat result = ScriptableObject.CreateInstance<GenericStat>();
+            result.value = a.Value * b.Value;
+            return result;
+        }
+        public static GenericStat operator +(GenericStat a, GenericStat b)
+        {
+            GenericStat result = ScriptableObject.CreateInstance<GenericStat>();
+            result.value = a.Value + b.Value;
+            return result;
+        }
+        public static GenericStat operator -(GenericStat a, GenericStat b)
+        {
+            GenericStat result = ScriptableObject.CreateInstance<GenericStat>();
+            result.value = a.Value - b.Value;
+            return result;
+        }
+        public static GenericStat operator /(GenericStat a, GenericStat b)
+        {
+            GenericStat result = ScriptableObject.CreateInstance<GenericStat>();
+            result.value = a.Value / b.Value;
+            return result;
+        }*/
+    #endregion
 
 }
 

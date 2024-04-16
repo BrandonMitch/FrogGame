@@ -11,4 +11,10 @@ public class Item : ScriptableObject
 
     [Header("Only UI")]
     public bool stackable = false;
+
+    public override string ToString()
+    {
+        string s = name;
+        return s;
+    }
 }

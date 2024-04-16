@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
   m_Name: PlayerMaxSpeed
   m_EditorClassIdentifier: 
-  statType: 0
-  addToAmount: 0
-  multiplyAmount: 0
+  value: 0.8
+  addToAmount: 0.8
+  multiplyAmount: 1
+  hasSetValueApplied: 0
+  setAmount: 0
+  baseStat: {fileID: 11400000, guid: 6836b998033a8354fb1a5fb123462514, type: 2}
+  modifiers: []

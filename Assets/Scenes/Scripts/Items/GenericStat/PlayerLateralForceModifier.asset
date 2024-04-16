@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
   m_Name: PlayerLateralForceModifier
   m_EditorClassIdentifier: 
-  statType: 0
-  addToAmount: 0
-  multiplyAmount: 0
+  value: 150
+  addToAmount: 150
+  multiplyAmount: 1
+  hasSetValueApplied: 0
+  setAmount: 0
+  baseStat: {fileID: 11400000, guid: 160723459a26a3a409bea2b9ec8a9f85, type: 2}
+  modifiers: []

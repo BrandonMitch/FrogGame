@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
   m_Name: PlayerRunForceModifier
   m_EditorClassIdentifier: 
-  statType: 0
-  addToAmount: 0
-  multiplyAmount: 0
+  value: 40
+  addToAmount: 40
+  multiplyAmount: 1
+  hasSetValueApplied: 0
+  setAmount: 0
+  baseStat: {fileID: 11400000, guid: c7d1082a4a29f2949be071bfa2d0889a, type: 2}
+  modifiers: []

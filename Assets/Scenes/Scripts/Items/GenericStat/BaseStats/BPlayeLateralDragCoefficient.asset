@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
-  m_Name: PlayerMinimumTimeToSpawnANewPoint
+  m_Script: {fileID: 11500000, guid: 6bc81a601ff230b4ab68bbd462f81687, type: 3}
+  m_Name: BPlayeLateralDragCoefficient
   m_EditorClassIdentifier: 
-  statType: {fileID: 0}
-  statTypeOLD: 0
+  statType: {fileID: 11400000, guid: 37cdbc1d175968c46882b0c0a41107c8, type: 2}
   addToAmount: 0
-  multiplyAmount: 0
+  multiplyAmount: 1
+  willSetValue: 0
+  setAmount: 0
