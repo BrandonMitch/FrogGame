@@ -29,23 +29,12 @@ public class PlayerStatManager : MonoBehaviour
         {
             statDictionary.ConstructDictionary(GENERIC_STAT_LIST, out genericStats);
         }
-/*        // Iterate over the stats list
-        foreach (GenericStat stat in GENERIC_STAT_LIST.genericStats)
-        {
-            // Create a new instance for each stat and add it to the dictionary
-            if (stat != null)
-            {
-                var newInstance = Instantiate(stat);
-                statDictionary[stat] = newInstance;
-                genericStats.Add(newInstance);
-                newInstance.CompleteUpdateValue();
-            }
-        }*/
     }
     public void RegisterItem(ItemModifier item, bool updateValueOnRegister = true)
     {
         statDictionary.RegisterItemToDictionary(item, updateValueOnRegister);
     }
+
     #region Debugs
     [Header("Debugs")]
     [SerializeField] ItemModifier itemX = null;
@@ -63,6 +52,10 @@ public class PlayerStatManager : MonoBehaviour
             item = items[0];
         }
         RegisterItem(item, updateOnRegisterOfX);
+        if (!items.Contains(item))
+        {
+            items.Add(item);
+        }
         if (debug)
         {
             Debug.Log("After:\n" + statDictionary.ToString());

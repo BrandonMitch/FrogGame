@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-[System.Serializable, CreateAssetMenu(fileName = "Stat", menuName = "Stat")]
+[CreateAssetMenu(fileName = "Stat", menuName = "Stat")]
 public class Stat : ScriptableObject
 {
     /// <summary>
@@ -15,7 +16,7 @@ public class Stat : ScriptableObject
     [SerializeField] private float multiplyAmount;
     [SerializeField] private bool willSetValue = false;
     [SerializeField] private float setAmount = 0;
-    private bool registered = false;
+
     public float GetAddToAmount()
     {
         return addToAmount;
@@ -38,18 +39,21 @@ public class Stat : ScriptableObject
     {
         return willSetValue;
     }
-    public void OnDeregister()
-    {
-        registered = false;
-    }
-    public void OnRegister()
-    {
-        registered = true;
-    }
-    public bool isRegistered()
-    {
-        return registered;
-    }
+    /*  
+        private bool registered = false;
+        public void OnDeregister()
+        {
+            registered = false;
+        }
+        public void OnRegister()
+        {
+            registered = true;
+        }
+        public bool isRegistered()
+        {
+            return registered;
+        }
+    */
     public override string ToString()
     {
         string s = "";

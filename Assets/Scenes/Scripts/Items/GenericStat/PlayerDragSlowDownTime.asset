@@ -18,4 +18,5 @@ MonoBehaviour:
   hasSetValueApplied: 0
   setAmount: 0
   baseStat: {fileID: 11400000, guid: d85f1a1dc05fe1144b73e9e70740b840, type: 2}
+  clampingBehavior: {fileID: 11400000, guid: b8f97c25e36c90542bf11a0ea031d69c, type: 2}
   modifiers: []

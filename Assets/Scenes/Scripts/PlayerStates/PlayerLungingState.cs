@@ -15,34 +15,29 @@ public class PlayerLungingState : PlayerState
 
     #region Lunge Varaibles
     private NonLinearRadialAccelerator nonLinearRadialAccelerator = null;
-    private float minimumLateralDuration;
-    private float lateralDragCoefficient;
-    private float dampingCoefficient;
+
+    //private float dampingCoefficient;
     private float minimumDistanceToSpawnANewPoint;
     private float minimumTimeToSpawnANewPoint;
     private ContactFilter2D tongeContactFilter;
-    private float forwardLungeDragCoefficient;
-    private float forwardForceModifer;
     private ContactFilter2D playerContactFilter;
-    private float lateralLungeEaseInFrames;
-    private float lateralLungeEaseOutFrames;
-    private float lateralLungeDesiredVEL;
+    private GenericStat minimumLateralDuration;
+    private GenericStat lateralDragCoefficient;
+    private GenericStat forwardLungeDragCoefficient;
+    private GenericStat forwardForceModifer;
+    private GenericStat lateralLungeEaseInFrames;
+    private GenericStat lateralLungeEaseOutFrames;
+    private GenericStat lateralLungeDesiredVEL;
     protected void getLungeVariables()
     {
         ArrayList vars = player.getLungeVaraiables();
-        //lateralForceModifer =               (float)vars[0];
-        minimumLateralDuration =            (float)vars[1];
-        lateralDragCoefficient =            (float)vars[2];
-        tongeContactFilter =      (ContactFilter2D)vars[3];
-        dampingCoefficient =                (float)vars[4];
-        minimumDistanceToSpawnANewPoint =   (float)vars[5];
-        minimumTimeToSpawnANewPoint =       (float)vars[6];
-        forwardLungeDragCoefficient =       (float)vars[7];
-        forwardForceModifer =               (float)vars[8];
-        playerContactFilter =     (ContactFilter2D)vars[9];
-        lateralLungeEaseInFrames =          (float)vars[10];
-        lateralLungeEaseOutFrames =         (float)vars[11];
-        lateralLungeDesiredVEL =            (float)vars[12];
+        tongeContactFilter =      (ContactFilter2D)vars[0];
+
+        minimumDistanceToSpawnANewPoint =   (float)vars[1];
+        minimumTimeToSpawnANewPoint =       (float)vars[2];
+
+        playerContactFilter =     (ContactFilter2D)vars[3];
+
     }
     private float v0;
     #endregion
@@ -56,6 +51,13 @@ public class PlayerLungingState : PlayerState
     public PlayerLungingState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
     {
         playerRB = player.GetPlayerRigidBody();
+        minimumLateralDuration = player.MinimumLateralDuration;
+        lateralDragCoefficient = player.LateralDragCoefficient;
+        forwardLungeDragCoefficient = player.ForwardLungeDragCoefficient;
+        forwardForceModifer = player.ForwardLungeForceModifer;
+        lateralLungeEaseInFrames = player.LateralLungeEaseInFrames;
+        lateralLungeEaseOutFrames = player.LateralLungeEaseOutFrames;
+        lateralLungeDesiredVEL = player.LateralLungeDesiredVEL;
     }
 
     public override void AnimationTriggerEvent(Player.AnimationTriggerType triggerType)
@@ -82,9 +84,9 @@ public class PlayerLungingState : PlayerState
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
-                playerRB.drag = forwardLungeDragCoefficient;
-                playerRB.AddForce(jhat * forwardForceModifer);
-                v0 = Time.fixedDeltaTime * forwardForceModifer / playerRB.mass;
+                playerRB.drag = forwardLungeDragCoefficient.Value;
+                playerRB.AddForce(jhat * forwardForceModifer.Value);
+                v0 = Time.fixedDeltaTime * forwardForceModifer.Value / playerRB.mass;
                 break;
             case LatchMovementType.LungeLeft:
                 LateralLungeIntialization(-1); // negative (-1) is -ihat which is left
@@ -102,17 +104,17 @@ public class PlayerLungingState : PlayerState
     }
     private void LateralLungeIntialization(int direction)
     {
-        playerRB.drag = lateralDragCoefficient;
+        playerRB.drag = lateralDragCoefficient.Value;
         // Create a new lateral acclerator 
         r0 = (playerRB.position - (Vector2)endOfTongueTransform.position).magnitude;
         if (nonLinearRadialAccelerator != null)
         {
             // TODO: Make use of intialize() that doesn't use all of the params, this is just used to allow play time editing
-            nonLinearRadialAccelerator.intitalize(lateralLungeEaseInFrames, lateralLungeEaseOutFrames, lateralLungeDesiredVEL, playerRB.mass);
+            nonLinearRadialAccelerator.intitalize(lateralLungeEaseInFrames.Value, lateralLungeEaseOutFrames.Value, lateralLungeDesiredVEL.Value, playerRB.mass);
         }
         else
         {
-            nonLinearRadialAccelerator = new NonLinearRadialAccelerator(lateralLungeEaseInFrames, lateralLungeEaseOutFrames, lateralLungeDesiredVEL, playerRB.mass);
+            nonLinearRadialAccelerator = new NonLinearRadialAccelerator(lateralLungeEaseInFrames.Value, lateralLungeEaseOutFrames.Value, lateralLungeDesiredVEL.Value, playerRB.mass);
         }
         lungeDirection = direction; // negative is -ihat which is left, right is +1 which is +ihat which is right
         hitData = player.tongueStateMachine.GetRotationPoint();
@@ -403,7 +405,7 @@ public class PlayerLungingState : PlayerState
         if (latchMovementType == LatchMovementType.LungeLeft || latchMovementType == LatchMovementType.LungeRight)
         {
             //Debug.Log("trying to shut off lateral lunge");
-            if (Time.time > minimumLateralDuration + entryTime)
+            if (Time.time > minimumLateralDuration.Value + entryTime)
             {
                 //Debug.Log("sucess!");
                 ShutOffTongueForLateral();

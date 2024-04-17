@@ -9,7 +9,6 @@ public class Player : Mover
     [Space]
     [Header("|-----Movement Variables-----|")]
     // Movement Varaibles
-    private float mass;
     [SerializeField] private float playerSpeed = 1.0f;
     [SerializeField] private float playerMaxSpeed = 2.0f;
     [SerializeField] private float playerRestingDrag = 5.0f;
@@ -18,21 +17,30 @@ public class Player : Mover
     [SerializeField] private float playerRunForceModifier = 10f;
     [Space]
     [Header("|-----Lunge Variables-----|")]
-    [SerializeField] private float lateralForceModifer = 100f;
-    [SerializeField] private float minimumLateralDuration = 1.0f;
-    [SerializeField] private float lateralDragCoefficient = 0f;
-    [SerializeField] private float dampingCoefficient = 0.95f;
     [SerializeField] private float minimumDistanceToSpawnANewPoint = 0.05f;
     [SerializeField] private float minimumTimeToSpawnANewPoint = 0.1f;
-    [SerializeField] private float forwardLungeCoefficient = 0f;
-    [SerializeField] private float forwardLungeForceModifer = 100f;
-    [Space]
-    [SerializeField] private float lateralLungeEaseInFrames = 10;
-    [SerializeField] private float lateralLungeEaseOutFrames = 30;
-    [SerializeField] private float lateralLungeDesiredVEL = 2;
     [Space]
     [SerializeField] public ContactFilter2D tongueContactFilter;
     [SerializeField] private ContactFilter2D playerContactFilter;
+
+    [SerializeField] private GenericStat lateralForceModifer;
+    [SerializeField] private GenericStat minimumLateralDuration;
+    [SerializeField] private GenericStat lateralDragCoefficient;
+    [SerializeField] private GenericStat forwardLungeCoefficient;
+    [SerializeField] private GenericStat forwardLungeForceModifer;
+    [SerializeField] private GenericStat lateralLungeEaseInFrames;
+    [SerializeField] private GenericStat lateralLungeEaseOutFrames;
+    [SerializeField] private GenericStat lateralLungeDesiredVEL;
+    #region Lateral Getters and setters
+    public GenericStat LateralForceModifer { get => lateralForceModifer;              private set => lateralForceModifer = value; }
+    public GenericStat MinimumLateralDuration { get => minimumLateralDuration;        private set => minimumLateralDuration = value; }
+    public GenericStat LateralDragCoefficient { get => lateralDragCoefficient;        private set => lateralDragCoefficient = value; }
+    public GenericStat ForwardLungeDragCoefficient { get => forwardLungeCoefficient;  private set => forwardLungeCoefficient = value; }
+    public GenericStat ForwardLungeForceModifer { get => forwardLungeForceModifer;    private set => forwardLungeForceModifer = value; }
+    public GenericStat LateralLungeEaseInFrames { get => lateralLungeEaseInFrames;    private set => lateralLungeEaseInFrames = value; }
+    public GenericStat LateralLungeEaseOutFrames { get => lateralLungeEaseOutFrames;  private set => lateralLungeEaseOutFrames = value; }
+    public GenericStat LateralLungeDesiredVEL { get => lateralLungeDesiredVEL;        private set => lateralLungeDesiredVEL = value; }
+    #endregion
 
     private Rigidbody2D playerRB;
     private Collider2D playerCollider;
@@ -55,7 +63,7 @@ public class Player : Mover
 
     [Space]
     [Header("|-----References-----|")]
-    public PlayerBaseStatsSO currentStats;
+    public GenericStatDictionary statDictionary;
     public PlayerInputManager inputManager;
     public Animator animator;
     public GameObject customizableWeaponOjbect;
@@ -113,7 +121,17 @@ public class Player : Mover
     {
         playerRB = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<Collider2D>();
-        mass = playerRB.mass;
+
+        // Get all instances of the generic stat
+        lateralForceModifer = statDictionary.GetPlayerStatInstance(lateralForceModifer);
+        minimumLateralDuration = statDictionary.GetPlayerStatInstance(minimumLateralDuration);
+        lateralDragCoefficient = statDictionary.GetPlayerStatInstance(lateralDragCoefficient);
+        forwardLungeCoefficient = statDictionary.GetPlayerStatInstance(forwardLungeCoefficient);
+        forwardLungeForceModifer = statDictionary.GetPlayerStatInstance(forwardLungeForceModifer);
+
+        lateralLungeEaseInFrames = statDictionary.GetPlayerStatInstance(lateralLungeEaseInFrames);
+        lateralLungeEaseOutFrames = statDictionary.GetPlayerStatInstance(lateralLungeEaseOutFrames);
+        lateralLungeDesiredVEL = statDictionary.GetPlayerStatInstance(lateralLungeDesiredVEL);
 
         stateMachine = new PlayerStateMachine();
         // Intialize all of the player states
@@ -196,20 +214,11 @@ public class Player : Mover
     {
         ArrayList returnVals = new()
         {
-            lateralForceModifer, // 0 
-            minimumLateralDuration, // 1
-            lateralDragCoefficient, // 2
-            tongueContactFilter, // 3
-            dampingCoefficient, // 4
-            minimumDistanceToSpawnANewPoint, // 5
-            minimumTimeToSpawnANewPoint, // 6
-            forwardLungeCoefficient, // 7 
-            forwardLungeForceModifer,  // 8 
-            playerContactFilter, // 9
-            lateralLungeEaseInFrames, // 10
-            lateralLungeEaseOutFrames, // 11
-            lateralLungeDesiredVEL, // 12
-};
+            tongueContactFilter,                // 0
+            minimumDistanceToSpawnANewPoint,    // 1
+            minimumTimeToSpawnANewPoint,        // 2
+            playerContactFilter,                // 3
+        };
         return returnVals;
     }
     #endregion
@@ -225,7 +234,6 @@ public class Player : Mover
     /***********************************---END---*********************************/
     protected override void Start()
     {
- 
         base.Start();
 
         stateMachine.Intialize(idleState);
@@ -300,35 +308,7 @@ public class Player : Mover
         // more optimal 
         spriteRenderer.sprite = GameManager.instance.playerSprites[skinID];
     }
-    protected override void ReceiveDamage(Damage dmg)
-    {
-        if (!isAlive) { return; }
 
-        base.ReceiveDamage(dmg);
-        GameManager.instance.OnHitpointChange();
-    }
-
-    /*public void OnLevelUp()
-    {
-        maxHitpoint++;
-        hitpoint = maxHitpoint;
-    }
-    public void SetLevel(int level)
-    {
-        for(int i = 0; i < level; i++)
-        {
-            OnLevelUp();
-        }
-    }*/ // TODO: REMOVE PLAYER LEVEL SYSTEM
-
-    /*private void Dash()
-    {
-        dashDirection = Vector3.Scale(lastMoveDirection, new Vector3(playerSpeed * dashSpeed, playerSpeed * dashSpeed, 0));
-        
-        Debug.Log("DASH");
-        // DASH!
-
-    }*/
     private void BackSwordSwing()
     {
         // TODO: Sort out if we want to slow movement after a swing;
@@ -348,22 +328,6 @@ public class Player : Mover
                 break;
         }
     } 
-    public void Heal(int healingAmount)
-    {
-        if (hitpoint == maxHitpoint)
-        {
-            return;
-        }
-        hitpoint += healingAmount;
-        if (hitpoint > maxHitpoint)
-        {
-            hitpoint = maxHitpoint;
-        }
-        GameManager.instance.ShowText("+" + healingAmount.ToString() + "hp", 25,Color.green, transform.position, Vector3.up * 30, 1.0f);
-        GameManager.instance.OnHitpointChange();
-
-    }
-
     protected override void Death()
     {
         if (!Unkillable)
@@ -382,7 +346,6 @@ public class Player : Mover
     }
     public void Respawn()
     {
-        Heal(maxHitpoint);
         isAlive = true;
         lastImmune = Time.time;
         pushDirection = Vector3.zero;

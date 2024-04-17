@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
-[CreateAssetMenu(fileName ="Generic Stat Dictionary",menuName ="Item/Generic Stat Dictionary"), System.Serializable]
+[CreateAssetMenu(fileName ="Generic Stat Dictionary",menuName ="Item/Generic Stat Dictionary")]
 public class GenericStatDictionary : ScriptableObject
 {
-    [SerializeReference] public Dictionary<GenericStat, GenericStat> statDictionary;
+    public Dictionary<GenericStat, GenericStat> statDictionary;
+    [SerializeField] List<GenericStat> genericStatInstances;
     /// <summary>
     /// Constructions A Dictionary from a list of generic stats. Each generic stat will get its own instance, which will allow players to have thier own instances of generic stats
     /// </summary>
@@ -15,13 +17,15 @@ public class GenericStatDictionary : ScriptableObject
     {
         stats = new();
         statDictionary = new();
+        genericStatInstances = new();
         foreach (GenericStat stat in GENERIC_STAT_LIST.genericStats)
         {
             // Create a new instance for each stat and add it to the dictionary
             if (stat != null)
             {
                 GenericStat newInstance = Instantiate(stat);    // create instance
-                statDictionary[stat] = newInstance;             // add it to the dictionary of the same generic stat type
+                statDictionary[stat] = newInstance;             // add it to the dictionary of the same generic stat type  
+                genericStatInstances.Add(newInstance);          // add it to generic stat instances
                 stats.Add(newInstance);                         // set the out variable to have these new instances
                 newInstance.CompleteUpdateValue();              // update the values of the instance
             }
@@ -62,8 +66,12 @@ public class GenericStatDictionary : ScriptableObject
     /// </summary>
     /// <param name="genericStatType">The type of stat</param>
     /// <returns>The instance of the player stat</returns>
-    public GenericStat GetPlayerStatInstance(GenericStat genericStatType)
+    public GenericStat GetPlayerStatInstance(GenericStat genericStatType, bool debug = false)
     {
+        if (debug)
+        {
+            Debug.Log("Generic Stat:" + genericStatType.name + ", Type:" + genericStatType.GetType());
+        }
         if (statDictionary.ContainsKey(genericStatType))
         {
             GenericStat playerStat = statDictionary[genericStatType]; // the instance of the generic stat type

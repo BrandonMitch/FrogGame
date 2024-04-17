@@ -8,11 +8,12 @@ public class ItemModifier : Item
     [Header("Stats")]
     [SerializeField] public List<Stat> stats;
 
-    public void RegisterItem(GenericStatDictionary statDictionary, bool updateStatOnRegister = false)
+    // DEPREICATED, We will do this in the stat dictionary
+/*    public void RegisterItem(GenericStatDictionary statDictionary, bool updateStatOnRegister = false)
     {
         foreach (Stat stat in stats)
         {
-            /*            if (stat != null && statDictionary != null)
+            *//*            if (stat != null && statDictionary != null)
                         {
                             // register to an inventory (which is a dictionary data structure)
                             var dic = statDictionary.statDictionary;
@@ -22,7 +23,7 @@ public class ItemModifier : Item
                             var playerStat = dic[stat.statType];
 
                             playerStat.RegisterStat(stat, updateStatOnRegister);
-                        }*/
+                        }*//*
             GenericStat playerGenericStat = statDictionary.GetPlayerStat(stat);
             if(playerGenericStat != null)
             {
@@ -35,7 +36,7 @@ public class ItemModifier : Item
             }
         }
     }
-
+*/
     public override string ToString()
     {
         string s = base.ToString();

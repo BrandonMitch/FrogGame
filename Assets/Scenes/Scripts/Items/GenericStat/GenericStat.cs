@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName ="Generic Stat",menuName ="Generic Stat"), System.Serializable]
+using System;
+[CreateAssetMenu(fileName ="Generic Stat",menuName ="Generic Stat/Generic Stat")]
 public class GenericStat : ScriptableObject
 {
     [SerializeField] private float value;
@@ -13,6 +14,7 @@ public class GenericStat : ScriptableObject
     /// This is the base stat that we taken reference's from
     /// </summary>
     [SerializeField] private Stat baseStat;
+    [SerializeField] private ClampingBehavior clampingBehavior = null;
     /// <summary>
     /// List of all registered stats that can modify the generic stat
     /// </summary>
@@ -24,7 +26,7 @@ public class GenericStat : ScriptableObject
     /// Intializes a stat to its base stat values.
     /// </summary>
     /// <returns>True if the intialization succeded, false if it failed</returns>
-    public bool IntializeStat()
+    public bool IntializeGenericStat()
     {
         if (baseStat != null)
         {
@@ -40,7 +42,6 @@ public class GenericStat : ScriptableObject
         }
         return false;
     }
-
     /// <summary>
     /// This method registers new modifiers to the generic stat.
     /// </summary>
@@ -67,24 +68,25 @@ public class GenericStat : ScriptableObject
         } 
 
         modifiers.Add(stat);
-        stat.OnRegister();
 
-        if (updateValueOnRegister)
+        if (stat.DoesSetValue())
         {
-            QuickUpdateStat(stat, updateValueOnRegister);
+            setAmount = stat.GetSetAmount();
+            hasSetValueApplied = true;
         }
+
+        QuickUpdateStat(stat, updateValueOnRegister);
 
         return true;
 
     }
-
     /// <summary>
     /// Completely recalculates all stat values. 
     /// <br>-Should be avoided whenever possible, meant for on Awake() and when reloading the game </br>
     /// </summary>
     public void CompleteUpdateValue()
     {
-        if(!IntializeStat())
+        if(!IntializeGenericStat())
         {
             addToAmount = 0;
             multiplyAmount = 1;
@@ -103,15 +105,13 @@ public class GenericStat : ScriptableObject
                 nullStats.Add(stat);
                 continue; // Skip further processing for null stats
             }
+            // If the stat has a set applied, save the value
             if (stat.DoesSetValue())
             {
                 setAmount = stat.GetSetAmount();
                 hasSetValueApplied = true;
-                value = setAmount;
-                return;
             }
-
-            QuickUpdateStat(stat);
+            QuickUpdateStat(stat, recalculateValue: false);
         }
 
         // Deregister null stats
@@ -120,23 +120,42 @@ public class GenericStat : ScriptableObject
             DeregisterStat(nullStat);
         }
 
-        // Calculate value based on modifiers
-        value = addToAmount * multiplyAmount;
+        // Calculate what the value of the stat should be 
+        RecalculateValue(applyClamp: true);
     }
-
-    public void QuickUpdateStat(Stat stat, bool recalculateValue = false)
+    public void QuickUpdateStat(Stat stat, bool recalculateValue = false, bool applyClamp = true)
     {
-        if (!hasSetValueApplied) // TODO: Might be a bad line of code because now we have to do a complete update value if this switches to true
-        {
-            addToAmount += stat.GetAddToAmount();
-            multiplyAmount += stat.GetMultiplyAmount();
-        }
+        addToAmount += stat.GetAddToAmount();
+        multiplyAmount += stat.GetMultiplyAmount();
+
+
         if (recalculateValue)
         {
-            value = addToAmount * multiplyAmount;
+            RecalculateValue(applyClamp);
+        }
+    }
+    public void RecalculateValue(bool applyClamp = true)
+    {
+        if (hasSetValueApplied)
+        {
+            value = setAmount;
+            return;
+        }
+        value = addToAmount * multiplyAmount;
+        if (applyClamp)
+        {
+            if(clampingBehavior != null)
+            {
+                value = clampingBehavior.Clamp(value);
+            }
         }
     }
 
+    [ContextMenu("Recalculate Value")]
+    public void RecalculateValue()
+    {
+        RecalculateValue(applyClamp: true);
+    }
     public void DeregisterStat(Stat stat)
     {
         modifiers.RemoveAll(item => item == null);
@@ -145,7 +164,7 @@ public class GenericStat : ScriptableObject
             modifiers.Remove(stat);
             addToAmount -= stat.GetAddToAmount();
             multiplyAmount -= stat.GetMultiplyAmount();
-            stat.OnDeregister();
+            //stat.OnDeregister();
         }
         else
         {

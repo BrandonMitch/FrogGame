@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a32f2c666147e0a428b5975b4becf853, type: 3}
+  m_Name: Generic Stat Clamping Behavior
+  m_EditorClassIdentifier: 
+  hasMaxValue: 0
+  maxValue: 3.4028235e+38
+  hasMinValue: 0
+  minValue: -3.4028235e+38
