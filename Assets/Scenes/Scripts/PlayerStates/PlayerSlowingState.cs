@@ -15,7 +15,7 @@ public class PlayerSlowingState : PlayerState
     protected float playerRestingDrag;
     protected float playerRunningDrag;
     protected float playerDragSlowDownTime;
-    protected float playerRunForceModifier;
+    //protected float playerRunForceModifier;
     protected void getMovementVaraibles()
     {
         float[] vars = player.getMovementVaraibles();
@@ -24,7 +24,7 @@ public class PlayerSlowingState : PlayerState
         playerRestingDrag = vars[2];
         playerRunningDrag = vars[3];
         playerDragSlowDownTime = vars[4];
-        playerRunForceModifier = vars[5];
+        //playerRunForceModifier = vars[5];
     }
     #endregion
     public PlayerSlowingState(Player player, PlayerStateMachine playerStateMachine) : base(player, playerStateMachine)
@@ -84,6 +84,6 @@ public class PlayerSlowingState : PlayerState
     }
     public void setRestingDrag(float modifier)
     {
-        playerRB.drag = Mathf.Clamp(modifier*playerRestingDrag, playerRunningDrag,modifier*playerRestingDrag); ;
+        playerRB.drag = Mathf.Clamp(modifier*playerRestingDrag, playerRunningDrag, modifier*playerRestingDrag); ;
     }
 }

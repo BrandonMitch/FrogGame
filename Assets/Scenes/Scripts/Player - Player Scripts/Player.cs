@@ -41,6 +41,11 @@ public class Player : Mover
     public GenericStat LateralLungeEaseOutFrames { get => lateralLungeEaseOutFrames;  private set => lateralLungeEaseOutFrames = value; }
     public GenericStat LateralLungeDesiredVEL { get => lateralLungeDesiredVEL;        private set => lateralLungeDesiredVEL = value; }
     #endregion
+    [Header("|-----Tongue Variables-----|")]
+    [SerializeField] private GenericStat tongueThrowForceModifier;
+    #region Tongue Getters and Setters
+    public GenericStat TongueThrowForceModifier { get => tongueThrowForceModifier;    private set => tongueThrowForceModifier = value; }
+    #endregion
 
     private Rigidbody2D playerRB;
     private Collider2D playerCollider;
@@ -133,6 +138,7 @@ public class Player : Mover
         lateralLungeEaseOutFrames = statDictionary.GetPlayerStatInstance(lateralLungeEaseOutFrames);
         lateralLungeDesiredVEL = statDictionary.GetPlayerStatInstance(lateralLungeDesiredVEL);
 
+        tongueThrowForceModifier = statDictionary.GetPlayerStatInstance(tongueThrowForceModifier);
         stateMachine = new PlayerStateMachine();
         // Intialize all of the player states
         idleState = new PlayerIdleState(this, stateMachine);
@@ -256,12 +262,15 @@ public class Player : Mover
     private void Update()
     {
         //*******STATE MACHINE******//
-        stateMachine.CurrentPlayerState.FrameUpdate();
-        tongueStateMachine.CurrentTongueState.FrameUpdate();
+        inputManager.FrameUpdate(); // basically checks if we want to freeze the player, allows us to freeze the state etc.
+        if (!inputManager.isPaused)
+        {
+            stateMachine.CurrentPlayerState.FrameUpdate();
+            tongueStateMachine.CurrentTongueState.FrameUpdate();
 
-        ProcessInputs();
-
-        Animate();
+            ProcessInputs();
+            Animate();
+        }
     }
     private void ProcessInputs()
     {

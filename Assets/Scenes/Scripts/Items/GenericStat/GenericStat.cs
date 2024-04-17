@@ -156,20 +156,53 @@ public class GenericStat : ScriptableObject
     {
         RecalculateValue(applyClamp: true);
     }
-    public void DeregisterStat(Stat stat)
+    public void DeregisterStat(Stat stat, bool recalculateOnDeregister = true)
     {
         modifiers.RemoveAll(item => item == null);
-        if (stat != null)
+        if (stat != null && modifiers.Contains(stat))
         {
+            // Remove stat, and subtract the ammounts applied from this stat
             modifiers.Remove(stat);
             addToAmount -= stat.GetAddToAmount();
             multiplyAmount -= stat.GetMultiplyAmount();
-            //stat.OnDeregister();
+
+            // Check if the stat had a set value, if it did then we need to see if there was any other sets applied to this generic stat.
+            bool thisStatSets = stat.DoesSetValue();
+            if (thisStatSets)
+            {
+                hasSetValueApplied = CheckForSetApplied();
+            }
+
+            // Recalculate the new value afer deregistering the stat
+            if (recalculateOnDeregister)
+            {
+                RecalculateValue(applyClamp: true);
+            }
+
         }
         else
         {
-            Debug.LogWarning("Attempting to deregister a null stat.");
+            Debug.LogWarning("Attempting to deregister a null stat, or a stat that's already been removed");
         }
+    }
+
+    /// <summary>
+    /// Check if any stats in the registered stat list has a set value applied, will update the set value if a set value is found
+    /// </summary>
+    /// <returns>True if there is a stat that has a set applied</returns>
+    private bool CheckForSetApplied()
+    {
+        bool sets = false;
+        foreach (Stat stat in modifiers)
+        {
+            if (stat.DoesSetValue())
+            {
+                sets = true;
+                setAmount = stat.GetSetAmount();
+                break;
+            }
+        }
+        return sets;
     }
     public static string TypeName(GenericStat stat)
     {

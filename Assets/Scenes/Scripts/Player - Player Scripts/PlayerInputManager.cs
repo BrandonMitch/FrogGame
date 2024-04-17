@@ -41,6 +41,28 @@ public class PlayerInputManager : MonoBehaviour
 
 
     // This implementation allows us to get last input if we make get[control] return [control]
+    [SerializeField] public bool isPaused = false;
+    public void FrameUpdate()
+    {
+        // Check if the editor is in play mode and the user presses the space key
+        if (Application.isPlaying && Input.GetKeyDown(KeyCode.P))
+        {
+            PauseUnPausePlayer();
+        }
+    }
+    public void PauseUnPausePlayer()
+    {
+        if (Time.timeScale == 0f)
+        {
+            isPaused = false;
+            Time.timeScale = 1f;
+        }
+        else
+        {
+            isPaused = true;
+            Time.timeScale = 0f;
+        }
+    }
     public bool LeftMouseDown
     {
         get {

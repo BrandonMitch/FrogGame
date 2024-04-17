@@ -10,12 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a94efd24ce6f4ad40b9ee86edd925289, type: 3}
-  m_Name: PlayerLungeDampingCoefficient
+  m_Name: PlayerTongueForceModifier
   m_EditorClassIdentifier: 
-  value: 0.99
-  addToAmount: 0.99
-  multiplyAmount: 1
+  value: 0
+  addToAmount: 0
+  multiplyAmount: 0
   hasSetValueApplied: 0
   setAmount: 0
-  baseStat: {fileID: 11400000, guid: ded59ee68664ff6489f96b3658fe473f, type: 2}
+  baseStat: {fileID: 11400000, guid: 3f78c33fa8e3bca449d0bfaf1699f650, type: 2}
+  clampingBehavior: {fileID: 11400000, guid: f77597f1251234840a496a8793cc0170, type: 2}
   modifiers: []

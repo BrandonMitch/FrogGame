@@ -14,10 +14,11 @@ public class TongueThrowState : TongueState
     private Vector3 latchLocation;
     private RaycastHit2D collisionHit;
     private IPushable_Pullable pushPullInterface;
-
+    private GenericStat tongueThrowForceModifier;
     public TongueThrowState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
         player.StartCoroutine(GetParentTransform());
+        tongueThrowForceModifier = player.TongueThrowForceModifier;
     }
     private IEnumerator GetParentTransform()
     {
@@ -87,7 +88,7 @@ public class TongueThrowState : TongueState
         Vector2 direction = new Vector2(location.x, location.y);
         direction = (direction - (Vector2)parentTransform.position);
         direction.Normalize();
-        endOfTongueRB.AddForce(20 * direction);
+        endOfTongueRB.AddForce(tongueThrowForceModifier.Value * direction);
         Debug.Log("velocity found: " + endOfTongueRB.velocity);
     }
 

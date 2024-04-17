@@ -113,22 +113,13 @@ MonoBehaviour:
   ySpeed: 1
   xSpeed: 1
   playerSpeed: 1
-  playerMaxSpeed: 0.8
+  playerMaxSpeed: 20
   playerRestingDrag: 100
   playerRunningDrag: 5
   playerDragSlowDownTime: 0.2
   playerRunForceModifier: 40
-  lateralForceModifer: 150
-  minimumLateralDuration: 0.3
-  lateralDragCoefficient: 0
-  dampingCoefficient: 0.8
   minimumDistanceToSpawnANewPoint: 0.1
-  minimumTimeToSpawnANewPoint: 0.3
-  forwardLungeCoefficient: 0.1
-  forwardLungeForceModifer: 150
-  lateralLungeEaseInFrames: 5
-  lateralLungeEaseOutFrames: 12
-  lateralLungeDesiredVEL: 3
+  minimumTimeToSpawnANewPoint: 1
   tongueContactFilter:
     useTriggers: 0
     useLayerMask: 0
@@ -157,8 +148,17 @@ MonoBehaviour:
     maxDepth: 0
     minNormalAngle: 0
     maxNormalAngle: 0
+  lateralForceModifer: {fileID: 11400000, guid: d11dbd63748ae0e4f87f7ffac063c1f7, type: 2}
+  minimumLateralDuration: {fileID: 11400000, guid: 8d4b505f2972404498281329bb0d6ff0, type: 2}
+  lateralDragCoefficient: {fileID: 11400000, guid: 37cdbc1d175968c46882b0c0a41107c8, type: 2}
+  forwardLungeCoefficient: {fileID: 11400000, guid: 2c9edc60273efa741b6fc6639fd4ea72, type: 2}
+  forwardLungeForceModifer: {fileID: 11400000, guid: aa00795b8a414f9479a13993a910746e, type: 2}
+  lateralLungeEaseInFrames: {fileID: 11400000, guid: ab36cceacf768cf4e9203be8e0beef52, type: 2}
+  lateralLungeEaseOutFrames: {fileID: 11400000, guid: 58131511dbd3b23429ef86e75b83cf85, type: 2}
+  lateralLungeDesiredVEL: {fileID: 11400000, guid: 4a6ad2f037dffdf4b93225952d5f151e, type: 2}
   lastMoveDirection: {x: 0, y: 0, z: 0}
   Unkillable: 1
+  statDictionary: {fileID: 11400000, guid: d46b57b6f0443494aa9f2ebe6938424b, type: 2}
   inputManager: {fileID: 6816962011063937620}
   animator: {fileID: 6816962011063937624}
   customizableWeaponOjbect: {fileID: 6816962010483762103}
@@ -203,10 +203,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 920ff0912f7547243af2d865412a2941, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerBaseStats: {fileID: 11400000, guid: f3f44eb01511e234ab0ff418cb886838, type: 2}
-  playerCurrentStats: {fileID: 11400000, guid: 1b58656742ca8fd459a7fffbb2a1c4de, type: 2}
-  playerAddStats: {fileID: 11400000, guid: e016495dab77e784a8bd98ceb6b01478, type: 2}
-  playerMultiplyStats: {fileID: 11400000, guid: 18f6a023c9a200c4e9c90467c25d6eee, type: 2}
+  genericStats: []
+  GENERIC_STAT_LIST: {fileID: 11400000, guid: 1385a02f12d8adb46b9fed7a90fe65c6, type: 2}
+  statDictionary: {fileID: 11400000, guid: d46b57b6f0443494aa9f2ebe6938424b, type: 2}
+  items:
+  - {fileID: 11400000, guid: 5db585939e7e5564694c6783932b9184, type: 2}
+  itemX: {fileID: 11400000, guid: 5db585939e7e5564694c6783932b9184, type: 2}
+  updateOnRegisterOfX: 1
+  debug: 0
 --- !u!114 &3252293133332766952
 MonoBehaviour:
   m_ObjectHideFlags: 0

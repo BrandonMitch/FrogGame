@@ -154,15 +154,7 @@ public class NonLinearRadialAccelerator
     { 
         RB.AddForce(jhat * forceMagnitude);
     }
-    /*
-    private void Tracer(Vector2 lastPosition, Vector2 currentPosition)
-    {
-        if (lastPosition != Vector2.zero)
-        {
-            Debug.DrawLine(currentPosition, lastPosition, Color.red, 5f);
-        }
-    }
-    */
+
     private void ClampRBVelocity(Rigidbody2D RB)
     {
         RB.velocity = Vector2.ClampMagnitude(RB.velocity, VEL * 1.5f);

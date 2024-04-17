@@ -32,10 +32,8 @@ public class PlayerLungingState : PlayerState
     {
         ArrayList vars = player.getLungeVaraiables();
         tongeContactFilter =      (ContactFilter2D)vars[0];
-
         minimumDistanceToSpawnANewPoint =   (float)vars[1];
         minimumTimeToSpawnANewPoint =       (float)vars[2];
-
         playerContactFilter =     (ContactFilter2D)vars[3];
 
     }
@@ -58,6 +56,8 @@ public class PlayerLungingState : PlayerState
         lateralLungeEaseInFrames = player.LateralLungeEaseInFrames;
         lateralLungeEaseOutFrames = player.LateralLungeEaseOutFrames;
         lateralLungeDesiredVEL = player.LateralLungeDesiredVEL;
+
+        getLungeVariables(); // TODO: Remove so this is only called once, just used for updating vars
     }
 
     public override void AnimationTriggerEvent(Player.AnimationTriggerType triggerType)
@@ -72,7 +72,7 @@ public class PlayerLungingState : PlayerState
     public override void EnterState()
     {
         pauseCasting = false;
-        getLungeVariables(); // TODO: Remove so this is only called once, just used for updating vars
+    
     
         ihat = player.tongueLatchedState.GetIhat(); // right
         jhat = player.tongueLatchedState.GetJhat(); // forward
@@ -109,7 +109,7 @@ public class PlayerLungingState : PlayerState
         r0 = (playerRB.position - (Vector2)endOfTongueTransform.position).magnitude;
         if (nonLinearRadialAccelerator != null)
         {
-            // TODO: Make use of intialize() that doesn't use all of the params, this is just used to allow play time editing
+            // TODO: Make use of intialize() that doesn't use all of the params, this is just used to allow play time editing (we just need to update the start time)
             nonLinearRadialAccelerator.intitalize(lateralLungeEaseInFrames.Value, lateralLungeEaseOutFrames.Value, lateralLungeDesiredVEL.Value, playerRB.mass);
         }
         else
@@ -133,12 +133,6 @@ public class PlayerLungingState : PlayerState
 
     public override void FrameUpdate()
     {
-        if (Input.GetKey(KeyCode.P))
-        {
-            player.tongueStateMachine.EnterOffStateImmediately(player);
-            playerStateMachine.EnterOffStateImmediately(player);
-            return;
-        }
         // Reading inputs differently based on lunge type.
         switch (latchMovementType)
         {

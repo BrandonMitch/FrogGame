@@ -52,6 +52,7 @@ public class PlayerMovingState : PlayerState
         if (rightMouseButton)
         {
             playerStateMachine.ChangeState(player.aimingTongueState);
+            SetMovementInputs(Vector2.zero);
             return;
         }
         moveVec = GetCurrentMovementInputs();
@@ -69,7 +70,7 @@ public class PlayerMovingState : PlayerState
 
     public override void PhysicsUpdate()
     {
-        movementCode(moveVec);
+        movementCode3(moveVec);
     }
     public void movementCode(Vector2 moveVec)
     {
@@ -85,6 +86,33 @@ public class PlayerMovingState : PlayerState
         {
             playerRB.AddForce(playerRunForceModifier * moveVec);
         }
+    }
+    public void movementCode2(Vector2 moveVec)
+    {
+        Vector2 oldvelocity = playerRB.velocity;
+        float velocityMagnitude = oldvelocity.magnitude;
+        Vector2 newVelocity = oldvelocity + (playerRunForceModifier * moveVec)/playerRB.mass ; // add force to the old velocity
+                newVelocity = Vector2.ClampMagnitude(newVelocity, playerMaxSpeed) * playerRB.mass;
+        playerRB.velocity = newVelocity;
+    }
+
+    float turnFactorScaling = 0.1f; // controls how fast you can turn around, if = 0.1, turning around instantly would only give you 1/10 acceleration compared to walking in a direction close to the one you were already running in
+
+    public void movementCode3(Vector2 movVec) {
+        float turnFactor; // number ranging from 1/2 to 1 based on the dot product of your move direction and your last direction, stops quick turn arounds
+        Vector2 oldvelocity = playerRB.velocity;
+        turnFactor = Vector2.Dot(oldvelocity.normalized, movVec);
+        turnFactor = 0.5f * (1 + turnFactor + turnFactorScaling - turnFactor*turnFactorScaling); // this is some dot product mapping, it is a perfect circle when turnFactorScaling = 1, and looks like a mini heart when it = 0. (It's called a cardiod curve)
+/*        if (oldvelocity.magnitude > playerMaxSpeed)
+        {
+            playerRB.velocity = Vector2.ClampMagnitude(oldvelocity, playerMaxSpeed);
+        }
+        else
+        {
+            playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
+        }*/
+        playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
+        playerRB.velocity = Vector2.ClampMagnitude(playerRB.velocity, playerMaxSpeed);
     }
     // This is only ccalled when we leave the idle state
     public void setMoveVecToFirstInput(Vector2 firstMoveDiretion)
