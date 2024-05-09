@@ -79,8 +79,11 @@ public class PlayerLungingState : PlayerState
         dampingCounter = 0;
         entryTime = Time.time;
         endOfTongueTransform = player.tongueStateMachine.GetEndOfTongueTransform();
-        
-        
+
+        // Sets Trigger For Forward Lunge;
+        player.AnimateLunge(true);
+
+
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
@@ -121,6 +124,7 @@ public class PlayerLungingState : PlayerState
     }
     public override void ExitState()
     {
+        player.AnimateLunge(false);
         SetLatchMovementType(LatchMovementType.Waiting);
         lungeDirection = 1;
         pauseCasting = false;

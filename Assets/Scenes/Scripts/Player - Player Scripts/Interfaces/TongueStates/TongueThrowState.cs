@@ -52,7 +52,7 @@ public class TongueThrowState : TongueState
         endOfTongueTransform.position = parentTransform.position;
         endOfTongueRB.simulated = true; // Enable physics for tongue
         TongueVelocity = Vector2.zero;
-        moveTongueTowards(tongueStateMachine.aimLocation);
+        MoveTongueTowards(tongueStateMachine.aimLocation);
 
         // turn on rendering for tongue, call it for one frame
         tongueStateMachine.TurnOnLineRenderer();
@@ -66,7 +66,7 @@ public class TongueThrowState : TongueState
     }
     public override void FrameUpdate()
     {
-
+        tongueStateMachine.TwoPointTongueRenderer();
     }
 
     public override void PhysicsUpdate()
@@ -79,17 +79,14 @@ public class TongueThrowState : TongueState
         {
             OnHit(latchLocation, collisionHit);
         }
-
-        tongueStateMachine.TwoPointTongueRenderer();
-        //lineRenderer.SetPosition(1, endOfTongueTransform.position); // maybe should be in frame update
     }
-    private void moveTongueTowards(Vector3 location)
+    private void MoveTongueTowards(Vector3 location)
     {
         Vector2 direction = new Vector2(location.x, location.y);
         direction = (direction - (Vector2)parentTransform.position);
         direction.Normalize();
         endOfTongueRB.AddForce(tongueThrowForceModifier.Value * direction);
-        Debug.Log("velocity found: " + endOfTongueRB.velocity);
+        //Debug.Log("velocity found: " + endOfTongueRB.velocity);
     }
 
     private void DistanceTestTongue()

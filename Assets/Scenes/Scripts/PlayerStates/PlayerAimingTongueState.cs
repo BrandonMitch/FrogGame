@@ -15,6 +15,7 @@ public class PlayerAimingTongueState : PlayerState
     }
     public override void EnterState()
     {
+
         activeAimCoroutine = false;
         activeThrowCoroutine = false;
 
@@ -53,6 +54,7 @@ public class PlayerAimingTongueState : PlayerState
         }
         if (rightMouseButton) // aim while right mouse button is down
         {
+            // Aims the cross hair GameObject
             player.AimTongueCrossHair();
             // these lines make frog look in the direction of the mouse
             _lookDirectionForAnimation = (player.GetCrossHairPosition() - player.GetPosition()).normalized;
@@ -71,6 +73,9 @@ public class PlayerAimingTongueState : PlayerState
     private Coroutine throwCoroutine = null;
     private IEnumerator ChangeToTongueAimingState()
     {
+        // Start animation for aiming
+        player.AnimateAim(true);
+
         activeAimCoroutine = true;
         // If the tongue is still retracting, then we have to wait for it to retract
         while (!player.tongueStateMachine.isTongueOff()) // while the tongue is not off, wait for it to be off
@@ -88,6 +93,9 @@ public class PlayerAimingTongueState : PlayerState
         {
             yield return new WaitForFixedUpdate(); // wait a fixed update frame
         }
+        // Stop animation for aiming
+        player.AnimateAim(false);
+
         player.SpitOutTongueOnRelease();
         player.stateMachine.ChangeState(player.throwingState);
         activeThrowCoroutine = false;

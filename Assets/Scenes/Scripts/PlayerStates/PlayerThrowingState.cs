@@ -25,6 +25,8 @@ public class PlayerThrowingState : PlayerState
     public override void EnterState()
     {
         Debug.Log("entered throwing state");
+
+        player.AnimateThrow(true);
         player.tongueStateMachine.ChangeState(player.tongueThrowState);
         // Save the current time when we enter the state
         _timeWhenEnteringThrowingState = Time.time;
@@ -34,6 +36,7 @@ public class PlayerThrowingState : PlayerState
 
     public override void ExitState()
     {
+        player.AnimateThrow(false);
         // throw the buffered input to the next state if it's not equal to zero,
         // after we change states to latched,
         // latched state will throw it to  tongue manager if the player is not giving inputs

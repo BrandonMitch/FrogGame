@@ -12,6 +12,7 @@ public class TongueAimState : TongueState
     bool needToKeepTryingToIntializeEndOfTongue;
     public override void EnterState()
     {
+
         needToKeepTryingToIntializeEndOfTongue = false;
         // Instatiate new end of tongue
         endOfTongue = tongueStateMachine.IntializeEndOfTongue();
@@ -41,6 +42,7 @@ public class TongueAimState : TongueState
                 needToKeepTryingToIntializeEndOfTongue = false;
             }
         }
+        tongueStateMachine.TwoPointTongueRenderer();
     }
     public override bool isAiming()
     {

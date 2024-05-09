@@ -30,6 +30,7 @@ public class TongueRetractingState : TongueState
 
     public override void ExitState()
     {
+        player.AnimateRetract_Reset();
         //Debug.Log("leaving Retracting State");
         tongueStateMachine.DestroyEndOfTongue();
     }

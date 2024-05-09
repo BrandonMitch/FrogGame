@@ -70,7 +70,7 @@ public class PlayerMovingState : PlayerState
 
     public override void PhysicsUpdate()
     {
-        movementCode3(moveVec);
+        movementCode4(moveVec);
     }
     public void movementCode(Vector2 moveVec)
     {
@@ -96,23 +96,38 @@ public class PlayerMovingState : PlayerState
         playerRB.velocity = newVelocity;
     }
 
-    float turnFactorScaling = 0.1f; // controls how fast you can turn around, if = 0.1, turning around instantly would only give you 1/10 acceleration compared to walking in a direction close to the one you were already running in
+    float turnFactorScaling = 0.3f; // controls how fast you can turn around, if = 0.1, turning around instantly would only give you 1/10 acceleration compared to walking in a direction close to the one you were already running in
 
     public void movementCode3(Vector2 movVec) {
         float turnFactor; // number ranging from 1/2 to 1 based on the dot product of your move direction and your last direction, stops quick turn arounds
         Vector2 oldvelocity = playerRB.velocity;
         turnFactor = Vector2.Dot(oldvelocity.normalized, movVec);
         turnFactor = 0.5f * (1 + turnFactor + turnFactorScaling - turnFactor*turnFactorScaling); // this is some dot product mapping, it is a perfect circle when turnFactorScaling = 1, and looks like a mini heart when it = 0. (It's called a cardiod curve)
-/*        if (oldvelocity.magnitude > playerMaxSpeed)
-        {
-            playerRB.velocity = Vector2.ClampMagnitude(oldvelocity, playerMaxSpeed);
+        playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
+        playerRB.velocity = Vector2.ClampMagnitude(playerRB.velocity, playerMaxSpeed);
+    }
+
+    public void movementCode4(Vector2 movVec)
+    {
+        Vector2 oldvelocity = playerRB.velocity;
+        float oldvelocityMag = oldvelocity.magnitude;
+  
+        if (oldvelocityMag < playerMaxSpeed) {
+            float turnFactor; // number ranging from 1/2 to 1 based on the dot product of your move direction and your last direction, stops quick turn arounds
+            turnFactor = Vector2.Dot(oldvelocity.normalized, movVec);
+            turnFactor = 0.5f * (1 + turnFactor + turnFactorScaling - turnFactor * turnFactorScaling); // this is some dot product mapping, it is a perfect circle when turnFactorScaling = 1, and looks like a mini heart when it = 0. (It's called a cardiod curve)
+            /*            float newVelMag = (oldvelocity + movVec * (playerRunForceModifier * turnFactor * playerRB.mass / (Time.fixedDeltaTime))).magnitude; // find the magnitude if we were to add this force,
+                        if (newVelMag > playerMaxSpeed)
+                        {
+                            playerRB.velocity = 0.9f * playerRB.velocity;
+                        }*/
+            playerRB.velocity *= 0.9f;
+            playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
         }
         else
         {
-            playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
-        }*/
-        playerRB.AddForce(playerRunForceModifier * moveVec * turnFactor);
-        playerRB.velocity = Vector2.ClampMagnitude(playerRB.velocity, playerMaxSpeed);
+            playerRB.velocity = Vector2.ClampMagnitude(playerRB.velocity, playerMaxSpeed);
+        }
     }
     // This is only ccalled when we leave the idle state
     public void setMoveVecToFirstInput(Vector2 firstMoveDiretion)

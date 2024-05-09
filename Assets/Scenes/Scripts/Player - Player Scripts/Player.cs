@@ -169,6 +169,10 @@ public class Player : Mover
     {
         PlayerDamaged,
         PlayerIdle,
+        Retract_Reset,
+        ChargeTongue,
+        ThrowTongue,
+        Lunge,
     }
 
     public void SetMovementInputs(Vector2 moveVec)
@@ -275,7 +279,7 @@ public class Player : Mover
     private void ProcessInputs()
     {
         // Check x/y movement, normalize vector
-        // negative is left, positive is right. CLAMP MOVEMENT SPEED IF CONTROLLERS ARE A PROBLEM
+        // negative is left, positive is right. 
         //Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
         speedForAnimation = Mathf.Clamp(new Vector2(xInput,yInput).magnitude,0.0f,1.0f);
         
@@ -287,6 +291,23 @@ public class Player : Mover
         } 
 
     }
+    public void AnimateAim(bool active)
+    {
+        animator.SetBool("ChargeTongue", active);
+    }
+    public void AnimateThrow(bool active)
+    {
+        Debug.Log("animate throw" + active);
+        animator.SetBool("ThrowTongue", active);
+    }
+    public void AnimateLunge(bool active)
+    {
+        animator.SetBool("Lunge", active);
+    }
+    public void AnimateRetract_Reset()
+    {
+        animator.SetTrigger("Retract_Reset");
+    }
     public void AimTongueCrossHair()
     {
         crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
@@ -297,20 +318,19 @@ public class Player : Mover
     }
     public void SpitOutTongueOnRelease()
     {
-       /* if (tongue.TryThrowTongue(crossHair.getCrossHairPosition()))
-        {
-            //Debug.Log("Sucessfully Thrown Tongue");
-        };*/
         crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
         crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
     }
 
     public void Animate()
     {
+
         animator.SetFloat("Horizontal", lastMoveDirection.x);
         animator.SetFloat("Vertical", lastMoveDirection.y);
         animator.SetFloat("Speed",speedForAnimation);
     }
+
+
     public void SwapSprite(int skinID)
     {
         // GetComponent<SpriteRenderer>().sprite = GameManager.instance.playerSprites[skinID]; not optimal
@@ -323,7 +343,6 @@ public class Player : Mover
         // TODO: Sort out if we want to slow movement after a swing;
         animator.SetTrigger("QuickBackSlash");
     }
-
     private void externalCall() // This method is used to call external events during an animation. If we want to spawn a slash then we set the enum to the correct value and then make a new event in the attack
     {
         switch (referenceCall)
@@ -345,13 +364,6 @@ public class Player : Mover
             stateMachine.ChangeState(deadState);
             deadState = null;
         }
-        /*
-        if (!Unkillable)
-        {
-            isAlive = false;
-            GameManager.instance.deathMenuAnim.SetTrigger("Show");
-        }
-        */
     }
     public void Respawn()
     {
@@ -359,11 +371,6 @@ public class Player : Mover
         lastImmune = Time.time;
         pushDirection = Vector3.zero;
         
-
-    }
-    //TODO: Add equip component
-    public void EquipComponent(WeaponComponent component)
-    {
 
     }
 }
