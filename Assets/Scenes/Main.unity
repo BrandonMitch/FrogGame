@@ -395,7 +395,7 @@ MonoBehaviour:
   isUpdating: 1
   itemTransform: {fileID: 1933135564}
   itemRenderer: {fileID: 1933135565}
-  itemType: {fileID: 11400000, guid: de39e1a9bba136c4bb5c299115e65cbb, type: 2}
+  itemType: {fileID: 11400000, guid: 69e1c9ef6c9f2c640bbf742a066b477a, type: 2}
 --- !u!212 &13746779
 SpriteRenderer:
   m_ObjectHideFlags: 0

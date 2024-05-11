@@ -126,8 +126,9 @@ public class PlayerLungingState : PlayerState
     {
         // Shut off animation
         player.AnimateLunge(false);
-        // Reset rotation
-        //player.AnimateLunge(Quaternion.Euler(0, 0, 0));
+        // Reset rotation after physics update has occured
+        ///player.StartCoroutine(ResetRotationCoroutine());
+        ResetRotation();
 
         SetLatchMovementType(LatchMovementType.Waiting);
         lungeDirection = 1;
@@ -138,7 +139,16 @@ public class PlayerLungingState : PlayerState
             activeStopSwingCoroutine = false;
         }
     }
-
+    private void ResetRotation()
+    {
+        player.AnimateLunge(Quaternion.Euler(0, 0, 0));
+    }
+/*    IEnumerator ResetRotationCoroutine()
+    {
+        //yield return new WaitForFixedUpdate();
+        yield return new WaitUntil(PhysicsUpdate());
+        ResetRotation();
+    }*/
     public override void FrameUpdate()
     {
         // Reading inputs differently based on lunge type.

@@ -299,7 +299,6 @@ public class Player : Mover
     }
     public void AnimateThrow(bool active)
     {
-        Debug.Log("animate throw" + active);
         animator.SetBool("ThrowTongue", active);
     }
     public void AnimateLunge(bool active)
@@ -308,9 +307,11 @@ public class Player : Mover
     }
     public void AnimateLunge(Quaternion rotation)
     {
-        Debug.Log("Animate Lunge:" + rotation);
-        headTransform.rotation = rotation;
-        characterSpriteTransform.rotation = rotation; 
+        if (stateMachine.CurrentPlayerState.Equals(lungingState))
+        {
+            headTransform.rotation = rotation;
+            characterSpriteTransform.rotation = rotation;
+        }
     }
     public void AnimateRetract_Reset()
     {
