@@ -42,7 +42,6 @@ public class TongueAimState : TongueState
                 needToKeepTryingToIntializeEndOfTongue = false;
             }
         }
-        tongueStateMachine.TwoPointTongueRenderer();
     }
     public override bool isAiming()
     {

@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ForwardCharge
+  m_Name: Aim_R
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -20,9 +20,9 @@ AnimationClip:
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: 598046727, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
+      value: {fileID: -840477383, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
     - time: 0.33333334
-      value: {fileID: -682927335, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
+      value: {fileID: -1845159660, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
     attribute: m_Sprite
     path: Sprites/Character
     classID: 212
@@ -42,8 +42,8 @@ AnimationClip:
       customType: 23
       isPPtrCurve: 1
     pptrCurveMapping:
-    - {fileID: 598046727, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
-    - {fileID: -682927335, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
+    - {fileID: -840477383, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
+    - {fileID: -1845159660, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}

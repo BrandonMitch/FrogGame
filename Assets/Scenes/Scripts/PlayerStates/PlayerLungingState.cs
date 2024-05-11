@@ -124,7 +124,11 @@ public class PlayerLungingState : PlayerState
     }
     public override void ExitState()
     {
+        // Shut off animation
         player.AnimateLunge(false);
+        // Reset rotation
+        //player.AnimateLunge(Quaternion.Euler(0, 0, 0));
+
         SetLatchMovementType(LatchMovementType.Waiting);
         lungeDirection = 1;
         pauseCasting = false;
@@ -142,7 +146,7 @@ public class PlayerLungingState : PlayerState
         {
             case LatchMovementType.LungeForward:
                 {
-                    //GetFKeyInputs();
+                    // allows you to cancel out of the lunge by stoping movement inputs, or by pressing f key
                     if (fKeyDown)
                     {
                         TryShutOffForForwardsLunge();
@@ -192,6 +196,7 @@ public class PlayerLungingState : PlayerState
 
     public override void PhysicsUpdate()
     {
+        // First apply proper lunging forces, linecasts, and update ihat jhat vectors.
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
@@ -219,6 +224,9 @@ public class PlayerLungingState : PlayerState
                 Debug.LogError("ERROR in player lunging state, invalid state:" + latchMovementType);
                 return;
         }
+        // Next we apply rotations to the character
+        // TODO: This doesn't need to be done every frame for the forward lunge
+        player.AnimateLunge(GetCharacterRotation());
     }
     public void SetLatchMovementType(LatchMovementType m)
     {
@@ -227,7 +235,9 @@ public class PlayerLungingState : PlayerState
     Vector2 rotationPoint = Vector2.zero; // For two body hits this is just the end of the tongue
     private void LateralLunge()
     {
-        /// NON LINEAR RAIDAL ACCLERATOR WAS ADDED HERE
+        // The lines below first cast a line from the character to the end of the tongue, if there is a collision it spawns a new rotation point. 
+        // Next we update new position vector after the rotation has happened last frame.
+        // Finally, we apply forces to keep the character rotating with the proper amount of rotational energy. 
         TwoBodySwingingLogic();
         Updateihatjhat(lungeDirection);
         nonLinearRadialAccelerator.FixedUpdateCall(ihat, jhat, playerRB, r0);
@@ -243,6 +253,9 @@ public class PlayerLungingState : PlayerState
     /// </summary>
     TongueHitData hitData;
     bool pauseCasting = false;
+    /// <summary>
+    /// Two body swinging logic for the frog around a rotation point. Each frame there is a line cast and if a new collision is detected, it spawns a new rotation point. 
+    /// </summary>
     private void TwoBodySwingingLogic()
     {
         if (pauseCasting) return;
@@ -382,7 +395,7 @@ public class PlayerLungingState : PlayerState
             {
                 if (collision.tag != "Player")
                 {
-                    Debug.Log("Collision's name in forward lunge:" + collision.name);
+                    //Debug.Log("Collision's name in forward lunge:" + collision.name);
                     Tracer.DrawCircle(col.point, 0.03f, 8, Color.red);
                     TryShutOffForForwardsLunge();
                     return;
@@ -473,6 +486,24 @@ public class PlayerLungingState : PlayerState
         Vector3 khat = Vector3.forward;
         ihat = direction*Vector3.Cross(jhat, khat); // gets the vector perpendicular to the tongue direction
     }
+
+    /// <summary>
+    /// Gets the character rotation for lunging in a certain direction. Used for animation
+    /// </summary>
+    /// <returns>The rotation needed so that the character is facing towards the end of the tongue during the lunge animation</returns>
+    private Quaternion GetCharacterRotation()
+    {
+        // jhat is a vector that is updated every frame that points from the character towards the end of the tongue.
+        float angle = Mathf.Rad2Deg * Mathf.Atan2(jhat.y, jhat.x) + 90; // This calculates the angle from the downwards vector (0,-1).
+                                                   // if jhat is (0,-1) -> angle = 0
+                                                   // if jhat is (-1, 0) -> angle = 90
+                                                   // if jhat is (0, 1) -> angle = 180
+        Debug.Log("Angle:" + angle);
+        Quaternion rotation = Quaternion.Euler(0, 0, angle);
+        //Debug.Log("GetCharacterRotation():" + rotation);
+        return rotation;
+    }
+
 
     // OLD LOGIC
     /* old linecast opposite direction

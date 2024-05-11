@@ -73,6 +73,8 @@ public class Player : Mover
     public Animator animator;
     public GameObject customizableWeaponOjbect;
     private WeaponCustomizable customizableWeapon;
+    [SerializeField] private Transform headTransform;
+    [SerializeField] private Transform characterSpriteTransform;
     [SerializeField] private CrossHairScript crossHair;
     
     public enum ExternalCall
@@ -303,6 +305,12 @@ public class Player : Mover
     public void AnimateLunge(bool active)
     {
         animator.SetBool("Lunge", active);
+    }
+    public void AnimateLunge(Quaternion rotation)
+    {
+        Debug.Log("Animate Lunge:" + rotation);
+        headTransform.rotation = rotation;
+        characterSpriteTransform.rotation = rotation; 
     }
     public void AnimateRetract_Reset()
     {

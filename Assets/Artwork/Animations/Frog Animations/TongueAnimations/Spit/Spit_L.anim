@@ -6,7 +6,7 @@ AnimationClip:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ThrowTongue
+  m_Name: Spit_L
   serializedVersion: 6
   m_Legacy: 0
   m_Compressed: 0
@@ -55,7 +55,14 @@ AnimationClip:
   m_PPtrCurves:
   - curve:
     - time: 0
-      value: {fileID: -535994852, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
+      value: {fileID: 2062879594, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
+    attribute: m_Sprite
+    path: WeaponScriptContainer/TongueContainer/Head
+    classID: 212
+    script: {fileID: 0}
+  - curve:
+    - time: 0
+      value: {fileID: -780447426, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
     attribute: m_Sprite
     path: Sprites/Character
     classID: 212
@@ -75,6 +82,13 @@ AnimationClip:
       customType: 0
       isPPtrCurve: 0
     - serializedVersion: 2
+      path: 1503840013
+      attribute: 0
+      script: {fileID: 0}
+      typeID: 212
+      customType: 23
+      isPPtrCurve: 1
+    - serializedVersion: 2
       path: 1744681313
       attribute: 0
       script: {fileID: 0}
@@ -89,7 +103,8 @@ AnimationClip:
       customType: 0
       isPPtrCurve: 0
     pptrCurveMapping:
-    - {fileID: -535994852, guid: 9525784c347748d4cb2a851a92f3ad3e, type: 3}
+    - {fileID: 2062879594, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
+    - {fileID: -780447426, guid: 37676f067669c3448b90dac6dc5c60d6, type: 3}
   m_AnimationClipSettings:
     serializedVersion: 2
     m_AdditiveReferencePoseClip: {fileID: 0}
