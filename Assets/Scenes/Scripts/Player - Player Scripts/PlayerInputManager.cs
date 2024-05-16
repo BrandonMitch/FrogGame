@@ -49,6 +49,17 @@ public class PlayerInputManager : MonoBehaviour
         {
             PauseUnPausePlayer();
         }
+        // Move forward one frame
+        if (isPaused)
+        {
+            if (Input.GetKeyDown(KeyCode.O)) 
+            {
+                this.StartCoroutine(AdvanceOneFixedFrame());
+            } else if(Input.GetKeyDown(KeyCode.L))
+            {
+                this.StartCoroutine(AdvanceOneFrame());
+            }
+        }
     }
     public void PauseUnPausePlayer()
     {
@@ -62,6 +73,18 @@ public class PlayerInputManager : MonoBehaviour
             isPaused = true;
             Time.timeScale = 0f;
         }
+    }
+    IEnumerator AdvanceOneFixedFrame()
+    {
+        PauseUnPausePlayer();
+        yield return new WaitForFixedUpdate();
+        PauseUnPausePlayer();
+    }
+    IEnumerator AdvanceOneFrame()
+    {
+        PauseUnPausePlayer();
+        yield return null;
+        PauseUnPausePlayer();
     }
     public bool LeftMouseDown
     {

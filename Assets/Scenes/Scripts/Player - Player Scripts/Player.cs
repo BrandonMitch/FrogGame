@@ -333,7 +333,6 @@ public class Player : Mover
 
     public void Animate()
     {
-
         animator.SetFloat("Horizontal", lastMoveDirection.x);
         animator.SetFloat("Vertical", lastMoveDirection.y);
         animator.SetFloat("Speed",speedForAnimation);

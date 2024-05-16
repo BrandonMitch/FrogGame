@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: TongueTonic
   description: Elevate your taste game
-  image: {fileID: -1615951178, guid: 08de450adf43f81458415eaf7774de68, type: 3}
+  image: {fileID: 21300000, guid: 721ae885968e3df43ad7a54202398b49, type: 3}
   stackable: 0
   stats:
   - {fileID: 11400000, guid: 321e7c9ea16571d4ca59dc3693860ed7, type: 2}

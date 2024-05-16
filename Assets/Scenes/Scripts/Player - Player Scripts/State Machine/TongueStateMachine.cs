@@ -157,21 +157,15 @@ public class TongueStateMachine
     public void DestroyTongueMidPoint(float t)
     {
         int points = tonguePoints.Count;
-        //Debug.Log("there are " + points + " tongue points");
-
         if (points > 2)
         {
             TongueHitData lastElement = (TongueHitData)tonguePoints[points - 2];
-            //Debug.Log("TEST1:" + lastElement);
             if (lastElement != null && lastElement.DestroyPoint())
             {
-                if (lastElement.type != TonguePointType.tongueHitPoint){Debug.LogError("Tongue midpoints is not the correct type");return;}
-                //Debug.Log("MADE IT TO POINT 1.5"); 
+                if (lastElement.type != TonguePointType.tongueHitPoint){Debug.LogError("Tongue midpoints is not the correct type");return;} 
                 GameObject TgameObject = lastElement.getGameObject();
-                //Debug.Log("TEST2:" + lastElement);
                 if (TgameObject != null)
                 {
-                    //Debug.Log("TEST3:"+lastElement);
                     tonguePoints.Remove(lastElement); // Remove from the list
                     GameObject.Destroy(TgameObject, t); // Destroy the GameObject
                     lineRenderer.positionCount--;
@@ -193,10 +187,9 @@ public class TongueStateMachine
             Debug.LogError("Error in trying to destroy tongue mid point: Not enough points.");
         }
     }
-
+    bool debugRenderer = true;
     private void MultiPointTongueRenderer(int nPoints)
     {
-        //int nPoints = tonguePoints.Count;
         lineRenderer.SetPosition(0, parentTransform.position);
         lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
         for (int i = 1; (i < (nPoints-1)) && (i < lineRenderer.positionCount); i++)
@@ -205,13 +198,42 @@ public class TongueStateMachine
             lineRenderer.SetPosition(i, point.getPos());
         }
     }
+    bool activeCoroine = false;
+
     public void TwoPointTongueRenderer()
     {
+
+
         int nPoints = tonguePoints.Count;
-        if (nPoints == 1) return;
-        if (nPoints > 2) { MultiPointTongueRenderer(nPoints); return; }
-        lineRenderer.SetPosition(0, parentTransform.position);
-        lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
+        if (nPoints == 1) { return; }
+
+        Player player = CurrentTongueState.GetPlayer();
+        if (!activeCoroine)
+        {
+            player.StartCoroutine(drawFrame(nPoints, player));
+        }
+    }
+    IEnumerator drawFrame(int nPoints, Player player)
+    {
+        activeCoroine = true;
+        yield return new WaitForFixedUpdate();
+        if (debugRenderer)
+        {
+            Tracer.DrawCircle(parentTransform.position, 0.05f, 5, Color.yellow);
+            Tracer.DrawCircle(player.GetPlayerRigidBody().position, 0.05f, 7, Color.green);
+        }
+
+        if (nPoints > 2)
+        {
+            MultiPointTongueRenderer(nPoints);
+        }
+        else
+        {
+            lineRenderer.SetPosition(0, parentTransform.position);
+            lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
+        }
+
+        activeCoroine = false;
     }
     public TongueHitData GetPointBeforeEndOfTongue()
     {

@@ -11,23 +11,29 @@ public class CrossHairScript : MonoBehaviour
     [HideInInspector] public Vector3 difference = new Vector3(1, 1);
     [SerializeField] private Sprite swordCrossHair;
     [SerializeField] private Sprite tongueCrossHair;
+
+    [SerializeField] private Transform parentTransform;
+
     private SpriteRenderer sprite;
     private void Start()
     {
-            sprite = this.GetComponent<SpriteRenderer>();
-            setCrossHairState(0);
-            setCrossHairDistance();
-            maxDistance = maxDistanceDefault;
-            lookat = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x,Input.mousePosition.y, 10));
+        sprite = this.GetComponent<SpriteRenderer>();
+        parentTransform = transform.parent;
+        setCrossHairState(0);
+        setCrossHairDistance();
+        maxDistance = maxDistanceDefault;
+        lookat = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
     }
+
     float joyStick2x;
     float joyStick2y;
+    public bool debugLines = true;
     void Update()
     {
         switch (inputManager.controllerMode) {
             case PlayerInputManager.ControllerMode.Mouse:
                 lookat = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
-                difference = lookat - transform.parent.transform.position;
+                difference = lookat - (parentTransform.transform.position);
                 if (difference.magnitude < maxDistance)
                 {
                     transform.position = lookat;
@@ -46,11 +52,16 @@ public class CrossHairScript : MonoBehaviour
 
                 if (vec.magnitude > 0.5f)
                 {
-                    transform.localPosition = Vector2.ClampMagnitude(vec, maxDistance);
+                    transform.localPosition = Vector3.ClampMagnitude(vec, maxDistance);
                 }
                 break;
         }
+        if (debugLines)
+        {
+            Tracer.DrawCircle(parentTransform.position, 0.02f, 5, Color.white);
+            Debug.DrawLine(transform.position, parentTransform.position, Color.magenta);
 
+        }
 
     }
     public void setCrossHairDistance(float distance)

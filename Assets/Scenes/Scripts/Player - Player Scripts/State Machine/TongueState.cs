@@ -11,7 +11,10 @@ public class TongueState
         this.player = player;
         this.tongueStateMachine = tongueStateMachine;
     }
-
+    public Player GetPlayer()
+    {
+        return player;
+    }
     public virtual void EnterState()
     {
 

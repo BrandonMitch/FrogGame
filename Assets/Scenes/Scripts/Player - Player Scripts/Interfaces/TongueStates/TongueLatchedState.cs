@@ -66,6 +66,7 @@ public class TongueLatchedState : TongueState
         {
             movementType = readInput();
         }
+        tongueStateMachine.TwoPointTongueRenderer();
     }
 
     public override void PhysicsUpdate()
