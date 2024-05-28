@@ -55,7 +55,7 @@ public class TongueThrowState : TongueState
         MoveTongueTowards(tongueStateMachine.aimLocation);
 
         // turn on rendering for tongue, call it for one frame
-        tongueStateMachine.TurnOnLineRenderer();
+        tongueStateMachine.StartTongueRenderer();
         tongueStateMachine.TwoPointTongueRenderer();
     }
 

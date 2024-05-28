@@ -80,9 +80,8 @@ public class PlayerLungingState : PlayerState
         entryTime = Time.time;
         endOfTongueTransform = player.tongueStateMachine.GetEndOfTongueTransform();
 
-        // Sets Trigger For Forward Lunge;
-        player.AnimateLunge(true);
-
+        // Sets Trigger For Forward Lunge, and sets the rotation
+        player.StartCoroutine(startLungeAnimation());
 
         switch (latchMovementType)
         {
@@ -90,6 +89,7 @@ public class PlayerLungingState : PlayerState
                 playerRB.drag = forwardLungeDragCoefficient.Value;
                 playerRB.AddForce(jhat * forwardForceModifer.Value);
                 v0 = Time.fixedDeltaTime * forwardForceModifer.Value / playerRB.mass;
+                hitData = player.tongueStateMachine.GetRotationPoint();
                 break;
             case LatchMovementType.LungeLeft:
                 LateralLungeIntialization(-1); // negative (-1) is -ihat which is left
@@ -104,6 +104,12 @@ public class PlayerLungingState : PlayerState
                 Debug.LogError("ERROR IN player lunging state on entry, should not be waiting");
                 break;
         }
+    }
+    IEnumerator startLungeAnimation()
+    {
+        yield return new WaitForFixedUpdate();
+        player.AnimateLunge(true);
+        player.AnimateLunge(GetCharacterRotation());
     }
     private void LateralLungeIntialization(int direction)
     {
@@ -129,6 +135,7 @@ public class PlayerLungingState : PlayerState
         // Reset rotation after physics update has occured
         ///player.StartCoroutine(ResetRotationCoroutine());
         ResetRotation();
+        player.ResetColliderDirection();
 
         SetLatchMovementType(LatchMovementType.Waiting);
         lungeDirection = 1;
@@ -161,6 +168,12 @@ public class PlayerLungingState : PlayerState
                     {
                         TryShutOffForForwardsLunge();
                     }
+                    Vector2 input = GetCurrentMovementInputs();
+                    if (input != Vector2.zero)
+                    {
+                        return;
+                    }
+                    TryShutOffForForwardsLunge();
                 }
                 return;
             case LatchMovementType.LungeLeft:
@@ -250,8 +263,8 @@ public class PlayerLungingState : PlayerState
         // Finally, we apply forces to keep the character rotating with the proper amount of rotational energy. 
         TwoBodySwingingLogic();
         Updateihatjhat(lungeDirection);
+        player.SetOffsetColliderDirection(-jhat);
         nonLinearRadialAccelerator.FixedUpdateCall(ihat, jhat, playerRB, r0);
-
     }
     private float r1; // intial radius
     private float vt1; // intial tangental velocity
@@ -391,6 +404,8 @@ public class PlayerLungingState : PlayerState
     }
     private void ForwardLunge()
     {
+        Updateihatjhat(1);
+        player.SetOffsetColliderDirection(-jhat);
         // We need to cast the player's collider forward to check if we hit something.
         RaycastHit2D[] collisions = new RaycastHit2D[3];
         int result = Physics2D.CircleCast(playerRB.position, 0.05f,  jhat, playerContactFilter, collisions, (Time.fixedDeltaTime * v0));
@@ -405,7 +420,7 @@ public class PlayerLungingState : PlayerState
             {
                 if (collision.tag != "Player")
                 {
-                    //Debug.Log("Collision's name in forward lunge:" + collision.name);
+                    Debug.Log("Collision's name in forward lunge:" + collision.name);
                     Tracer.DrawCircle(col.point, 0.03f, 8, Color.red);
                     TryShutOffForForwardsLunge();
                     return;
@@ -463,6 +478,7 @@ public class PlayerLungingState : PlayerState
         float distance = (endOfTonguePos - playerPos).magnitude;
         if(distance < 0.1f)
         {
+            Debug.Log("Distance Check Failed");
             return true;
         }
         return false;
@@ -472,6 +488,7 @@ public class PlayerLungingState : PlayerState
         float velocityMagnitude = playerRB.velocity.magnitude;
         if (velocityMagnitude < 0.1f)
         {
+            Debug.Log("Velocity Check Failed");
             return true;
         }
         return false;
@@ -508,7 +525,7 @@ public class PlayerLungingState : PlayerState
                                                    // if jhat is (0,-1) -> angle = 0
                                                    // if jhat is (-1, 0) -> angle = 90
                                                    // if jhat is (0, 1) -> angle = 180
-        Debug.Log("Angle:" + angle);
+        //Debug.Log("Angle:" + angle);
         Quaternion rotation = Quaternion.Euler(0, 0, angle);
         //Debug.Log("GetCharacterRotation():" + rotation);
         return rotation;

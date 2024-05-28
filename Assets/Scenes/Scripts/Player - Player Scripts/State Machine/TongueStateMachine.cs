@@ -19,7 +19,6 @@ public class TongueStateMachine
     public Vector3 aimLocation;
 
     private ArrayList tonguePoints = new ArrayList();
-
     public TongueStateMachine(TongueData tongueData)
     {
         this.tongueData = tongueData;
@@ -35,6 +34,7 @@ public class TongueStateMachine
 
         CurrentTongueState = startingState;
         CurrentTongueState.EnterState();
+        activeCoroutine = false;
     }
 
 
@@ -44,25 +44,7 @@ public class TongueStateMachine
         CurrentTongueState = newState;
         CurrentTongueState.EnterState();
     }
-    public void TurnOffLineRenderer()
-    {
-        if (lineRenderer != null)
-        {
-            lineRenderer.positionCount = 2;
-            lineRenderer.enabled = false;
-        }
-        else
-        {
-            Debug.Log("Line renderer null, try again");
-        }
-    }
-    public void TurnOnLineRenderer()
-    {
-        if(lineRenderer != null)
-        {
-            lineRenderer.enabled = true;
-        }
-    }
+
     public void TurnOffEndOfTongueRB()
     {
         endOfTongueRB.simulated = false;
@@ -187,54 +169,101 @@ public class TongueStateMachine
             Debug.LogError("Error in trying to destroy tongue mid point: Not enough points.");
         }
     }
-    bool debugRenderer = true;
-    private void MultiPointTongueRenderer(int nPoints)
-    {
-        lineRenderer.SetPosition(0, parentTransform.position);
-        lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
-        for (int i = 1; (i < (nPoints-1)) && (i < lineRenderer.positionCount); i++)
-        {
-            TongueHitData point = (TongueHitData)tonguePoints[i];
-            lineRenderer.SetPosition(i, point.getPos());
-        }
-    }
-    bool activeCoroine = false;
 
+    #region Rendering the tongue
+    bool debugRenderer = true;
+    bool activeCoroutine = false;
+    bool tongueRenderIsStarted = false;
+    Coroutine drawTongueCoroutine = null;
     public void TwoPointTongueRenderer()
     {
 
-
+        // Don't do anything if there is only one tongue point.
         int nPoints = tonguePoints.Count;
         if (nPoints == 1) { return; }
 
+        // We need to get the player to start a coroutine.
+        // This is because the rendering had some issues if we don't wait for the fixed update.
+        // This caused the tongue position to lag behind the rigid body and make the tongue float ahead or behind the player
         Player player = CurrentTongueState.GetPlayer();
-        if (!activeCoroine)
+        if (!activeCoroutine)
         {
-            player.StartCoroutine(drawFrame(nPoints, player));
+            drawTongueCoroutine = player.StartCoroutine(drawTongue(nPoints, player));
         }
     }
-    IEnumerator drawFrame(int nPoints, Player player)
+    public void StartTongueRenderer()
     {
-        activeCoroine = true;
+        tongueRenderIsStarted = true;
+    }
+    public void StopTongueRenderer()
+    {
+        tongueRenderIsStarted = false;
+        TurnOffLineRenderer();
+    }
+    private void TurnOffLineRenderer()
+    {
+        // Stop the tongue renderer coroutine so it does not play next frame
+        if (activeCoroutine && drawTongueCoroutine != null) {
+            CurrentTongueState.GetPlayer().StopCoroutine(drawTongueCoroutine);
+        }
+        activeCoroutine = false;
+        drawTongueCoroutine = null;
+
+        // Shut off the renderer
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = 2;
+            lineRenderer.enabled = false;
+            tongueRenderIsStarted = false;
+        }
+        else
+        {
+            Debug.LogError("Line renderer null");
+        }
+    }
+    private void TurnOnLineRenderer()
+    {
+        lineRenderer.enabled = true;
+    }
+    IEnumerator drawTongue(int nPoints, Player player)
+    {
+        activeCoroutine = true;
         yield return new WaitForFixedUpdate();
         if (debugRenderer)
         {
             Tracer.DrawCircle(parentTransform.position, 0.05f, 5, Color.yellow);
             Tracer.DrawCircle(player.GetPlayerRigidBody().position, 0.05f, 7, Color.green);
         }
-
-        if (nPoints > 2)
+        // First turn on the tongue renderer
+        if (tongueRenderIsStarted)
         {
-            MultiPointTongueRenderer(nPoints);
+            if (nPoints > 2)
+            {
+                MultiPointTongueRenderer(nPoints);
+            }
+            else
+            {
+                lineRenderer.SetPosition(0, parentTransform.position);
+                lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
+            }
+            // TODO: Doesn't need to be called every frame but requires more switches
+            TurnOnLineRenderer();
         }
-        else
-        {
-            lineRenderer.SetPosition(0, parentTransform.position);
-            lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
-        }
-
-        activeCoroine = false;
+        activeCoroutine = false;
+        drawTongueCoroutine = null;
     }
+    private void MultiPointTongueRenderer(int nPoints)
+    {
+        lineRenderer.SetPosition(0, parentTransform.position);
+        lineRenderer.SetPosition(tonguePoints.Count - 1, endOfTongue.transform.position);
+        for (int i = 1; (i < (nPoints - 1)) && (i < lineRenderer.positionCount); i++)
+        {
+            TongueHitData point = (TongueHitData)tonguePoints[i];
+            lineRenderer.SetPosition(i, point.getPos());
+        }
+    }
+
+    #endregion
     public TongueHitData GetPointBeforeEndOfTongue()
     {
         TongueHitData p = (TongueHitData)tonguePoints[tonguePoints.Count - 2];

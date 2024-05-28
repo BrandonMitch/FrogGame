@@ -11,7 +11,7 @@ public class TongueOffState : TongueState
 
     public override void EnterState()
     {
-        tongueStateMachine.TurnOffLineRenderer();
+        tongueStateMachine.StopTongueRenderer();
     }
 
     public override void ExitState()

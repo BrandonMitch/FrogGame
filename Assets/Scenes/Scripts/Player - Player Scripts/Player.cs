@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class Player : Mover
 {
+
     private SpriteRenderer spriteRenderer;
+    private Vector2 defaultCollisionOffSet;
+    private float defaultColliderOffsetMagnitude;
     private bool isAlive = true;
     [Space]
     [Header("|-----Movement Variables-----|")]
@@ -48,7 +51,7 @@ public class Player : Mover
     #endregion
 
     private Rigidbody2D playerRB;
-    private Collider2D playerCollider;
+    private CircleCollider2D playerCollider;
 
     // TODO: Come up with better way to do this
 
@@ -127,7 +130,10 @@ public class Player : Mover
     private void Awake()
     {
         playerRB = GetComponent<Rigidbody2D>();
-        playerCollider = GetComponent<Collider2D>();
+        playerCollider = GetComponent<CircleCollider2D>();
+        defaultCollisionOffSet = playerCollider.offset;
+        defaultColliderOffsetMagnitude = defaultCollisionOffSet.magnitude;
+
 
         // Get all instances of the generic stat
         lateralForceModifer = statDictionary.GetPlayerStatInstance(lateralForceModifer);
@@ -189,6 +195,14 @@ public class Player : Mover
         xInput = moveVec.x;
         yInput = moveVec.y;
     }
+    public void SetOffsetColliderDirection(Vector2 direction)
+    {
+        playerCollider.offset = direction*defaultColliderOffsetMagnitude;
+    }
+    public void ResetColliderDirection()
+    {
+        playerCollider.offset = defaultCollisionOffSet;
+    }
     #region ---Getter's---
     public Vector2 GetLastMoveDirection()
     {
@@ -201,10 +215,6 @@ public class Player : Mover
     public Vector3 GetPosition()
     {
         return transform.position;
-    }
-    public Collider2D GetCollider()
-    {
-        return playerCollider;
     }
     public Vector3 GetCrossHairPosition()
     {
@@ -246,7 +256,8 @@ public class Player : Mover
     /***********************************---END---*********************************/
     protected override void Start()
     {
-        base.Start();
+/*        collider2D = GetComponent<CircleCollider2D>();
+        defaultCollisionOffSet = collider2D.offset;*/
 
         stateMachine.Intialize(idleState);
         tongueStateMachine.Intialize(tongueOffState);

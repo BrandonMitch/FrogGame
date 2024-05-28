@@ -47,19 +47,4 @@ public class TongueState
     {
 
     }
-  
-/*
-    static void UpdateBaseOfTongueRenderer(LineRenderer LR, Transform parentTransform)
-    {
-        LR.SetPosition(0, parentTransform.position);
-    }
-    static void UpdateEndOfTongueRenderer(LineRenderer LR, Transform endOfTongueTransform)
-    {
-        LR.SetPosition(1, endOfTongueTransform.position);
-    }
-    static protected void UpdateTongueRenderer(LineRenderer LR, Transform parentTransform, Transform endOfTongueTransform)
-    {
-        UpdateBaseOfTongueRenderer(LR, parentTransform);
-        UpdateEndOfTongueRenderer(LR, endOfTongueTransform);
-    }*/
 }

@@ -13,12 +13,12 @@ GameObject:
   - component: {fileID: 630498754107504137}
   - component: {fileID: 6816962011063937620}
   - component: {fileID: 8347307529788624381}
+  - component: {fileID: 1749928391082527142}
   - component: {fileID: 3252293133332766952}
-  - component: {fileID: 630498754107504136}
+  - component: {fileID: 3442953644521386344}
   - component: {fileID: 6816962011063937623}
   - component: {fileID: 6816962011063937624}
   - component: {fileID: 6816962011063937630}
-  - component: {fileID: 1749928391082527142}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -111,8 +111,6 @@ MonoBehaviour:
   hitpoint: 10
   maxHitpoint: 10
   pushRecoverySpeed: 0.3
-  ySpeed: 1
-  xSpeed: 1
   playerSpeed: 1
   playerMaxSpeed: 1
   playerRestingDrag: 100
@@ -216,6 +214,32 @@ MonoBehaviour:
   itemX: {fileID: 11400000, guid: 69e1c9ef6c9f2c640bbf742a066b477a, type: 2}
   updateOnRegisterOfX: 1
   debug: 0
+--- !u!114 &1749928391082527142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 630498754107504139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 147bba388bb8994468609faebcec1050, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultStartingHeartContainers:
+  - {fileID: 11400000, guid: 86b5da44225f70d4cbcdeceb83944ec4, type: 2}
+  - {fileID: 11400000, guid: c66e693bbc62d844b9ba27e6662f2bb2, type: 2}
+  - {fileID: 11400000, guid: 950c54b444d52f94c892c61c4b945f05, type: 2}
+  heartContainers: []
+  playerHealthSO: {fileID: 11400000, guid: 53154d70d58802b418db2fbfe3730e5a, type: 2}
+  onPlayerHealthChange: {fileID: 11400000, guid: a976e3d662c5a8d44b06e43a06ba5034, type: 2}
+  onPlayerHeartContainerBreak: {fileID: 11400000, guid: e75f7def9e75c9347b90036f86b3a2fe, type: 2}
+  onPlayerDamaged: {fileID: 11400000, guid: 14ce6a5e4eaef8d4d82f243d8139ef38, type: 2}
+  maxHealthContainers: {fileID: 11400000, guid: 75f0ef03fc9a73b44abd3bfeeb4a6360, type: 2}
+  printDebugsForHealandDamage: 0
+  xDamage: 40
+  xHeal: 0
+  xHeart: {fileID: 11400000, guid: 86b5da44225f70d4cbcdeceb83944ec4, type: 2}
 --- !u!114 &3252293133332766952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,8 +256,8 @@ MonoBehaviour:
   Response:
     m_PersistentCalls:
       m_Calls: []
---- !u!61 &630498754107504136
-BoxCollider2D:
+--- !u!58 &3442953644521386344
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -245,19 +269,9 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.002463568, y: 0.05582057}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.18, y: 0.24}
-    newSize: {x: 0.15, y: 0.16}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
+  m_Offset: {x: 0, y: 0.07}
   serializedVersion: 2
-  m_Size: {x: 0.13676235, y: 0.12833062}
-  m_EdgeRadius: 0
+  m_Radius: 0.09
 --- !u!50 &6816962011063937623
 Rigidbody2D:
   serializedVersion: 4
@@ -312,32 +326,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e81456529eb14774081506eddb551566, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1749928391082527142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 630498754107504139}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 147bba388bb8994468609faebcec1050, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defaultStartingHeartContainers:
-  - {fileID: 11400000, guid: 86b5da44225f70d4cbcdeceb83944ec4, type: 2}
-  - {fileID: 11400000, guid: c66e693bbc62d844b9ba27e6662f2bb2, type: 2}
-  - {fileID: 11400000, guid: 950c54b444d52f94c892c61c4b945f05, type: 2}
-  heartContainers: []
-  playerHealthSO: {fileID: 11400000, guid: 53154d70d58802b418db2fbfe3730e5a, type: 2}
-  onPlayerHealthChange: {fileID: 11400000, guid: a976e3d662c5a8d44b06e43a06ba5034, type: 2}
-  onPlayerHeartContainerBreak: {fileID: 11400000, guid: e75f7def9e75c9347b90036f86b3a2fe, type: 2}
-  onPlayerDamaged: {fileID: 11400000, guid: 14ce6a5e4eaef8d4d82f243d8139ef38, type: 2}
-  maxHealthContainers: {fileID: 11400000, guid: 75f0ef03fc9a73b44abd3bfeeb4a6360, type: 2}
-  printDebugsForHealandDamage: 0
-  xDamage: 40
-  xHeal: 0
-  xHeart: {fileID: 11400000, guid: 86b5da44225f70d4cbcdeceb83944ec4, type: 2}
 --- !u!1 &1752753209110905356
 GameObject:
   m_ObjectHideFlags: 0
@@ -410,7 +398,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 1048786664, guid: b8ef384eb182b984880573e0191f1ca4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -1048,11 +1036,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bcd1ba3673ba14c8f3c800f56cb966, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputManager: {fileID: 0}
+  inputManager: {fileID: 6816962011063937620}
   lookat: {x: 1, y: 1, z: 0}
   difference: {x: 1, y: 1, z: 0}
   swordCrossHair: {fileID: 2118868088, guid: 299956419ab87704d9e47a6150ef0788, type: 3}
   tongueCrossHair: {fileID: 337405216, guid: 299956419ab87704d9e47a6150ef0788, type: 3}
+  parentTransform: {fileID: 0}
+  debugLines: 1
 --- !u!1 &6816962009997998687
 GameObject:
   m_ObjectHideFlags: 0
@@ -1199,7 +1189,7 @@ MonoBehaviour:
   - {x: 0.018977925, y: -0.11899213, z: 0}
   m_ShapePathHash: -190875527
   m_Mesh: {fileID: 0}
-  m_InstanceId: -12184
+  m_InstanceId: 103090
   m_LocalBounds:
     m_Center: {x: -0.006605774, y: -0.09673907, z: 0}
     m_Extent: {x: 0.046420626, y: 0.022253055, z: 0}
@@ -1717,7 +1707,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6816962010683598761}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
