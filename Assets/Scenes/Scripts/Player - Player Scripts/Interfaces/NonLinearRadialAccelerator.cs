@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class NonLinearRadialAccelerator 
 {
+    public enum ForcingType
+    {
+        Radial,
+        Linear,
+    };
     private float e;    // ease in time
     private float E;    // ease in frames
     private float ep;   // ease in percent
@@ -55,21 +60,28 @@ public class NonLinearRadialAccelerator
         @param RB - the rigidbody you want to apply the force to
         @param r0 - the inital radius of the object you are orbiting
      */    
-    public void FixedUpdateCall(Vector3 ihat, Vector3 jhat, Rigidbody2D RB, float r0)
+    public void FixedUpdateCall(Vector3 ihat, Vector3 jhat, Rigidbody2D RB, float r0 = 0, ForcingType forcingType = ForcingType.Radial)
     {
-        if(RB == null) { Debug.LogError("RB is null"); return; }
+        if (RB == null) { Debug.LogError("RB is null"); return; }
         float t = CalculateTime(); // t goes from 0 -> 1 based on the length of range (range = ease in time + ease out time)
         float fm = CalculateForceTotal(t);
-        if (fm > 0.01)
-        {
-            ApplyNonLinearTangentialForce(RB, fm, ihat);
+
+        switch (forcingType) {
+            case ForcingType.Radial:
+                if (fm > 0.01)
+                {
+                    ApplyNonLinearTangentialForce(RB, fm, ihat);
+                }
+                ClampRBVelocity(RB);
+                float cp = CalculateNonLinearCentripetalForce(RB.velocity.magnitude, r0);
+                ApplyCentripetalForce(RB, cp, jhat);
+                break;
+            case ForcingType.Linear:
+                ApplyNonLinearTangentialForce(RB, fm, jhat); // we can reuse the same functions as before by just applying it towards the tongue
+                ClampRBVelocity(RB);
+                break;
         }
 
-        ClampRBVelocity(RB);
-
-        float cp = CalculateNonLinearCentripetalForce(RB.velocity.magnitude, r0);
-
-        ApplyCentripetalForce(RB, cp, jhat);
         if (DebugOn)
         {
             Tracer.Trace(lastPosition, RB.position, Color.red, 5f);

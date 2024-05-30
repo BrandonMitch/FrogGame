@@ -191,7 +191,7 @@ public class Player : Mover
     }
     public void SetMovementInputs(Vector2 moveVec, float speedForAnimation)
     {
-        speedForAnimation = Mathf.Clamp(speedForAnimation, 0.0f, 1.0f);
+        this.speedForAnimation = Mathf.Clamp(speedForAnimation, 0.0f, 1.0f);
         xInput = moveVec.x;
         yInput = moveVec.y;
     }
@@ -291,11 +291,6 @@ public class Player : Mover
     }
     private void ProcessInputs()
     {
-        // Check x/y movement, normalize vector
-        // negative is left, positive is right. 
-        //Vector2 movVec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical")).normalized;
-        speedForAnimation = Mathf.Clamp(new Vector2(xInput,yInput).magnitude,0.0f,1.0f);
-        
         // Save the last player Direction, only when moving. 
         if (xInput != 0 || yInput != 0)
         {

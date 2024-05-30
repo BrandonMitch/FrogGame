@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using MovementNameSpace;
 
+// create teching by making no ease in frames and shutting off the speed and distance checks for lunging
 public class PlayerLungingState : PlayerState
 {
     /* Lunge variables */
@@ -86,10 +87,11 @@ public class PlayerLungingState : PlayerState
         switch (latchMovementType)
         {
             case LatchMovementType.LungeForward:
-                playerRB.drag = forwardLungeDragCoefficient.Value;
+                /*  playerRB.drag = forwardLungeDragCoefficient.Value;
                 playerRB.AddForce(jhat * forwardForceModifer.Value);
                 v0 = Time.fixedDeltaTime * forwardForceModifer.Value / playerRB.mass;
-                hitData = player.tongueStateMachine.GetRotationPoint();
+                hitData = player.tongueStateMachine.GetRotationPoint();*/
+                ForwardLungeInialization();
                 break;
             case LatchMovementType.LungeLeft:
                 LateralLungeIntialization(-1); // negative (-1) is -ihat which is left
@@ -110,6 +112,20 @@ public class PlayerLungingState : PlayerState
         yield return new WaitForFixedUpdate();
         player.AnimateLunge(true);
         player.AnimateLunge(GetCharacterRotation());
+    }
+    private void ForwardLungeInialization()
+    {
+        playerRB.drag = forwardLungeDragCoefficient.Value;
+
+        if (nonLinearRadialAccelerator != null)
+        {
+            nonLinearRadialAccelerator.intitalize(lateralLungeEaseInFrames.Value / 1.5f, lateralLungeEaseOutFrames.Value*2.0f, forwardForceModifer.Value * Time.fixedDeltaTime / playerRB.mass, playerRB.mass);
+        }
+        else
+        {
+            nonLinearRadialAccelerator = new NonLinearRadialAccelerator(lateralLungeEaseInFrames.Value / 1.5f, lateralLungeEaseOutFrames.Value / 2.0f, forwardForceModifer.Value * Time.fixedDeltaTime / playerRB.mass, playerRB.mass);
+        }
+        hitData = player.tongueStateMachine.GetRotationPoint();
     }
     private void LateralLungeIntialization(int direction)
     {
@@ -146,16 +162,15 @@ public class PlayerLungingState : PlayerState
             activeStopSwingCoroutine = false;
         }
     }
+    
+    /// <summary>
+    /// This method will reset the player's rotation so that it is looking down
+    /// </summary>
     private void ResetRotation()
     {
         player.AnimateLunge(Quaternion.Euler(0, 0, 0));
     }
-/*    IEnumerator ResetRotationCoroutine()
-    {
-        //yield return new WaitForFixedUpdate();
-        yield return new WaitUntil(PhysicsUpdate());
-        ResetRotation();
-    }*/
+
     public override void FrameUpdate()
     {
         // Reading inputs differently based on lunge type.
@@ -216,7 +231,7 @@ public class PlayerLungingState : PlayerState
                 return;
         }
     }
-
+    static readonly float SPEED_THRESHOLD_FOR_LUNGE = 0.4f;
     public override void PhysicsUpdate()
     {
         // First apply proper lunging forces, linecasts, and update ihat jhat vectors.
@@ -247,9 +262,23 @@ public class PlayerLungingState : PlayerState
                 Debug.LogError("ERROR in player lunging state, invalid state:" + latchMovementType);
                 return;
         }
-        // Next we apply rotations to the character
-        // TODO: This doesn't need to be done every frame for the forward lunge
-        player.AnimateLunge(GetCharacterRotation());
+
+
+        // Lunging speed
+        float percentMaxSpeed = playerRB.velocity.magnitude / lateralLungeDesiredVEL.Value;
+        
+        // Animates the direction of the spitting animation, and also plays the lunge animation if we are going fast enough
+        player.SetMovementInputs(jhat, percentMaxSpeed);
+
+        if(percentMaxSpeed < SPEED_THRESHOLD_FOR_LUNGE)
+        {
+            ResetRotation();
+        }
+        else
+        {
+            // Apply rotations to the character if in the lunge animation
+            player.AnimateLunge(GetCharacterRotation());
+        }
     }
     public void SetLatchMovementType(LatchMovementType m)
     {
@@ -412,7 +441,6 @@ public class PlayerLungingState : PlayerState
         Debug.DrawLine(playerRB.position, playerRB.position + (Time.fixedDeltaTime * v0 * jhat), Color.green);
         Tracer.DrawCircle(playerRB.position, 0.05f, 8, Color.green);
         Tracer.DrawCircle(playerRB.position + (Time.fixedDeltaTime * v0 * jhat), 0.05f, 8,Color.cyan);
-        //Debug.Break();
         foreach (RaycastHit2D col in collisions) 
         {
             Collider2D collision = col.collider;
@@ -427,10 +455,15 @@ public class PlayerLungingState : PlayerState
                 }
             }
         }
+        // Check if we should stop forward lunging
         bool shutOff = DistanceCheckForForwardLunge();
         if (shutOff) { TryShutOffForForwardsLunge(); return; }
-        shutOff = VelocityCheckForForwardLunge();
-        if (shutOff) { TryShutOffForForwardsLunge(); return; }
+/*        shutOff = VelocityCheckForForwardLunge();
+        if (shutOff) { TryShutOffForForwardsLunge(); return; }*/
+
+        // Apply force
+        nonLinearRadialAccelerator.FixedUpdateCall(ihat, jhat, playerRB, forcingType:NonLinearRadialAccelerator.ForcingType.Linear);
+
     }
     private void BackwardsLunge()
     {
@@ -493,8 +526,6 @@ public class PlayerLungingState : PlayerState
         }
         return false;
     }
-
-    /******NEW METHOD*********/
     /// <summary>
     ///  Updates ihat and jhat. 
     ///  <br>jhat is the is direction towards the tongue. </br>
@@ -530,243 +561,4 @@ public class PlayerLungingState : PlayerState
         //Debug.Log("GetCharacterRotation():" + rotation);
         return rotation;
     }
-
-
-    // OLD LOGIC
-    /* old linecast opposite direction
-        public bool LineCastOppositeDirection(Vector2 collisionPoint, Vector2 playerPos, bool applyForce)
-        {
-            RaycastHit2D[] collisions = new RaycastHit2D[3];
-            Physics2D.Linecast(playerPos, collisionPoint, tongeContactFilter, collisions);
-            foreach (RaycastHit2D col in collisions)
-            {
-                Collider2D collision = col.collider;
-                if (collision != null) // Check if the collision is not null
-                {
-                    if (!collision.CompareTag("Player")) 
-                    {
-
-                        // Instantiate tongue collision object, create a new hit data instance to save, then add it to the array list of new collision points
-                        GameObject colObject = GameObject.Instantiate(player.tongueStateMachine.tongeHitCollisionPrefab, col.point, Quaternion.identity);
-                        TongueHitData hitData = new TongueHitData(col, TonguePointType.tongueHitPoint, colObject);
-                        player.tongueStateMachine.AddNewTongueCollisionPoint(hitData);
-
-                        // No need to save r1 since it was already done 
-                        // r1 = (rotationPoint - playerPos).magnitude;
-                        // vt1 = v0;
-
-                        dampingCounter++;
-                        lastTimePointSpawned = Time.time;
-                        rotationPoint = hitData.getPos();
-                        float r2 = (rotationPoint - playerPos).magnitude;
-
-                        if (applyForce)
-                        {
-                            ApplyCentripetalForce(playerPos, r1, r2);
-                        }
-                        // *** Debugs ***
-                        // Yellow is normal
-                        Debug.Log("Collision Name: " + collision.name);
-                        DrawCircle(col.point, 0.03f, 10, Color.red);
-
-
-                        Vector2 normVector = col.normal;
-                        Debug.DrawLine(col.point, col.point + normVector, Color.yellow,5f);
-                        //Debug.Break();
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-    */
-    /* nbody   
-        private void NBodySwingingLogic(Vector2 playerPos)
-        {
-            // we need to cast on the last point, see if we collide, if we do update the last point, and then apply a rotation around the last point we found. *Only allow one new collision per physics frame
-
-            //TongueHitData lastTonguePoint = player.tongueStateMachine.GetPointBeforeEndOfTongue();
-            TongueHitData lastTonguePoint = player.tongueStateMachine.GetRotationPoint();
-            Vector2 rotationPoint = lastTonguePoint.getPos();
-            bool TEMP = true;
-            if (Time.time > lastTimePointSpawned + minimumTimeToSpawnANewPoint)
-            {
-                RaycastHit2D[] collisions = new RaycastHit2D[3];
-                Debug.DrawLine(rotationPoint, playerPos, Color.black);
-                int result = Physics2D.Linecast(rotationPoint, playerPos, tongeContactFilter, collisions);
-                foreach (RaycastHit2D col in collisions)
-                {
-                    if (TEMP == false) break;
-                    Collider2D collision = col.collider;
-                    if (collision != null) // Check if the collision is not null
-                    {
-                        if (!collision.CompareTag("Player"))
-                        {
-                            { // Do a minimum distance check
-                                float distanceFromLastPoint = (rotationPoint - col.point).magnitude;
-                                if (distanceFromLastPoint < minimumDistanceToSpawnANewPoint) break;
-                            }
-
-
-
-                            // Instantiate tongue collision object, create a new hit data instance to save, then add it to the array list of new collision points
-                            GameObject colObject = GameObject.Instantiate(player.tongueStateMachine.tongeHitCollisionPrefab, col.point, Quaternion.identity);
-                            TongueHitData hitData = new TongueHitData(col, TonguePointType.tongueHitPoint, colObject);
-                            player.tongueStateMachine.AddNewTongueCollisionPoint(hitData);
-
-
-                            r1 = (rotationPoint - playerPos).magnitude; // This is the last rotation point magnitude; 
-                            //vt1 = playerRB.velocity.magnitude;
-
-                            dampingCounter++;
-                            lastTimePointSpawned = Time.time;
-                            TEMP = false;
-
-                            LineCastOppositeDirection(col.point, playerPos, false);
-
-                            // ***Debugs***
-                            Debug.Log("Collision Name: " + collision.name);
-                            DrawCircle(col.point, 0.03f, 10, Color.red);
-                            Vector2 normVector = col.normal;
-                            Debug.DrawLine(col.point, col.point + normVector, Color.white);
-                            DrawCircle(col.point + normVector, 1f, 5, Color.white);
-                            Debug.Break();
-                        }
-                    }
-                }
-            }
-            float r2;
-            if(TEMP == false) // if there was a new collision
-            { // find the new last tongue position
-                lastTonguePoint = player.tongueStateMachine.GetPointBeforeEndOfTongue();
-                rotationPoint = lastTonguePoint.getPos();
-                r2 = (rotationPoint - playerPos).magnitude;
-            }
-            else
-            {
-                r2 = r1;
-            }
-            ApplyCentripetalForce(playerPos, r1, r2);
-            //ApplyCentripetalForce(playerPos, savedR1);
-        }
-    */
-    /* centripetal around one point
-        private void ApplyCentripetalForce(Vector2 rotationPoint)
-        {
-            Vector2 playerPos = playerRB.position;
-            Vector2 forceDirection = (rotationPoint - playerPos);
-            float mass = playerRB.mass;
-            float radius = forceDirection.magnitude;
-            DrawCircle(rotationPoint, radius, 50, Color.blue);
-            Debug.DrawLine(rotationPoint, playerPos, Color.blue);
-            forceDirection.Normalize();
-            playerRB.AddForce(forceDirection * (mass * v0 * v0) / (radius)); // Fc = m v0^2 / r
-
-            Tracer(lastPos, playerPos);
-            lastPos = playerPos;
-        }
-    */
-    /* centripetal around new point
-        private void ApplyCentripetalForce(Vector2 playerPos, float radius1, float radius2)
-        {
-            TongueHitData tongueRotationPoint = player.tongueStateMachine.GetRotationPoint();
-            Vector2 rotationPoint = tongueRotationPoint.getPos();
-            //radius2 = (rotationPoint - playerPos).magnitude;
-            if(radius2 < 0.1f)
-            {
-                return;
-            }
-            Vector2 forceDirection = (rotationPoint - playerPos);
-            float mass = playerRB.mass;
-
-            DrawCircle(rotationPoint, radius2, 50, new Color(0, Mathf.Pow(dampingCoefficient, dampingCounter), 1));
-
-            forceDirection.Normalize();
-
-            float vt2 = mass * vt1 * (radius1 / radius2); // based off conservation of angular momentum
-
-            float forceMagnitude = mass * Mathf.Pow(vt2,2) / radius2;// Fc2 = * m * vt2^2  / r2
-
-            Debug.DrawLine(rotationPoint, playerPos, Color.magenta);
-            //Debug.Log("ForceMag"+  (forceDirection * forceMagnitude).magnitude + " Force:" + forceDirection );
-            //Debug.Break();
-            playerRB.AddForce(forceDirection * forceMagnitude);
-            vt2 *= Mathf.Pow(dampingCoefficient, dampingCounter);
-            playerRB.velocity = Vector2.ClampMagnitude(playerRB.velocity, vt2);
-
-            Tracer(lastPos, playerPos);
-            lastPos = playerPos;
-        }
-    */
-    /* updateihatjhat old
-    private void Updateihatjhat()
-    {
-        // We have make sure this works for analog also it needs to be rotated to the reference frame relative to the tongue direction
-        // EOT = j hat
-        // right of this vector is i hat, which is EOTx{0,1,0}; 
-        TongueHitData rotationPoint = player.tongueStateMachine.GetRotationPoint();
-
-        //jhat = endOfTongueTransform.position - (Vector3)playerRB.position;
-        jhat = rotationPoint.getPos() - (Vector3)playerRB.position;
-        jhat.Normalize();
-
-        Vector3 khat = Vector3.forward;
-        ihat =  Vector3.Cross(jhat, khat); // gets the vector perpendicular to the tongue direction
-    }
-    */
-    /* TwobodyswingingLogic
-    private void TwoBodySwingingLogic(Vector2 rotationPoint, Vector2 playerPos)
-    {
-        bool TEMP = true;
-        RaycastHit2D[] collisions = new RaycastHit2D[3];
-        Physics2D.Linecast(rotationPoint, playerPos, tongeContactFilter, collisions);
-        foreach (RaycastHit2D col in collisions)
-        {
-            if (TEMP == false) return;
-            Collider2D collision = col.collider;
-            if (collision != null) // Check if the collision is not null
-            {
-                if (!collision.CompareTag("Player"))
-                {
-                    // Instantiate tongue collision object, create a new hit data instance to save, then add it to the array list of new collision points
-                    GameObject colObject = GameObject.Instantiate(player.tongueStateMachine.tongeHitCollisionPrefab, col.point, Quaternion.identity);
-                    TongueHitData hitData = new TongueHitData(col, TonguePointType.tongueHitPoint, colObject);
-                    player.tongueStateMachine.AddNewTongueCollisionPoint(hitData);
-
-                    tongueSwingingMode = TongueSwingingMode.nBody;
-
-                    r1 = (rotationPoint - playerPos).magnitude;
-                    vt1 = v0;
-                    dampingCounter++;
-                    TEMP = false;
-                    lastTimePointSpawned = Time.time;
-
-                    // *** Debugs ***
-                    // Yellow is normal
-                    // Red is collision point
-                    Debug.Log("Collision Name: " + collision.name);
-                    DrawCircle(col.point, 0.03f, 10, Color.red);
-
-                    Vector2 normVector = col.normal;
-                    Debug.DrawLine(col.point, col.point + normVector, Color.yellow,5f);
-                    ///Debug.Break();
-                    // -----------------
-
-                    // Try to line cast from the opposite direction
-                    rotationPoint = hitData.getPos();
-                    bool collidedOnOtherSide = LineCastOppositeDirection(rotationPoint, playerPos, true);// true will apply force
-                    if (collidedOnOtherSide) { 
-                        return; 
-                    }
-                    else{
-                        float r2 = (rotationPoint - playerPos).magnitude;
-                        ApplyCentripetalForce(playerPos, r1, r2);
-                    }
-
-                }
-            }
-        }
-        ApplyCentripetalForce(rotationPoint);
-    }
-*/
 }
