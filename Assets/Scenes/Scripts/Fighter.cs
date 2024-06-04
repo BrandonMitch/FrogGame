@@ -2,30 +2,78 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Fighter : MonoBehaviour
+public class Fighter : MonoBehaviour, IFighter, IHealth
 {
-    // Public Fields
-    public int hitpoint = 10;
-    public int maxHitpoint = 10;
-    public float pushRecoverySpeed = 0.2f;
+    public Rigidbody2D RB;
 
-    // Immunity
-    protected float immuneTime = 1.0f;
-    protected float lastImmune;
-
-
-    // Push
-    protected Vector3 pushDirection;
-
-    // All fighters can recieve damage / die
-    protected virtual void ReceiveChainLightning(GameObject chainLightningEffect)
+    protected virtual void Start()
     {
-        //Debug.Log("Chain Lightning Recieved By" + gameObject.name);
-        //Debug.Log("Creating New chain Lightning");
-        //Instantiate(chainLightningEffect, gameObject.transform.position, Quaternion.identity);
+        
+        RB = GetComponent<Rigidbody2D>();
     }
-    protected virtual void Death()
+    #region Fighter Interface
+    public virtual IHealth GetHealth()
     {
-
+        return this;
     }
+
+    public virtual bool HasHealth()
+    {
+        return true;
+    }
+    #endregion
+    #region Health Interface
+    public virtual void ForceTakeDamage(float damage)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual bool TakeDamage(float damage)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual int GetCurrentHealth()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual int GetMaxHealth()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual float GetPercentHealth()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual void Heal(float amount)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual float HealWithOverFlow(float amount)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual void HealFullHealth()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual void OnHealthChange()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public virtual void OnDamaged()
+    {
+        throw new System.NotImplementedException();
+    }
+    #endregion
+
+
 }
+

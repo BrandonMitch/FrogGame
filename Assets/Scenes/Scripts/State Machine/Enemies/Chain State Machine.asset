@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f210f20d7224f284b8e695c52f7a0bd3, type: 3}
+  m_Name: Chain State Machine
+  m_EditorClassIdentifier: 
+  referenceOFFSTATE: {fileID: 11400000, guid: fb45c43b44a2d004da98e802c91e1abb, type: 2}
+  referenceSubStates:
+  - {fileID: 11400000, guid: a34b02c805a99ca4ca95261c36200e68, type: 2}
+  - {fileID: 11400000, guid: 1e838c068426878438953a771eb39c83, type: 2}

@@ -175,15 +175,4 @@ public class Weapon : Colliad
            Instantiate(chainLightningEffect, gameObject.transform.position, Quaternion.identity);
         }
     }
-    public void UpgradeWeapon()
-    {
-        weaponLevel++;
-        spriteRenderer.sprite = GameManager.instance.weaponSprites[weaponLevel];
-    }
-
-    public void SetWeaponLevel(int level)
-    {
-        weaponLevel = level;
-        spriteRenderer.sprite = GameManager.instance.weaponSprites[weaponLevel];
-    }
 }

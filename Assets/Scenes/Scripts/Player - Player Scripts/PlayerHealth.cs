@@ -34,11 +34,10 @@ public class PlayerHealth : MonoBehaviour, IHealth
             maxHealthContainersVal = value;
         }
     }
-    private bool onAwake = true;
+
     private void Awake()
     {
         ResetHeartContainersToDefault();
-        onAwake = false;
     }
     bool debug2 = false; // print hearts
     [ContextMenu("Reset Heart Containers To Default")]

@@ -2,13 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : Mover
+public class Player: MonoBehaviour, IFighter
 {
-
-    private SpriteRenderer spriteRenderer;
     private Vector2 defaultCollisionOffSet;
     private float defaultColliderOffsetMagnitude;
-    private bool isAlive = true;
+
     [Space]
     [Header("|-----Movement Variables-----|")]
     // Movement Varaibles
@@ -71,6 +69,8 @@ public class Player : Mover
 
     [Space]
     [Header("|-----References-----|")]
+    [SerializeField] PlayerReferenceSO playerReferenceSO;
+    private PlayerHealth playerHealth;
     public GenericStatDictionary statDictionary;
     public PlayerInputManager inputManager;
     public Animator animator;
@@ -254,7 +254,7 @@ public class Player : Mover
     }
 
     /***********************************---END---*********************************/
-    protected override void Start()
+    private void Start()
     {
 /*        collider2D = GetComponent<CircleCollider2D>();
         defaultCollisionOffSet = collider2D.offset;*/
@@ -267,8 +267,15 @@ public class Player : Mover
         //tongueStateMachine.IntializeTongueStates(intilizedTongueStates);
 
         customizableWeapon = customizableWeaponOjbect.GetComponent<WeaponCustomizable>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
 
+    }
+    private void OnEnable()
+    {
+        playerReferenceSO.RegisterPlayer(this);
+    }
+    private void OnDisable()
+    {
+        playerReferenceSO.DeregisterPlayer(this);
     }
     private void FixedUpdate()
     {
@@ -344,14 +351,6 @@ public class Player : Mover
         animator.SetFloat("Speed",speedForAnimation);
     }
 
-
-    public void SwapSprite(int skinID)
-    {
-        // GetComponent<SpriteRenderer>().sprite = GameManager.instance.playerSprites[skinID]; not optimal
-        // more optimal 
-        spriteRenderer.sprite = GameManager.instance.playerSprites[skinID];
-    }
-
     private void BackSwordSwing()
     {
         // TODO: Sort out if we want to slow movement after a swing;
@@ -369,22 +368,32 @@ public class Player : Mover
                 Debug.Log(referenceCall + " Not implmented into player");
                 break;
         }
-    } 
-    protected override void Death()
+    }
+
+    #region Fighter Interface Implementation
+    public bool HasHealth()
     {
-        if (!Unkillable)
+        if (playerHealth != null)
         {
-            deadState = new PlayerDeadState(this, stateMachine);
-            stateMachine.ChangeState(deadState);
-            deadState = null;
+            return true;
+        }
+        else
+        {
+            playerHealth = GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
-    public void Respawn()
-    {
-        isAlive = true;
-        lastImmune = Time.time;
-        pushDirection = Vector3.zero;
-        
 
+    public IHealth GetHealth()
+    {
+        return playerHealth;
     }
+    #endregion
 }

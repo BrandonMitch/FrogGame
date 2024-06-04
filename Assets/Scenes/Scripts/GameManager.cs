@@ -25,10 +25,6 @@ public class GameManager : MonoBehaviour
         */
     }
     // Resources
-    public List<Sprite> playerSprites;
-    public List<Sprite> weaponSprites;
-    public List<int> weaponPrices;
-    public List<int> xpTable;
     
     [Space]
     [Header("References")]
@@ -41,11 +37,6 @@ public class GameManager : MonoBehaviour
     public GameObject HUD;
     public GameObject Menu;
 
-    [Space]
-    [Header("Player Values")]
-    // Logic
-    public int pesos;
-    public int experience;
     
     // Floating Text
     public void ShowText(string msg, int fontsSize, Color color, Vector3 position, Vector3 motion, float duration)
@@ -53,71 +44,7 @@ public class GameManager : MonoBehaviour
         floatingTextManager.Show(msg, fontsSize, color, position, motion, duration);
     }
 
-    // Upgrade Weapon
-    public bool TryUpgradeWeapon()
-    {
-        // is the weapon max level?s
-        if(weaponPrices.Count <= weapon.weaponLevel)
-        {
-            return false;
-        }
-
-        if(pesos >= weaponPrices[weapon.weaponLevel])
-        {
-            pesos -= weaponPrices[weapon.weaponLevel];
-            weapon.UpgradeWeapon();
-            return true;
-        }
-
-        return false;
-    }
     
-    // Hitpoint Bar
-    public void OnHitpointChange() {
-        float ratio = (float)player.hitpoint / (float)player.maxHitpoint;
-        hitpointBar.localScale = new Vector3(1, ratio, 1);
-    }
-    // Experience System
-    public int GetCurrentLevel()
-    {
-        int r = 0;
-        int add = 0;
-
-        while (experience >= add)
-        {
-            add += xpTable[r];
-            r++;
-
-            if (r == xpTable.Count) // Max Level
-            {
-                return r;
-            }
-        }
-
-        return r;
-    }
-    public int GetXpToLevel(int level)
-    {
-        int r = 0;
-        int xp = 0;
-
-        while (r < level)
-        {
-            xp += xpTable[r];
-            r++;
-        }
-        return xp;
-    }
-    // TODO: REMOVE
-    public void GrantXp(int xp)
-    {
-        int currLevel = GetCurrentLevel();
-        experience += xp;
-        if(currLevel < GetCurrentLevel())
-        {
-            /*OnLevelUp();*/
-        }
-    }
 
 
 
@@ -128,77 +55,12 @@ public class GameManager : MonoBehaviour
         player.transform.position = GameObject.Find("SpawnPoint").transform.position;
     }
     */
-    // Save State
-    /*
-     * INT preferedSkin
-     * INT pesos 
-     * INT experience
-     * INT weaponLevel
-     */
-    public void SaveState()
-    {
-        string s = "";
 
-        s += "0" + "|";
-        s += pesos.ToString() + "|";
-        s += experience.ToString() + "|";
-        s += weapon.weaponLevel.ToString();
-
-        PlayerPrefs.SetString("SaveState", s);
-    }
-
-    // Load State
-    // TODO: REFACTOR OR DELETE
-    /***
-    public void LoadState(Scene s, LoadSceneMode mode) 
-    {
-        SceneManager.sceneLoaded -= LoadState;
-        if (PlayerPrefs.HasKey("SaveState"))
-        {
-            return;
-        }
-
-        string[] data = PlayerPrefs.GetString("SaveState").Split('|');
-        //" 0|10|15|2 " -> ["0","10","15","2"]
-        if (data.Length >= 4)
-        {
-            // Change peso or player skin? 
-            pesos = int.Parse(data[1]);
-
-            // Experience and Levels
-            experience = int.Parse(data[2]);
-            if (GetCurrentLevel() != 1)
-            {
-                player.SetLevel(GetCurrentLevel());
-            }
-
-            // Change weapon level
-            weapon.SetWeaponLevel(int.Parse(data[3]));
-
-        }
-        else
-        {
-            Debug.Log("SaveState/LoadStates is data is incomplete. Cannot Load State.");
-        }
-
-
-        //Debug.Log("we should teleport right now");
-        player.transform.position = GameObject.Find("SpawnPoint").transform.position;
-
-    }    **/
-    
-    /*public void OnLevelUp()
-    {
-        Debug.Log("Level Up!");
-        player.OnLevelUp();
-        OnHitpointChange();
-    }*/
 
     // Death Menu and Respond 
     public void Respawn()
     {
         deathMenuAnim.SetTrigger("Hide");
         UnityEngine.SceneManagement.SceneManager.LoadScene("Main");
-        player.Respawn();
     }
 }

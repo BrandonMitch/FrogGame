@@ -6,7 +6,7 @@ public class CantGoThroughTongue : MonoBehaviour, ICantGoThroughTongue
 {
     bool debug = true;
     Vector2 lastPos;
-    [SerializeField] float forceMultiplier = 10;
+    //[SerializeField] float forceMultiplier = 10;
     public void OnSwungOn(RaycastHit2D hit)
     {
         OnTongueCollide(hit);

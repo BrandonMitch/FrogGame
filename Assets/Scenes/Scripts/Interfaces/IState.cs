@@ -1,0 +1,25 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public interface IState
+{
+    void EnterState()
+    {
+
+    }
+    void FrameUpdate()
+    {
+
+    }
+    void PhysicsUpdate()
+    {
+
+    }
+    void ExitState()
+    {
+
+    }
+    void ResetValues();
+
+}

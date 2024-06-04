@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerStateMachine 
 {
-    public PlayerState CurrentPlayerState { get; set; }
+    public PlayerState CurrentPlayerState {  get; private set; }
     private PlayerState PreviousPlayerState;
 
     public PlayerInputManager playerInputManager;

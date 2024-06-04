@@ -1,27 +1,47 @@
-
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using System;
-
-public abstract class BaseState<EState> where EState : Enum
+/// <summary>
+/// A base for all other state to derive from. Base states do not hold data avaliable for other states to retreive.
+/// </summary>
+/// <typeparam name="RefType">The parent class holding the stateMachine I.E Player, or Enemy</typeparam>
+abstract public class BaseState<RefType> : ScriptableObject, IState 
+    where RefType : class
 {
-    public BaseState(EState key) {
-        stateKey = key;
+    protected IStateMachine<RefType> SM;
+    protected RefType reference;
+    /// <summary>
+    /// Intializes a state with a reference to a statemachine
+    /// </summary>
+    /// <param name="stateMachine"></param>
+    public virtual void Initialize(IStateMachine<RefType> stateMachine)
+    {
+        SM = stateMachine;
+        reference = SM.GetRef();
     }
-      
-        public EState stateKey { get; private set; }
-    public abstract void EnterState();
+    public virtual void EnterState()
+    {
 
-    public abstract void ExitState();
+    }
+    public virtual void FrameUpdate()
+    {
 
-    public abstract void UpdateState();
+    }
+    public virtual void PhysicsUpdate()
+    {
 
-    public abstract EState GetNextState();
+    }
+    public virtual void ExitState()
+    {
 
-    public abstract void OnTriggerEnter2D(Collider other);
+    }
 
-    public abstract void OnTriggerStay2D(Collider other);
-    public abstract void OnTriggerExit2D(Collider other);
-
-    
-
+    /// <summary>
+    /// This is called before anything else to reset the initalization to make sure everything goes smoothly
+    /// </summary>
+    public virtual void ResetValues()
+    {
+        reference = null;
+        SM = null;
+    }
 }

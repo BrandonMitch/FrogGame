@@ -4,13 +4,13 @@ using UnityEngine;
 
 public class GrappleEnemyLogic : MonoBehaviour
 {
-    protected enum Hita
+    public enum Hita
     {
         player,
         notAPlayer,
         nothing,
     }
-    protected struct HitData
+    public struct HitData
     {
         public Hita hit;
         public Vector2 location;
@@ -33,18 +33,18 @@ public class GrappleEnemyLogic : MonoBehaviour
 
     protected struct GrappleData{
         public bool grapplePointAvalible;
+        public int direction;
         public Vector2 grapplePoint;
-        public Vector2 grappleDirection; 
 
-        public GrappleData(bool grapplePointAvalible, Vector2 grapplePoint, Vector2 grappleDirection)
+        public GrappleData(bool grapplePointAvalible, Vector2 grapplePoint, int direction = 1)
         {
             this.grapplePointAvalible = grapplePointAvalible;
+            this.direction = direction;
             this.grapplePoint = grapplePoint;
-            this.grappleDirection = grappleDirection;
         }
     }
 
-    protected class BoundingBox
+    protected struct BoundingBox
     {
         readonly float xpointLeft;
         readonly float xpointRight;
@@ -88,10 +88,11 @@ public class GrappleEnemyLogic : MonoBehaviour
     }
 
     bool debugLineCasts = true;
-    bool debugCircleCasts = true;
-    static readonly Vector3 k = Vector3.forward;
+    private bool debugCircleCasts = true;
+    [SerializeField] float angularCastLimit = 180f;
+    [SerializeField] float minimimumAngleForBoxCheck = 45f;
     [SerializeField] float marchDistance = 0.1f;
-    [SerializeField] static Color marchColor = new Color(0f, 0.2f, 1f);
+    [SerializeField] Color marchColor = new Color(0f, 0.2f, 1f);
     static int startingDepth = 10;
     // Start is called before the first frame update
     [SerializeField] Rigidbody2D RB;
@@ -152,7 +153,7 @@ public class GrappleEnemyLogic : MonoBehaviour
     GrappleData GrappleEnemyLogicAlg(HitData hit, Vector2 playerPos)
     {
         // First take n x k and n x -k
-        Vector2 perp = Vector3.Cross(hit.normal, k)*marchDistance;
+        Vector2 perp = Vector2.Perpendicular(hit.normal)*marchDistance;
         BoundingBox box = new BoundingBox(0.3f, playerPos);
         box.drawBox(Color.yellow, 0);
         marchAndCast(startingDepth, RB.position, hit.location, perp, box);
@@ -169,19 +170,19 @@ public class GrappleEnemyLogic : MonoBehaviour
     /// <param name="perp">Perpendicular Vector to the left or right of the starting normal vector position</param>
     /// <param name="box"> Bounding box surrounding where is a valid grapple location</param>
     /// <returns>A GrappleData struct. If the grappleData is valid then the struct will contain information to grapple around</returns>
-    static GrappleData marchAndCast(int depth, Vector2 grapplerPosition, Vector2 startingPosition, Vector2 perp, BoundingBox box)
+    private GrappleData marchAndCast(int depth, Vector2 grapplerPosition, Vector2 startingPosition, Vector2 perp, BoundingBox box)
     {
         // Break from recursion if nothing was found
         if (depth <= 0)
         {
-            return new GrappleData(false, Vector2.zero, Vector2.zero);
+            return new GrappleData(false, Vector2.zero);
         }
         // March
         DrawMarch(depth, startingPosition, startingPosition + perp);
         startingPosition += perp;
 
         // Line cast
-        GrappleData grapplePoint = new GrappleData(false, startingPosition, perp);
+        GrappleData grapplePoint = new GrappleData(false, startingPosition);
         RaycastHit2D[] hits = Physics2D.LinecastAll(grapplerPosition, grapplerPosition +  (startingPosition - grapplerPosition)*1.5f);
         DrawMarch(depth, grapplerPosition, grapplerPosition + (startingPosition - grapplerPosition) * 1.5f);
         bool GrapplePointIsValidSoCircleCast = false;
@@ -198,12 +199,25 @@ public class GrappleEnemyLogic : MonoBehaviour
         }
 
         // Circle Cast only if we have a grapple point. 
-        if(GrapplePointIsValidSoCircleCast){
-            // TOOO: FIX THIS PART
-            if (CircleCast(depth, grapplePoint, grapplerPosition) && CircleCast(depth, grapplePoint, grapplerPosition, -1) )
+        if (GrapplePointIsValidSoCircleCast) {
+            if (CircleCast(depth, grapplePoint, grapplerPosition, box, 1))
             {
-                // if circle cast passes, return the grapple point.
+                grapplePoint.direction = 1;
+                // if circle cast passes, return the grapple point, and direction
                 // TODO: Uncomment
+                //return grapplePoint;
+            }
+            else
+            {
+                // if circle cast fails,
+                grapplePoint.grapplePointAvalible = false;
+            }
+
+            if (CircleCast(depth, grapplePoint, grapplerPosition, box, -1))
+            {
+                grapplePoint.direction = -1;
+                // if circle cast passes, return the grapple point, and direction
+                // TODO: Uncomment/Comment if you want to see full cast range
                 //return grapplePoint;
             }
             else
@@ -220,38 +234,87 @@ public class GrappleEnemyLogic : MonoBehaviour
         return marchAndCast(depth, grapplerPosition, startingPosition, perp, box);
     }
 
-    static bool CircleCast(int depth, GrappleData grapplePoint, Vector2 grapplerPosition, int sign = 1)
+    private bool CircleCast(int depth, GrappleData grapplePoint, Vector2 grapplerPosition, BoundingBox box, int sign = 1)
     {
-        float theta = sign * 12.0f * Mathf.Deg2Rad;
+        float theta = 12.0f * Mathf.Deg2Rad;
         Vector2 jhat = grapplerPosition - grapplePoint.grapplePoint;
         float length = jhat.magnitude;
         float startingAngle = Mathf.Atan2(jhat.y, jhat.x);
         var prev = grapplerPosition;
 
-        for (float degreesShifted = 0; Mathf.Abs(degreesShifted) < Mathf.PI; degreesShifted += theta)
+        for (float degreesShifted = 0; degreesShifted < Mathf.PI; degreesShifted += theta)
         {
-            
             // Next is supposed to be the vector that is theta degrees further along the arc path
-            var next = 
-                new Vector2(Mathf.Cos(degreesShifted + startingAngle), Mathf.Sin(degreesShifted + startingAngle)) * length 
-                + grapplePoint.grapplePoint;
-            DrawMarch(depth, prev, next);
+            var next = CalculateNextCirclePoint(sign * degreesShifted, startingAngle, length, grapplePoint);
+
+            if (debugCircleCasts)
+            {
+                DrawMarch(depth, prev, next);
+            }
             RaycastHit2D[] xxxxx = Physics2D.LinecastAll(prev, next);
             foreach (RaycastHit2D hit in xxxxx)
             {
-                Tracer.DrawCircle(hit.point, 0.05f, 5, Color.green);
+                if (hit.collider.CompareTag("Player"))
+                {
+                    // Stops the casting if we hit the player.
+                    Tracer.DrawCircle(hit.point, 0.05f, 5, Color.red);
+                    return true;
+                }
+                else
+                {
+                    Tracer.DrawCircle(hit.point, 0.05f, 4, Color.green);
+                    // Stops the casting if we hit something that isn't the player.
+                    return false;
+                }
+
+            }
+
+            // If we didn't hit, check if we are in the bounding box surrounding the player
+            if ( (degreesShifted > minimimumAngleForBoxCheck) && box.inBounds(next) )
+            {
+                Tracer.DrawCircle(next, 0.04f, 3, Color.green);
                 return true;
-                //return false;
             }
             prev = next;
         }
-        return true ;
+        // If we didn't hit anything, then there is an avalible path
+        return true;
     }
 
-    static void DrawMarch(int depth, Vector2 p1, Vector2 p2)
+    private void DrawMarch(int depth, Vector2 p1, Vector2 p2)
     {
         Color c = new Color(marchColor.r, marchColor.g, marchColor.b*(depth/(float)startingDepth));
         Debug.DrawLine(p1, p2, c);
     }
 
+    /// <summary>
+    /// Returns the shifted version of the next circle point
+    /// </summary>
+    /// <param name="degreesShifted"></param>
+    /// <param name="startingAngle"></param>
+    /// <param name="length"></param>
+    /// <param name="grapplePoint"></param>
+    /// <returns></returns>
+    private static Vector2 CalculateNextCirclePoint(float degreesShifted, float startingAngle, float length, GrappleData grapplePoint)
+    {
+        return CalculateNextCirclePoint(degreesShifted, startingAngle, length) + grapplePoint.grapplePoint;
+    }
+
+    /// <summary>
+    /// Returns the unshifted version of the next circle point
+    /// </summary>
+    /// <param name="degreesShifted"></param>
+    /// <param name="startingAngle"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    private static Vector2 CalculateNextCirclePoint(float degreesShifted, float startingAngle, float length)
+    {
+        float newAngle = degreesShifted + startingAngle;
+        return new Vector2(Mathf.Cos(newAngle), Mathf.Sin(newAngle)) * length;
+    }
+
+    private static Vector2 ihat(Vector2 jhat, int direction = 1)
+    {
+        return direction*Vector2.Perpendicular(jhat);
+    }
 }
