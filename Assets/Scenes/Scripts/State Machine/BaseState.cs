@@ -10,6 +10,8 @@ abstract public class BaseState<RefType> : ScriptableObject, IState
 {
     protected IStateMachine<RefType> SM;
     protected RefType reference;
+    [SerializeField] public List<StateTag> stateTags;
+
     /// <summary>
     /// Intializes a state with a reference to a statemachine
     /// </summary>

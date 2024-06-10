@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f210f20d7224f284b8e695c52f7a0bd3, type: 3}
   m_Name: Chain State Machine
   m_EditorClassIdentifier: 
+  stateTag:
+  - {fileID: 0}
   referenceOFFSTATE: {fileID: 11400000, guid: fb45c43b44a2d004da98e802c91e1abb, type: 2}
   referenceSubStates:
   - {fileID: 11400000, guid: a34b02c805a99ca4ca95261c36200e68, type: 2}

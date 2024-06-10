@@ -5,7 +5,14 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    #region Static Fields
     public static GameManager instance;
+
+    public static StateTag moveTag;
+    public static StateTag grappleTag;
+    public static StateTag idleTag;
+    #endregion
+
     private void Awake()
     {
         if (GameManager.instance != null)
@@ -13,12 +20,15 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
             Destroy(player.gameObject);
             Destroy(floatingTextManager.gameObject); 
-            Destroy(HUD);
-            Destroy(Menu);
+
             return;
         }
-
+        moveTag = _moveTag;
+        grappleTag = _grappleTag;
+        idleTag = _idleTag;
         instance = this;
+
+
         /*
         SceneManager.sceneLoaded += LoadState;
         SceneManager.sceneLoaded += onSceneLoaded;
@@ -30,14 +40,13 @@ public class GameManager : MonoBehaviour
     [Header("References")]
     // References. Important to note that most of these will be lost when we change scenes. 
     public Player player;
-    public Weapon weapon;
     public FloatingTextManager floatingTextManager;
-    public RectTransform hitpointBar; // This lets us change the scale of bar when we take damage
     public Animator deathMenuAnim;
-    public GameObject HUD;
-    public GameObject Menu;
 
-    
+    [Header("--References: State Tags")]
+    [SerializeField] private StateTag _moveTag;
+    [SerializeField] private StateTag _grappleTag;
+    [SerializeField] private StateTag _idleTag;
     // Floating Text
     public void ShowText(string msg, int fontsSize, Color color, Vector3 position, Vector3 motion, float duration)
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 public class CoolDownBasic 
 {
-    public struct TimeInterval
+    private struct TimeInterval
     {
         public readonly float start;
         public readonly float end;
@@ -11,18 +11,17 @@ public class CoolDownBasic
             this.start = start;
             this.end = end;
         }
-        public float Duration { get => end - start; }
+        public float TimeIntervalDuration { get => end - start; }
     }
 
     private List<TimeInterval> intervals;
     private float duration;
     private float startTime;
-    private bool paused; 
-    public float Duration { get => duration;}
-    public float StartTime { get => startTime;}
+    private bool paused = false; 
+
 
     /// <summary>
-    /// Constructor for a new cooldown.
+    /// Constructor for a new cooldown. Provide how long the cool down is
     /// </summary>
     /// <param name="duration">How long the cooldown is to last</param>
     /// <param name="startOnCreation">Optional parameter that will start the timer on creation </param>
@@ -32,57 +31,52 @@ public class CoolDownBasic
         this.duration = duration;
         if (startOnCreation)
         {
-            startTime = Time.time;
+            StartCooldown();
         }
     }
-    public bool IsOnCooldown()
+    public bool IsCooldownComplete
     {
-        float elapsedTime = getElapsedTime();
-        if(elapsedTime > duration)
+        get
         {
-            return false;
-        } else
-        {
-            return true;
-        } 
-    }
-    /// <summary>
-    /// Get the progress of the cooldown on a percent basis.
-    /// </summary>
-    /// <param name="clamped"> If clamped is on, then the output will range from 0-1, otherwise it allow the percentage to go above 100%</param>
-    /// <returns>1 if the cooldown is 100% complete, 0 if it just started.</returns>
-    public float getCooldownProgress(bool clamped = true)
-    {
-        float elapsedTime = getElapsedTime() / duration;
-        if (!clamped)
-        {
-            return elapsedTime;
-        }
-        else
-        {
-            if(elapsedTime > 1)
+            if (ElapsedTime >= duration)
             {
-                return 1;
+                return true;
             }
             else
             {
-                return elapsedTime;
+                return false;
             }
         }
     }
-    public float getElapsedTime()
+    /// <summary>
+    /// Get the cool down progress on a percent basis, 0.0 being it just started, 1.0 if it is finished
+    /// </summary>
+    public float CoolDownProgressClamped => IsCooldownComplete ? 1 : CoolDownProgressUnclamped;
+    /// <summary>
+    /// Get the cool down progress on a perecent basis, 0.0 being it just started, 1.0 if it is just finished, will return greater than one if more time has passed.
+    /// </summary>
+    public float CoolDownProgressUnclamped
     {
-        float t = 0;
-        if (!paused)
-        {
-            t += startTime - Time.time;
-        }
-        foreach (TimeInterval interval in intervals)
-        {
-            t += interval.Duration;
-        }
-        return t; 
+        get => ElapsedTime / duration;
     }
+    public float ElapsedTime
+    {
+        get
+        {
+            float t = 0;
+            if (!paused)
+            {
+                t += Time.time - startTime;
+            }
+            foreach (TimeInterval interval in intervals)
+            {
+                t += interval.TimeIntervalDuration;
+            }
+            return t;
+        }
+    }
+    public float Duration { get => duration; set => duration = value; }
+
     public void StartCooldown()
     {
         StartCooldown(Time.time);
@@ -90,7 +84,15 @@ public class CoolDownBasic
     public void StartCooldown(float time)
     {
         startTime = time;
-        intervals = new();
+
+        if(intervals != null)
+        {
+            intervals.Clear();
+        }
+        else
+        {
+            intervals = new();
+        }
         paused = false;
     }
     public void Pause()
@@ -100,6 +102,10 @@ public class CoolDownBasic
             intervals.Add(new TimeInterval(startTime, Time.time));
             paused = true;
         }
+        else
+        {
+            Debug.LogWarning("Cool down is already paused and it is being paused again, make sure to Unpause()");
+        }
     }
     public void Unpause()
     {
@@ -108,5 +114,14 @@ public class CoolDownBasic
             startTime = Time.time;
             paused = false;
         }
+        else
+        {
+            Debug.LogWarning("Cool down is already unpaused");
+        }
+    }
+
+    public void SkipCooldown()
+    {
+        startTime -= 2 * duration;
     }
 }

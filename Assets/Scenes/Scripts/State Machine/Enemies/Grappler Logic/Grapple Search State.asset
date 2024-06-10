@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 70a662ce9c766fd4daa67c346fea1dd0, type: 3}
   m_Name: Grapple Search State
   m_EditorClassIdentifier: 
-  marchDistance: -0.04
+  stateTags:
+  - {fileID: 11400000, guid: 00a4db53e55b339499eeb04d7ae2df5f, type: 2}
+  marchDistance: 0.03
   marchColor: {r: 0, g: 0.0047488213, b: 1, a: 1}
-  startingDepth: 5
+  startingDepth: 6
   minimimumAngleForBoxCheck: 0
-  angularCastLimit: 200
+  angularCastLimit: 181
   boundingBoxSize: 0.16
-  angularCircleCastPercision: 30
+  angularCircleCastPercision: 18
+  scoreForSuccess: 10
   debugCircleCast: 1
   debugLineCast: 1
+  scoreDebug: 1

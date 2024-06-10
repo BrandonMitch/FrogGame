@@ -59,6 +59,7 @@ namespace Pathfinding {
 	[AddComponentMenu("Pathfinding/AI/AIPath (2D,3D)")]
 	[UniqueComponent(tag = "ai")]
 	public partial class AIPath : AIBase, IAstarAI {
+		#region variables
 		/// <summary>
 		/// How quickly the agent accelerates.
 		/// Positive values represent an acceleration in world units per second squared.
@@ -155,11 +156,11 @@ namespace Pathfinding {
 		protected PathInterpolator.Cursor interpolator;
 		/// <summary>Helper which calculates points along the current path</summary>
 		protected PathInterpolator interpolatorPath = new PathInterpolator();
+        #endregion
+        #region IAstarAI implementation
 
-		#region IAstarAI implementation
-
-		/// <summary>\copydoc Pathfinding::IAstarAI::Teleport</summary>
-		public override void Teleport (Vector3 newPosition, bool clearPath = true) {
+        /// <summary>\copydoc Pathfinding::IAstarAI::Teleport</summary>
+        public override void Teleport (Vector3 newPosition, bool clearPath = true) {
 			reachedEndOfPath = false;
 			base.Teleport(newPosition, clearPath);
 		}

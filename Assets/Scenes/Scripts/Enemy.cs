@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static GrappleEnemyLogic;
-
+using Pathfinding;
 public class Enemy : Fighter
 {
     [SerializeField] static ChainOffState<Enemy, Object> l;
@@ -10,16 +10,30 @@ public class Enemy : Fighter
     [SerializeField] protected List<BaseState<Enemy>> states = new();
     [SerializeField] bool debugLineCasts = true;
     [SerializeField] BoundingBox playerBoundingBox = new BoundingBox(Vector2.zero, -1);
+    private Seeker seeker;
+    public Seeker Seeker { get => seeker; }
     protected StateMachineBase<Enemy> SM;
-    
+
+    public static StateTag moveTag;
+
+
     protected override void Start()
     {
         base.Start();
 
+        seeker = GetComponent<Seeker>();
+
         /// Create a new state machine, then intialize it by giving it a refernce to the enemy
         SM = new StateMachineBase<Enemy>();
         SM.InitializeStateMachine(this);
-
+        /// For each state provided we must add it to the state machine
+        foreach (BaseState<Enemy> state in states)
+        {
+            if(state != null)
+            {
+                SM.AddState(state);
+            }
+        }
         /// Reset all values of the states, and intialize them
         foreach (BaseState<Enemy> state in states)
         {
@@ -39,7 +53,7 @@ public class Enemy : Fighter
     }
     protected void FixedUpdate()
     {
-        SM.CurrentState.PhysicsUpdate();
+        SM.PhysicsUpdate();
     }
     public HitData LineOfSightCheck()
     {
@@ -57,7 +71,7 @@ public class Enemy : Fighter
         {
             if (debugLineCasts)
             {
-                Tracer.DrawCircle(hit.point, 0.05f, 5, Color.yellow);
+                Tracer.DrawCircle(hit.point, 0.02f, 5, Color.yellow);
             }
 
             if (hit.collider.CompareTag("Player"))
@@ -77,7 +91,7 @@ public class Enemy : Fighter
     {
         public Hita hit;
         public Vector2 location;
-        public Vector3 normal;
+        public Vector2 normal;
 
         public HitData(Vector2 location, Vector2 normal, Hita hita = Hita.nothing)
         {
@@ -96,15 +110,27 @@ public class Enemy : Fighter
     public struct GrappleData
     {
         public bool grapplePointAvalible;
+        public bool circleCastPassed;
         public int direction;
+        public int score;
         public Vector2 grapplePoint;
-        public Vector2 playerPos;
-        public GrappleData(bool grapplePointAvalible, Vector2 grapplePoint, Vector2 playerPos, int direction = 1)
+
+        public GrappleData(bool grapplePointAvalible, Vector2 grapplePoint, int direction = 0, bool circleCastPassed = false, int score = 0)
         {
             this.grapplePointAvalible = grapplePointAvalible;
             this.direction = direction;
             this.grapplePoint = grapplePoint;
-            this.playerPos = playerPos;
+            this.circleCastPassed = circleCastPassed;
+            this.score = score;
+        }
+        public override string ToString()
+        {
+            //return direction.ToString();
+            return toString();
+        }
+        public string toString()
+        {
+            return score.ToString();
         }
     }
     public struct BoundingBox

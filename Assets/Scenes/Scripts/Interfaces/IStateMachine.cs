@@ -9,4 +9,9 @@ public interface IStateMachine<RefType>
     public RefType GetRef();
     public IState getCurrentState();
     public void ChangeState(BaseState<RefType> newState);
+
+    public void FrameUpdate();
+    public void PhysicsUpdate();
+
+    public void TakeRequest(Request request);
 }

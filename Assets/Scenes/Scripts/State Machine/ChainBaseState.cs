@@ -161,6 +161,12 @@ public abstract class ChainBaseState<RefType, DataType> : BaseState<RefType>, IS
         }
         return s;
     }
+
+    public void TakeRequest(Request request)
+    {
+        SM.TakeRequest(request);
+        //
+    }
     #endregion
 
     #endregion
