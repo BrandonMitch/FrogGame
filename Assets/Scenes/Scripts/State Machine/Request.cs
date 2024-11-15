@@ -32,7 +32,7 @@ public class Request
     /// <param name="state">The state requested is passed into this param by the state machine</param>
     public delegate void GetState(IState state);
     public GetState getState = null;
-    public ScriptableObject stateTag;
+    public StateTag stateTag;
 
 
     public enum SimpleRequest
@@ -60,7 +60,7 @@ public class Request
         this.locationRequest = locationRequest;
     }
 
-    public Request(GetState getState, ScriptableObject stateTag)
+    public Request(GetState getState, StateTag stateTag)
     {
         readMode = StateMachineReadMode.GetState;
         this.getState = getState;

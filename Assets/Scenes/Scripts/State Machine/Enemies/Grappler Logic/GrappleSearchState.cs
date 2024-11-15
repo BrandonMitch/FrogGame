@@ -37,6 +37,7 @@ public class GrappleSearchState : GrapplerBaseState
     private GrappleData[] grapplePoints_pos;
     private GrappleData[] grapplePoints_combined;
     private HitData lineOfSightCollision;
+    private bool hasGrapplingData = false;
     [Header("Circle Cast Parameters")]
     [SerializeField,Range(0,90)] float minimimumAngleForBoxCheck = 45f;
     [SerializeField,Range(20,270)] float angularCastLimit = 180f;
@@ -44,6 +45,9 @@ public class GrappleSearchState : GrapplerBaseState
     [SerializeField, Range(3, 30)] float angularCircleCastPercision = 12f;
     float AngularCastLimit { get => angularCastLimit * Mathf.Deg2Rad; }
     float MinimumAngleForBoxChek { get => minimimumAngleForBoxCheck * Mathf.Deg2Rad; }
+
+    private CoolDownBasic moveRequestCoolDown;
+    [SerializeField] float moveRequestCoolDownDuration = 0.2f;
 
     [SerializeField] int scoreForSuccess = 10;
 
@@ -53,13 +57,21 @@ public class GrappleSearchState : GrapplerBaseState
     [Header("Debug Features")]
     [SerializeField] bool debugCircleCast = false;
     [SerializeField] bool debugLineCast = false;
+    private enum SearchMode
+    {
+        SearchGrapples,
+        SearchGrapplesAndMove,
+    }
+    private SearchMode searchMode = SearchMode.SearchGrapples;
     #endregion
 
     #region Basic State Functions
     public override void EnterState()
     {
         Debug.Log("Changing To Grapple Search");
+        searchMode = SearchMode.SearchGrapples;
         base.EnterState();
+        hasGrapplingData = false;
     }
 
     public override void ExitState()
@@ -78,26 +90,56 @@ public class GrappleSearchState : GrapplerBaseState
         grapplePoints_neg = new GrappleData[2 * StartingDepth];
         grapplePoints_pos = new GrappleData[2 * StartingDepth];
         grapplePoints_combined = new GrappleData[4 * startingDepth];
+        moveRequestCoolDown = new CoolDownBasic(moveRequestCoolDownDuration, true);
+        moveRequestCoolDown.SkipCooldown();
+
         var request = new Request(GetMoverState, GameManager.moveTag);
         SM.TakeRequest(request);
     }
     public override void PhysicsUpdate()
+    {
+        switch (searchMode)
+        {
+            case SearchMode.SearchGrapples:
+                SearchLogic();
+                break;
+            case SearchMode.SearchGrapplesAndMove:
+                moverState.EnterState();
+                moverState.PhysicsUpdate();
+                searchMode = SearchMode.SearchGrapples;
+                SearchLogic();
+                break;
+        }
+    }
+    
+    private void SearchLogic()
     {
         Vector2 playerPos = reference.GetPlayerPos();
         HitData hitData = reference.LineOfSightCheck(playerPos);
         switch (hitData.hit)
         {
             case Hita.player:
-
+                {
+                    if (hasGrapplingData)
+                    {
+                        var g = GrappleEnemyLogic(hitData, playerPos, hasGrapplingData = true);
+                        ParseGrappleData(g, playerPos);
+                    }
+                }
                 break;
             case Hita.notAPlayer:
-                var g = GrappleEnemyLogic(hitData, playerPos);
-                lineOfSightCollision = hitData;
-                ParseGrappleData(g, playerPos);
-                break;
+                {
+                    var g = GrappleEnemyLogic(hitData, playerPos, hasGrapplingData = false);
+                    lineOfSightCollision = hitData;
+                    ParseGrappleData(g, playerPos);
+                    hasGrapplingData = true;
+                    break;
+                }
             case Hita.nothing:
-
+                {
+                
                 break;
+                }
             default:
 
                 break;
@@ -130,14 +172,14 @@ public class GrappleSearchState : GrapplerBaseState
     }
     #endregion
     #region Grapple Functions
-    private GrappleData GrappleEnemyLogic(HitData hitData, Vector2 playerPos)
+    private GrappleData GrappleEnemyLogic(HitData hitData, Vector2 playerPos, bool hasGrapplingData = false)
     {
         Vector2 perp = Vector2.Perpendicular(hitData.normal) * marchDistance;
         BoundingBox box = reference.GetBoundingBox(playerPos, boundingBoxSize); /// TODO: replace the player position with the next location after applying the velocity of the player
 
         box.drawBox(Color.yellow, 0);
-        MarchAndCast(StartingDepth, RB.position, hitData.location, -perp, box, ref grapplePoints_neg);
-        MarchAndCast(StartingDepth, RB.position, hitData.location, perp, box, ref grapplePoints_pos);
+        MarchAndCast(StartingDepth, RB.position, hitData.location, -perp, box, ref grapplePoints_neg, hasGrapplingData);
+        MarchAndCast(StartingDepth, RB.position, hitData.location, perp, box, ref grapplePoints_pos, hasGrapplingData);
         // Print this to see the form of both arrays.
         //Debug.Log("Before \n" + PrintArray(grapplePoints_neg) + "\n" + PrintArray(grapplePoints_pos));
 
@@ -162,7 +204,7 @@ public class GrappleSearchState : GrapplerBaseState
     /// <param name="perp">Perpendicular Vector to the left or right of the starting normal vector position</param>
     /// <param name="box"> Bounding box surrounding where is a valid grapple location</param>
     /// <returns>[CHANGED, now it's void to not create copies of grapples]A GrappleData struct. If the grappleData is valid then the struct will contain information to grapple around</returns>
-    private void MarchAndCast(int depth, in Vector2 grapplerPosition, Vector2 startingPosition, Vector2 perp, BoundingBox box, ref GrappleData[] grapples)
+    private void MarchAndCast(int depth, in Vector2 grapplerPosition, Vector2 startingPosition, Vector2 perp, BoundingBox box, ref GrappleData[] grapples, bool hasGrappleData = false)
     {
         // Break from recursion if nothing was found
         if (depth <= 0)
@@ -171,13 +213,24 @@ public class GrappleSearchState : GrapplerBaseState
         }
 
         // March
+#if UNITY_EDITOR
         DrawMarch(depth, startingPosition, startingPosition + perp, DrawType.March);
-        startingPosition += perp;
-
+#endif
+        if (!hasGrapplingData)
+        {
+            startingPosition += perp;
+        }
         // Line cast
         GrappleData grapplePoint = new GrappleData(false, startingPosition);
-        RaycastHit2D[] hits = Physics2D.LinecastAll(grapplerPosition, grapplerPosition + (startingPosition - grapplerPosition) * 1.5f);
-        DrawMarch(depth, grapplerPosition, grapplerPosition + (startingPosition - grapplerPosition) * 1.5f, DrawType.March);
+        if (hasGrappleData)
+        {
+            grapplePoint = grapples[StartingDepth - depth];
+        }
+
+        RaycastHit2D[] hits = Physics2D.LinecastAll(grapplerPosition, grapplerPosition + (grapplePoint.grapplePoint - grapplerPosition) * 1.5f);
+#if UNITY_EDITOR
+        DrawMarch(depth, grapplerPosition, grapplerPosition + (grapplePoint.grapplePoint - grapplerPosition) * 1.5f, DrawType.March);
+#endif
         bool GrapplePointIsValidSoCircleCast = false;
         foreach (RaycastHit2D hit in hits)
         {
@@ -196,8 +249,10 @@ public class GrappleSearchState : GrapplerBaseState
         // Negative side index  = (starting - depth)
         // Postive side index   = (startiing - depth) + starting
         grapplePoint.direction = -1;
+        grapplePoint.score = 0;
         grapples[StartingDepth - depth] = grapplePoint;
         grapplePoint.direction = 1;
+        grapplePoint.score = 0;
         grapples[2 * StartingDepth - depth] = grapplePoint;
 
 
@@ -228,7 +283,7 @@ public class GrappleSearchState : GrapplerBaseState
         --depth;
 
         // Recurse
-        MarchAndCast(depth, grapplerPosition, startingPosition, perp, box, ref grapples);
+        MarchAndCast(depth, grapplerPosition, startingPosition, perp, box, ref grapples, hasGrappleData);
     }
 
     private bool CircleCast(int depth, in GrappleData grapplePoint, in Vector2 grapplerPosition, in BoundingBox box, out bool hitPlayer, out bool madeitIntoBox, int sign = 1)
@@ -493,6 +548,7 @@ public class GrappleSearchState : GrapplerBaseState
     /// <returns></returns>
     public Vector2 FrameUpdatedGrapplingPosition()
     {
+        //Debug.Log("FrameUpdated Grappling Postion()");
         var pos = FindOptimalGrapplingPostion(lineOfSightCollision, reference.GetPlayerPos());
 #if UNITY_EDITOR
         Tracer.DrawCircle(lineOfSightCollision.location, 0.5f, 5, Color.magenta);
@@ -502,9 +558,14 @@ public class GrappleSearchState : GrapplerBaseState
     }
 
     #region Brains and Requester Logic
+    /// <summary>
+    /// This function basically determines what we are going to do with the grapple data.
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="playerPos"></param>
     public void ParseGrappleData(GrappleData data, Vector2 playerPos)
     {
-        Debug.Log("Parsing Grapple Data: " + data);
+        ///Debug.Log("Parsing Grapple Data: " + data);
         if (!data.grapplePointAvalible)
         {
             // Implement something
@@ -553,16 +614,19 @@ public class GrappleSearchState : GrapplerBaseState
     /// <param name="playerPos"></param>
     private void ParseGrappleData_AdjustPos(GrappleData data, Vector2 playerPos)
     {
-        Debug.Log("Trying to readjust Position");
-        Vector2 location = FrameUpdatedGrapplingPosition();/* FindOptimalGrapplingPostion(lineOfSightCollision, playerPos);*/
+        //Debug.Log("Trying to readjust Position");
+        
         if (moverState != null)
         {
             // directly handle with the move state
+            MoveRequest.FrameUpdatedPosition location = FrameUpdatedGrapplingPosition;/* FindOptimalGrapplingPostion(lineOfSightCollision, playerPos);*/
             moverState.RecieveData(new MoveRequest(location));
+            searchMode = SearchMode.SearchGrapplesAndMove;
         }
         else
         {
             // Ask state machine to deal with the request
+            Vector2 location = FrameUpdatedGrapplingPosition();/* FindOptimalGrapplingPostion(lineOfSightCollision, playerPos);*/
             var request = new Request(locationRequest: location, Request.SimpleRequest.MoveTo, onFuffill: ChangeBackToMe);
             SM.TakeRequest(request);
         }

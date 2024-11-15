@@ -110,6 +110,23 @@ public class StateMachineBase<RefType> : IStateMachine<RefType>
         if(request.simpleVectorRequest == Request.SimpleRequest.None)
         {
             /// If the simple request is == none then it is probably a get state. That means we msu
+            var stateTag = request.stateTag;
+            if(stateTag != null && request.getState != null)
+            {
+                if (stateDictionary.ContainsKey(stateTag))
+                {
+                    // TODO: Implement a way of providing an order
+                    request.getState.Invoke(stateDictionary[stateTag][0]);
+                }
+                else
+                {
+                    Debug.LogWarning("State machine cannot find a reference to the state tag:" + stateTag.name);
+                }
+            }
+            else
+            {
+                Debug.LogError("I think you called getState and it appears that .getState() wasn't provided, or state tag was null");
+            }
         }
         else
         {
@@ -168,9 +185,10 @@ public class StateMachineBase<RefType> : IStateMachine<RefType>
                 {
                     if (stateDictionary.TryGetValue(GameManager.grappleTag, out List<BaseState<RefType>> grappleStates))
                     {
-                        var x = grappleStates[0] as BaseDataState<RefType, object>;
+                        var x = grappleStates[0] as BaseDataState<RefType, Enemy.GrappleData>;
                         if (x != null)
                         {
+                            //x.RecieveData(request.dataRequest as Enemy.GrappleData);
                             ChangeState(x); // Make sure this state calls for the information
                         }
                         else

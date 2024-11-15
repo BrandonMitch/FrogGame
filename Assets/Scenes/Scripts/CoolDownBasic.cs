@@ -68,9 +68,12 @@ public class CoolDownBasic
             {
                 t += Time.time - startTime;
             }
-            foreach (TimeInterval interval in intervals)
+            if (intervals != null)
             {
-                t += interval.TimeIntervalDuration;
+                foreach (TimeInterval interval in intervals)
+                {
+                    t += interval.TimeIntervalDuration;
+                }
             }
             return t;
         }

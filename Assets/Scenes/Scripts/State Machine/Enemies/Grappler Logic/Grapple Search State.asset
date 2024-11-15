@@ -18,10 +18,11 @@ MonoBehaviour:
   marchColor: {r: 0, g: 0.0047488213, b: 1, a: 1}
   startingDepth: 6
   minimimumAngleForBoxCheck: 0
-  angularCastLimit: 181
+  angularCastLimit: 235
   boundingBoxSize: 0.16
   angularCircleCastPercision: 18
+  moveRequestCoolDownDuration: 0.2
   scoreForSuccess: 10
   debugCircleCast: 1
   debugLineCast: 1
-  scoreDebug: 1
+  scoreDebug: 0

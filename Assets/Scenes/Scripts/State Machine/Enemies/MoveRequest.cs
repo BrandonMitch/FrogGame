@@ -9,6 +9,7 @@ public class MoveRequest
 {
     public readonly Vector2 pos;
     public delegate Vector2 FrameUpdatedPosition();
+
     public readonly FrameUpdatedPosition frameUpdatedPosition = null;
     public MoveRequest(Vector2 pos)
     {

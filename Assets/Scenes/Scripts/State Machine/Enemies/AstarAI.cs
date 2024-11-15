@@ -209,7 +209,7 @@ public class AstarAI : BaseDataState<Enemy, object>, IMove
             }
             else
             {
-                
+                this.targetLocation = position.pos;
             }
 
         }
@@ -264,6 +264,7 @@ public class AstarAI : BaseDataState<Enemy, object>, IMove
         targetTransform = null;
         this.onComplete = onComplete;
     }
+
     public void MoveTo(Transform location, bool keepUpdating = false, Request.OnFuffill onComplete = null)
     {
         if (keepUpdating)
@@ -276,10 +277,12 @@ public class AstarAI : BaseDataState<Enemy, object>, IMove
         }
         this.onComplete = onComplete;
     }
+
     public void MoveTo(Rigidbody2D location, bool keepUpdating = false, Request.OnFuffill onComplete = null)
     {
         MoveTo(location.transform, keepUpdating, onComplete);
     }
+
     public void OnDestinationReached()
     {
         Debug.Log("Destination Reached, Oncomplete = " + onComplete);
@@ -309,6 +312,8 @@ public class AstarAI : BaseDataState<Enemy, object>, IMove
     /// <returns></returns>
     private Vector2 GetTargetLocation()
     {
+        Debug.Log("Get Target Location(), delegate:" + frameUpdatedPosition + "is delegate null?" + (frameUpdatedPosition == null).ToString());
+    
         var pos = Vector2.zero;
         if(frameUpdatedPosition != null)
         {
