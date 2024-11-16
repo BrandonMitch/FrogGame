@@ -15,6 +15,8 @@ public class TongueRetractingState : TongueState
     private const float TONGUE_PUESDO_DRAG = 0.4f;
     public override void EnterState()
     {
+        // Remove connection between end of tongue and object
+        tongueStateMachine.endOfTongueScript.SetInfo(movingObject: null);
         if(tongueStateMachine.TonguePointCount() == 1)
         {
             tongueStateMachine.ChangeState(player.tongueOffState);
@@ -30,7 +32,10 @@ public class TongueRetractingState : TongueState
 
     public override void ExitState()
     {
-        player.AnimateRetract_Reset();
+        if (player.stateMachine.positionStatus != PositionStatus.Flying)
+        {
+            player.AnimateRetract_Reset();
+        }
         //Debug.Log("leaving Retracting State");
         tongueStateMachine.DestroyEndOfTongue();
     }

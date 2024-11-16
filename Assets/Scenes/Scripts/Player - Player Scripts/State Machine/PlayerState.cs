@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public abstract class PlayerState
+public abstract class PlayerState : IState
 {
     protected Player player;
     protected PlayerStateMachine playerStateMachine;
-    protected bool leftMouseDown    {get{return player.inputManager.LeftMouseDown;}}
-    protected bool leftMouseUp      {get{return player.inputManager.LeftMouseUp;}}
-    protected bool leftMouseButton  {get{return player.inputManager.LeftMouseButton;}}
-    protected bool rightMouseDown   {get{return player.inputManager.RightMouseDown;}}
-    protected bool rightMouseUp     {get{return player.inputManager.RightMouseUp;}}
-    protected bool rightMouseButton {get{return player.inputManager.RightMouseButton;}}
-    protected bool fKeyDown         {get{return player.inputManager.ReleaseKeyDown;}}
+    protected bool LeftMouseDown    {get{return player.inputManager.LeftMouseDown;}}
+    protected bool LeftMouseUp      {get{return player.inputManager.LeftMouseUp;}}
+    protected bool LeftMouseButton  {get{return player.inputManager.LeftMouseButton;}}
+    protected bool RightMouseDown   {get{return player.inputManager.RightMouseDown;}}
+    protected bool RightMouseUp     {get{return player.inputManager.RightMouseUp;}}
+    protected bool RightMouseButton {get{return player.inputManager.RightMouseButton;}}
+    protected bool FKeyDown         {get{return player.inputManager.ReleaseKeyDown;}}
 
     public PlayerState(Player player, PlayerStateMachine playerStateMachine)
     {
@@ -147,14 +147,18 @@ public abstract class PlayerState
 
     public bool CheckIfPlayerWantsToRetractTongue()
     {
-        //GetFKeyInputs();
-        if (fKeyDown)
+        if (FKeyDown)
         {
-            playerStateMachine.ChangeState(player.slowingState);
-            player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+            RetractTongue();
             return true;
         }
         return false;
+    }
+
+    public void RetractTongue()
+    {
+        playerStateMachine.ChangeState(player.slowingState);
+        player.tongueStateMachine.ChangeState(player.tongueRetractingState);
     }
 
     protected void FindLeftMouseInputs()
@@ -265,5 +269,9 @@ public abstract class PlayerState
     public virtual void OnTongueSwungOnIntersection()
     {
 
+    }
+
+    public virtual void ResetValues()
+    {
     }
 }

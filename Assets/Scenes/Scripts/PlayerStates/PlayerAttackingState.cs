@@ -34,13 +34,13 @@ public class PlayerAttackingState : PlayerState
     public override void FrameUpdate()
     {
         //FindLeftMouseInputs();
-        if (leftMouseDown) // once the mouse is pressed down for the first time, record the time
+        if (LeftMouseDown) // once the mouse is pressed down for the first time, record the time
         {
             chargeStartedTime = Time.time;
             Debug.Log("attack charged started");
         }
 
-        if(leftMouseUp) // once the mouse is released, add the attack to the buffer
+        if(LeftMouseUp) // once the mouse is released, add the attack to the buffer
         {
             AddToAttackBuffer();
         }

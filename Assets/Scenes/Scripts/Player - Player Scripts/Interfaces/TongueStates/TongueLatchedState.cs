@@ -27,8 +27,8 @@ public class TongueLatchedState : TongueState
         if (push_pullable != null)
         {
 
-            bool pull = push_pullable.isPullableQ();
-            bool push = push_pullable.isPushableQ();
+            bool pull = push_pullable.isPullable(player);
+            bool push = push_pullable.isPushable(player);
             if (push || pull) push_pullRB = push_pullable.GetRigidBody();
 
             if (pull)

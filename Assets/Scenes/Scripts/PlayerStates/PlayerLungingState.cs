@@ -73,7 +73,7 @@ public class PlayerLungingState : PlayerState
     public override void EnterState()
     {
         pauseCasting = false;
-    
+        ReachedSpeedThresholdForFlying = false;
     
         ihat = player.tongueLatchedState.GetIhat(); // right
         jhat = player.tongueLatchedState.GetJhat(); // forward
@@ -111,7 +111,6 @@ public class PlayerLungingState : PlayerState
     {
         yield return new WaitForFixedUpdate();
         player.AnimateLunge(true);
-        player.AnimateLunge(GetCharacterRotation());
     }
     private void ForwardLungeInialization()
     {
@@ -146,12 +145,20 @@ public class PlayerLungingState : PlayerState
     }
     public override void ExitState()
     {
-        // Shut off animation
-        player.AnimateLunge(false);
-        // Reset rotation after physics update has occured
-        ///player.StartCoroutine(ResetRotationCoroutine());
-        ResetRotation();
-        player.ResetColliderDirection();
+        // reset value
+
+
+
+        PositionStatus posStatus = playerStateMachine.positionStatus;
+        // If we are not flying, reset rotation
+        if (posStatus != PositionStatus.Flying)
+        {
+            ReachedSpeedThresholdForFlying = false;
+            ResetRotation();
+            player.ResetColliderDirection();        
+            // Shut off animation
+            player.AnimateLunge(false);
+        }
 
         SetLatchMovementType(LatchMovementType.Waiting);
         lungeDirection = 1;
@@ -166,11 +173,12 @@ public class PlayerLungingState : PlayerState
     /// <summary>
     /// This method will reset the player's rotation so that it is looking down
     /// </summary>
-    private void ResetRotation()
+    public void ResetRotation()
     {
         player.AnimateLunge(Quaternion.Euler(0, 0, 0));
     }
 
+    bool SUPER_CAPE = true;
     public override void FrameUpdate()
     {
         // Reading inputs differently based on lunge type.
@@ -179,9 +187,20 @@ public class PlayerLungingState : PlayerState
             case LatchMovementType.LungeForward:
                 {
                     // allows you to cancel out of the lunge by stoping movement inputs, or by pressing f key
-                    if (fKeyDown)
+                    if (FKeyDown)
                     {
-                        TryShutOffForForwardsLunge();
+                        if (SUPER_CAPE && PercentMaxSpeed >= SPEED_THRESHOLD_FOR_FLYING && ReachedSpeedThresholdForFlying)
+                        {
+                            // if we want to fly,
+                            // we must change states to flying state
+                            Debug.Log("ForwardsLungeToFlying()");
+                            ForwardsLungeToFlying();
+                            return;
+                        }
+                        else
+                        {
+                            TryShutOffForForwardsLunge();
+                        }
                     }
                     Vector2 input = GetCurrentMovementInputs();
                     if (input != Vector2.zero)
@@ -194,7 +213,7 @@ public class PlayerLungingState : PlayerState
             case LatchMovementType.LungeLeft:
                 {
                     // allows you to cancel out of the lunge by stoping movement inputs, or by pressing f key
-                    if (fKeyDown)
+                    if (FKeyDown)
                     {
                         TryShutOffForLateralLunge(); 
                     }
@@ -209,7 +228,7 @@ public class PlayerLungingState : PlayerState
             case LatchMovementType.LungeRight:
                 {
                     // allows you to cancel out of the lunge by stoping movement inputs, or by pressing f key
-                    if (fKeyDown)
+                    if (FKeyDown)
                     {
                         TryShutOffForLateralLunge();
                     }
@@ -231,7 +250,10 @@ public class PlayerLungingState : PlayerState
                 return;
         }
     }
-    static readonly float SPEED_THRESHOLD_FOR_LUNGE = 0.4f;
+    static readonly float SPEED_THRESHOLD_FOR_FLYING = 0.4f;
+    bool ReachedSpeedThresholdForFlying = false;
+    float PercentMaxSpeed { get => playerRB.velocity.magnitude / lateralLungeDesiredVEL.Value;  }
+    
     public override void PhysicsUpdate()
     {
         // First apply proper lunging forces, linecasts, and update ihat jhat vectors.
@@ -265,19 +287,22 @@ public class PlayerLungingState : PlayerState
 
 
         // Lunging speed
-        float percentMaxSpeed = playerRB.velocity.magnitude / lateralLungeDesiredVEL.Value;
+        float percentMaxSpeed = PercentMaxSpeed;
         
         // Animates the direction of the spitting animation, and also plays the lunge animation if we are going fast enough
         player.SetMovementInputs(jhat, percentMaxSpeed);
 
-        if(percentMaxSpeed < SPEED_THRESHOLD_FOR_LUNGE)
+        // Make sure the orientation is not rotated unless we are lunging and have not already started lunging
+        if(percentMaxSpeed < SPEED_THRESHOLD_FOR_FLYING && !ReachedSpeedThresholdForFlying)
         {
             ResetRotation();
         }
         else
         {
             // Apply rotations to the character if in the lunge animation
+            player.AnimateLungeActual();
             player.AnimateLunge(GetCharacterRotation());
+            ReachedSpeedThresholdForFlying = true;
         }
     }
     public void SetLatchMovementType(LatchMovementType m)
@@ -326,6 +351,8 @@ public class PlayerLungingState : PlayerState
             {
                 if (!collision.CompareTag("Player"))
                 {
+
+
                     // Instantiate tongue collision object, create a new hit data instance to save, then add it to the array list of new collision points
                     GameObject colObject = GameObject.Instantiate(player.tongueStateMachine.tongeHitCollisionPrefab, col.point, Quaternion.identity);
                     hitData = new TongueHitData(col, TonguePointType.tongueHitPoint, colObject);
@@ -347,8 +374,31 @@ public class PlayerLungingState : PlayerState
                     ///Debug.Break();
                     // -----------------
                     rotationPoint = hitData.getPos();
-                    // Check if the collision can't be swung on
-                    CantBeSwungOnCheck(col);
+
+                    // Check if we can swing on the object
+                    IModifyTongueBehavior tongueBehavior = collision.GetComponent<IModifyTongueBehavior>();
+                    if (tongueBehavior != null && !tongueBehavior.isSwingableOn(player))
+                    {
+                        // OnSwungOn() if implements interface
+                        ICantBeSwungOn cantBeSwungInterface = col.collider.GetComponent<ICantBeSwungOn>();
+                        if (cantBeSwungInterface != null)
+                        {
+                            cantBeSwungInterface.OnSwungOn(col);
+                        }
+
+                        // pause casting if we cause a pause in the casting
+                        if (tongueBehavior.iCauseRetractOnUnSwingable(player))
+                        {
+                            pauseCasting = true;
+                            // if there isn't a retract on swing coroutine, start a new one
+                            if (!activeStopSwingCoroutine)
+                            {
+                                stopSwingingCoroutine = player.StartCoroutine(DelayedStopSwing());
+                            }
+                        }
+                        return;
+                    }
+
                     // Try to line cast from the opposite direction
                     bool collidedOnOtherSide = LineCastOppositeDirection(playerPos);// true will apply force
                 }
@@ -389,7 +439,30 @@ public class PlayerLungingState : PlayerState
                     Tracer.DrawCircle(col.point, 0.03f, 10, Color.red);
                     Vector2 normVector = col.normal;
                     Debug.DrawLine(col.point, col.point + normVector, Color.yellow,5f);
-                    //Debug.Break();
+
+                    // Check if we can swing on the object
+                    IModifyTongueBehavior tongueBehavior = collision.GetComponent<IModifyTongueBehavior>();
+                    if (tongueBehavior != null && !tongueBehavior.isSwingableOn(player))
+                    {
+                        // OnSwungOn() if implements interface
+                        ICantBeSwungOn cantBeSwungInterface = col.collider.GetComponent<ICantBeSwungOn>();
+                        if (cantBeSwungInterface != null)
+                        {
+                            cantBeSwungInterface.OnSwungOn(col);
+                        }
+
+                        // pause casting if we cause a pause in the casting
+                        if (tongueBehavior.iCauseRetractOnUnSwingable(player))
+                        {
+                            pauseCasting = true;
+                            // if there isn't a retract on swing coroutine, start a new one
+                            if (!activeStopSwingCoroutine)
+                            {
+                                stopSwingingCoroutine = player.StartCoroutine(DelayedStopSwing());
+                            }
+                        }
+                    }
+
                     return true;
                 }
             }
@@ -431,40 +504,7 @@ public class PlayerLungingState : PlayerState
         activeStopSwingCoroutine = false;
         TryShutOffForLateralLunge();
     }
-    private void ForwardLunge()
-    {
-        Updateihatjhat(1);
-        player.SetOffsetColliderDirection(-jhat);
-        // We need to cast the player's collider forward to check if we hit something.
-        RaycastHit2D[] collisions = new RaycastHit2D[3];
-        int result = Physics2D.CircleCast(playerRB.position, 0.05f,  jhat, playerContactFilter, collisions, (Time.fixedDeltaTime * v0));
-        Debug.DrawLine(playerRB.position, playerRB.position + (Time.fixedDeltaTime * v0 * jhat), Color.green);
-        Tracer.DrawCircle(playerRB.position, 0.05f, 8, Color.green);
-        Tracer.DrawCircle(playerRB.position + (Time.fixedDeltaTime * v0 * jhat), 0.05f, 8,Color.cyan);
-        foreach (RaycastHit2D col in collisions) 
-        {
-            Collider2D collision = col.collider;
-            if(collision != null)
-            {
-                if (collision.tag != "Player")
-                {
-                    Debug.Log("Collision's name in forward lunge:" + collision.name);
-                    Tracer.DrawCircle(col.point, 0.03f, 8, Color.red);
-                    TryShutOffForForwardsLunge();
-                    return;
-                }
-            }
-        }
-        // Check if we should stop forward lunging
-        bool shutOff = DistanceCheckForForwardLunge();
-        if (shutOff) { TryShutOffForForwardsLunge(); return; }
-/*        shutOff = VelocityCheckForForwardLunge();
-        if (shutOff) { TryShutOffForForwardsLunge(); return; }*/
 
-        // Apply force
-        nonLinearRadialAccelerator.FixedUpdateCall(ihat, jhat, playerRB, forcingType:NonLinearRadialAccelerator.ForcingType.Linear);
-
-    }
     private void BackwardsLunge()
     {
         TryShutOffFOrBackwardsLunge();
@@ -486,15 +526,73 @@ public class PlayerLungingState : PlayerState
         playerStateMachine.ChangeState(player.slowingState);
         player.tongueStateMachine.ChangeState(player.tongueRetractingState);
     }
+
+    #region |----Forward Lunge-----|
+    private void ForwardLunge()
+    {
+        Updateihatjhat(1);
+        player.SetOffsetColliderDirection(-jhat);
+        // We need to cast the player's collider forward to check if we hit something.
+        RaycastHit2D[] collisions = new RaycastHit2D[3];
+        int result = Physics2D.CircleCast(playerRB.position, 0.05f, jhat, playerContactFilter, collisions, (Time.fixedDeltaTime * v0));
+        Debug.DrawLine(playerRB.position, playerRB.position + (Time.fixedDeltaTime * v0 * jhat), Color.green);
+        Tracer.DrawCircle(playerRB.position, 0.05f, 8, Color.green);
+        Tracer.DrawCircle(playerRB.position + (Time.fixedDeltaTime * v0 * jhat), 0.05f, 8, Color.cyan);
+        foreach (RaycastHit2D col in collisions)
+        {
+            Collider2D collision = col.collider;
+            if (collision != null)
+            {
+                if (collision.tag != "Player")
+                {
+                    Debug.Log("Collision's name in forward lunge:" + collision.name);
+                    Tracer.DrawCircle(col.point, 0.03f, 8, Color.red);
+                    TryShutOffForForwardsLunge();
+                    return;
+                }
+            }
+        }
+        // Check if we should stop forward lunging
+        bool shutOff = DistanceCheckForForwardLunge();
+        if (shutOff) { TryShutOffForForwardsLunge(); return; }
+        /*        shutOff = VelocityCheckForForwardLunge();
+                if (shutOff) { TryShutOffForForwardsLunge(); return; }*/
+
+        // Apply force
+        nonLinearRadialAccelerator.FixedUpdateCall(ihat, jhat, playerRB, forcingType: NonLinearRadialAccelerator.ForcingType.Linear);
+
+    }
     private void TryShutOffForForwardsLunge()
     {
+        //Debug.Log("Trying to shut off forward lunge");
         if (latchMovementType == LatchMovementType.LungeForward)
         {
-            //Debug.Log("Trying to shut off forward lunge");
-            playerStateMachine.ChangeState(player.slowingState);
-            player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+            ShutOffForForwardsLunge();
         }
     }
+    private void ShutOffForForwardsLunge()
+    {
+        player.AnimateRetract_Reset();
+        ResetRotation();
+        playerStateMachine.ChangeState(player.slowingState);
+        player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+    }
+
+    private void ForwardsLungeToFlying()
+    {
+
+        // this has to be called first so we don't end up reseting rotations or animations
+        playerStateMachine.positionStatus = PositionStatus.Flying;
+        // Give the flying state a position so we can do distance checks to the end of our journey.
+        player.flyingState.SetLastPositionOfTongue(endOfTongueTransform.position);
+        // Change to flying state
+        playerStateMachine.ChangeState(player.flyingState);
+        
+        // Retract the tounge
+        player.tongueStateMachine.ChangeState(player.tongueRetractingState);
+    }
+    #endregion
+
     private void TryShutOffFOrBackwardsLunge()
     {
         if (latchMovementType == LatchMovementType.LungeBack)
@@ -506,10 +604,14 @@ public class PlayerLungingState : PlayerState
     }
     private bool DistanceCheckForForwardLunge()
     {
-        Vector3 endOfTonguePos = endOfTongueTransform.position;
+        return DistanceCheckForForwardLunge(endOfTongueTransform.position);
+    }
+    public bool DistanceCheckForForwardLunge(Vector3 position)
+    {
+        Vector3 endOfTonguePos = position;
         Vector3 playerPos = playerRB.position;
         float distance = (endOfTonguePos - playerPos).magnitude;
-        if(distance < 0.1f)
+        if (distance < 0.1f)
         {
             Debug.Log("Distance Check Failed");
             return true;

@@ -31,16 +31,16 @@ public class PlayerIdleState : PlayerState
         //Debug.Log("Right mouse inputs: up " + rightMouseUp + " down " + rightMouseDown);
         
         
-        if (rightMouseButton)
+        if (RightMouseButton)
         {
             if (TryChangingToTongueAimingState()) return;
         }
         // Save the time when the player starts charging
-        if (leftMouseDown) {
+        if (LeftMouseDown) {
             SaveStateData(0,"startChargingTime = " + Time.time); ;
         }
 
-        if (leftMouseButton) // while the button is being held down, we want to save the time
+        if (LeftMouseButton) // while the button is being held down, we want to save the time
         {
             if (TryChangingToAttackChargingState()) return;
         }

@@ -14,6 +14,7 @@ public class TongueStateMachine
     [HideInInspector] public Transform parentTransform = null;
 
     public GameObject endOfTongue;
+    public EndOfTongueScript endOfTongueScript;
     public Rigidbody2D endOfTongueRB;
 
     public Vector3 aimLocation;
@@ -122,9 +123,17 @@ public class TongueStateMachine
         // Instantiate new end of tongue.
 
         endOfTongue = GameObject.Instantiate(tongueEndPrefab, parentTransform.position, Quaternion.identity);
+        endOfTongueScript = endOfTongue.GetComponent<EndOfTongueScript>();
+        TongueHitData endOfTongueHitData = new TongueHitData(endOfTongue.transform, TonguePointType.endOfTongue, endOfTongue);
+
+        endOfTongueScript.SetInfo(
+            tongueStateMachine: this,
+            movingObject: null,
+            hitData: endOfTongueHitData
+            );
 
         // Now we need to add this to array list containing all of the tongue points.
-        tonguePoints.Add(new TongueHitData(endOfTongue.transform, TonguePointType.endOfTongue, endOfTongue));
+        tonguePoints.Add(endOfTongueHitData);
 
         // Now we need to set the rigid body to the new end of tongue, and shut it off
         endOfTongueRB = endOfTongue.GetComponent<Rigidbody2D>();

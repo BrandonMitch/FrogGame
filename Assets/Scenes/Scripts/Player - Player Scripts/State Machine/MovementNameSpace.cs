@@ -26,4 +26,11 @@ namespace MovementNameSpace
         pushLogic,
         pullLogic,
     }
+
+    public enum PositionStatus
+    {
+        OnTheGround,
+        Flying,
+        Lunging
+    }
 }

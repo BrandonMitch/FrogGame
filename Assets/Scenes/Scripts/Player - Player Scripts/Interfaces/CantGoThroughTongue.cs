@@ -6,6 +6,37 @@ public class CantGoThroughTongue : MonoBehaviour, ICantGoThroughTongue
 {
     bool debug = true;
     Vector2 lastPos;
+
+    public bool iCauseRetractOnUnLatchable(Player player)
+    {
+        return false;
+    }
+
+    public bool iCauseRetractOnUnSwingable(Player player)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool isLatchable(Player player)
+    {
+        return false;
+    }
+
+    public bool isPullable(Player player)
+    {
+        return false;
+    }
+
+    public bool isPushable(Player player)
+    {
+        return false;
+    }
+
+    public bool isSwingableOn(Player player)
+    {
+        return false;
+    }
+
     //[SerializeField] float forceMultiplier = 10;
     public void OnSwungOn(RaycastHit2D hit)
     {

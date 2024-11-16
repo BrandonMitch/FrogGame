@@ -1,6 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-public class CantBeSwungOn : MonoBehaviour, ICantBeSwungOn
+public class CantBeLatchedOnto : MonoBehaviour, IModifyTongueBehavior
 {
     public bool iCauseRetractOnUnLatchable(Player player)
     {
@@ -29,12 +31,6 @@ public class CantBeSwungOn : MonoBehaviour, ICantBeSwungOn
 
     public bool isSwingableOn(Player player)
     {
-        return false;
-    }
-
-    public void OnSwungOn(RaycastHit2D hit)
-    {
-        Debug.Log("You can't swing on me!");
+        return true;
     }
 }
-

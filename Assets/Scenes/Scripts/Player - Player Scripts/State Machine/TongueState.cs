@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MovementNameSpace;
-public class TongueState 
+public class TongueState : IState
 {
     protected Player player;
     protected TongueStateMachine tongueStateMachine;
@@ -44,6 +44,10 @@ public class TongueState
         return false;
     }
     public virtual void Intialize()
+    {
+
+    }
+    public virtual void ResetValues()
     {
 
     }

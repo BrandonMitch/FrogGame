@@ -45,21 +45,21 @@ public class PlayerAimingTongueState : PlayerState
     public override void FrameUpdate()
     {
         /// new code
-        if (fKeyDown)
+        if (FKeyDown)
         {
             StopCoroutines();
             TryToDestroyEndOfTongueAndChangeToOffState();
             playerStateMachine.ChangeState(player.idleState);
             return;
         }
-        if (rightMouseButton) // aim while right mouse button is down
+        if (RightMouseButton) // aim while right mouse button is down
         {
             // Aims the cross hair GameObject
             player.AimTongueCrossHair();
             // these lines make frog look in the direction of the mouse
             _lookDirectionForAnimation = (player.GetCrossHairPosition() - player.GetPosition()).normalized;
             player.SetLastMoveDirection(_lookDirectionForAnimation.normalized);
-        } else if (rightMouseUp) // if mouse is let go, start coroutine 
+        } else if (RightMouseUp) // if mouse is let go, start coroutine 
         {
             if (!activeThrowCoroutine)
             {

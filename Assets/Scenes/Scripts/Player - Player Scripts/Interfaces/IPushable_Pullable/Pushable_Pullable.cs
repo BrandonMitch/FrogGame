@@ -7,8 +7,8 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
     protected Rigidbody2D RB;
     [Space]
     [Header("|-----Is pushable/pullable?-----|")]
-    [SerializeField] protected bool isPushable;
-    [SerializeField] protected bool isPullable;
+    [SerializeField] protected bool _isPushable;
+    [SerializeField] protected bool _isPullable;
     [SerializeField] protected float restingDrag;
     [SerializeField] protected float movingDrag;
     protected bool enterSwitch = true;
@@ -36,16 +36,6 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
     {
         return transform;
     }
-    
-    public bool isPullableQ()
-    {
-        return isPullable;
-    }
-
-    public bool isPushableQ()
-    {
-        return isPushable;
-    }
     public Vector3 GetLatchLocation()
     {
         return latchLocation;
@@ -53,13 +43,13 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
     #endregion
     public virtual void OnLatchedTo(Vector3 latchLocation)
     {
-        if (isPullable)
+        if (_isPullable)
         {
             RB.drag = restingDrag * 10.0f;
             this.latchLocation = latchLocation;
             return;
         }
-        if (isPushable)
+        if (_isPushable)
         {
             this.latchLocation = latchLocation;
             RB.drag = movingDrag;
@@ -130,5 +120,35 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
             RB.drag = restingDrag;
             decelerateSwitch = false;
         }
+    }
+
+    public bool isSwingableOn(Player player)
+    {
+        return false;
+    }
+
+    public bool isLatchable(Player player)
+    {
+        return isPullable(player);
+    }
+
+    public bool isPullable(Player player)
+    {
+        return _isPullable;
+    }
+
+    public bool isPushable(Player player)
+    {
+        return _isPushable;
+    }
+
+    public bool iCauseRetractOnUnSwingable(Player player)
+    {
+        return isPushable(player);
+    }
+
+    public bool iCauseRetractOnUnLatchable(Player player)
+    {
+        return false;
     }
 }

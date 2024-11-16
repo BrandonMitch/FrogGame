@@ -14,6 +14,7 @@ public class TongueThrowState : TongueState
     private Vector3 latchLocation;
     private RaycastHit2D collisionHit;
     private IPushable_Pullable pushPullInterface;
+    private IModifyTongueBehavior collisionObjectBehaviour;
     private GenericStat tongueThrowForceModifier;
     public TongueThrowState(Player player, TongueStateMachine tongueStateMachine) : base(player, tongueStateMachine)
     {
@@ -45,6 +46,7 @@ public class TongueThrowState : TongueState
             Debug.LogError("This really should never happen. The parentTransform is null while trying to enter tongue throw state");
         }
         pushPullInterface = null;
+        collisionObjectBehaviour = null;
 
         endOfTongueTransform = tongueStateMachine.GetEndOfTongueTransform();
         endOfTongueRB = tongueStateMachine.endOfTongueRB;
@@ -123,30 +125,51 @@ public class TongueThrowState : TongueState
 
     private bool TryToLatch(Vector3 latchLocation, RaycastHit2D hit)
     {
-        bool returnVal = true;
-        pushPullInterface = hit.collider.GetComponent<IPushable_Pullable>();
-        if(pushPullInterface != null)
+        bool ableToLatch = true;
+        collisionObjectBehaviour = hit.collider.GetComponent<IModifyTongueBehavior>();
+        if (collisionObjectBehaviour != null)
         {
-
-            //Debug.Log("THIS IS PUSHABLE/PULLABLE");
-            //Debug.Log("Is this pulllable?" + pushPullInterface.isPullableQ());
-
+            pushPullInterface = collisionObjectBehaviour as IPushable_Pullable;
         }
-        if (returnVal)
+
+        if(collisionObjectBehaviour != null)
         {
-            // We will hit next frame;
-            willNotHitNextFrame = false;
+            ableToLatch = collisionObjectBehaviour.isLatchable(player);
+        }
+        if (ableToLatch)
+        {
+            willNotHitNextFrame = false; // will hit next frame
             this.latchLocation = latchLocation;
             this.collisionHit = hit;
         }
-        // TODO: Implement false return values, this will let us decided what we don't want to latch onto
-        return returnVal;
+        else // if unable to latch, should we retract?
+        {
+            if (collisionObjectBehaviour.iCauseRetractOnUnLatchable(player))
+            {
+                player.stateMachine.CurrentPlayerState.RetractTongue();
+            }
+        }
+        return ableToLatch;
     }
 
     private void OnHit(Vector3 latchlocation, RaycastHit2D hit)
     {
         endOfTongueRB.simulated = false;
+
         moveEndOfTongue(latchLocation);
+
+        // If we hit a moving object, send the information to the end of the tongue so it can "stick to the object" every frame
+        if (collisionObjectBehaviour != null)
+        {
+            ICanMoveTheTongue movingObject = collisionObjectBehaviour as ICanMoveTheTongue;
+            if (movingObject != null)
+            {
+                tongueStateMachine.endOfTongueScript.SetInfo(
+                    movingObject: movingObject
+                    );
+            }
+        }
+
         if (pushPullInterface != null)
         {
             pushPullInterface.OnLatchedTo(latchlocation);

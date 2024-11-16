@@ -58,8 +58,10 @@ public class Player: MonoBehaviour, IFighter
     private float yInput { get; set; }
     private float speedForAnimation;
 
-
-
+    [Space]
+    [Header("|-----Animation-----|")]
+    private static readonly int LungeAnimation = Animator.StringToHash("Lunge_Down");
+    private static readonly int LungeRetractResetAnimation = Animator.StringToHash("Retract_Reset");
     [Space]
     [Header("Attack Variables")]
 
@@ -73,7 +75,7 @@ public class Player: MonoBehaviour, IFighter
     private PlayerHealth playerHealth;
     public GenericStatDictionary statDictionary;
     public PlayerInputManager inputManager;
-    public Animator animator;
+    [SerializeField] private Animator animator;
     public GameObject customizableWeaponOjbect;
     private WeaponCustomizable customizableWeapon;
     [SerializeField] private Transform headTransform;
@@ -116,6 +118,7 @@ public class Player: MonoBehaviour, IFighter
     public PlayerComboState comboState { get; set; }
     public PlayerDeadState deadState { get; set; }
 
+    public PlayerFlyingState flyingState { get; set; }
     public TongueStateMachine tongueStateMachine { get; set; }
 
     [SerializeField] private TongueData tongueData;
@@ -159,6 +162,7 @@ public class Player: MonoBehaviour, IFighter
         attackChargingState = new PlayerAttackChargingState(this, stateMachine);
         attackingState = new PlayerAttackingState(this, stateMachine);
         comboState = new PlayerComboState(this, stateMachine);
+        flyingState = new PlayerFlyingState(this, stateMachine);
 
         tongueStateMachine = new TongueStateMachine(tongueData);
         // Intialize all of the tongue states
@@ -314,13 +318,27 @@ public class Player: MonoBehaviour, IFighter
     {
         animator.SetBool("ThrowTongue", active);
     }
+
+    public void AnimateLungeActual()
+    {
+        animator.CrossFade(LungeAnimation, 0, 0);
+    }
+    /// <summary>
+    /// This doesn't actually work, we use the cross fade method to active an animation because this one sucks. All this does is change to a blend tree
+    /// </summary>
+    /// <param name="active"></param>
     public void AnimateLunge(bool active)
     {
         animator.SetBool("Lunge", active);
     }
+
+    /// <summary>
+    /// Can only be called in lunging state or flying state
+    /// </summary>
+    /// <param name="rotation"></param>
     public void AnimateLunge(Quaternion rotation)
     {
-        if (stateMachine.CurrentPlayerState.Equals(lungingState))
+        if (stateMachine.CurrentPlayerState.Equals(lungingState) || stateMachine.CurrentPlayerState.Equals(flyingState))
         {
             headTransform.rotation = rotation;
             characterSpriteTransform.rotation = rotation;
@@ -328,7 +346,9 @@ public class Player: MonoBehaviour, IFighter
     }
     public void AnimateRetract_Reset()
     {
-        animator.SetTrigger("Retract_Reset");
+        animator.CrossFade(LungeRetractResetAnimation, 0, 0);
+        //animator.SetTrigger(LungeRetractResetAnimation);
+       // animator.SetTrigger("Retract_Reset");
     }
     public void AimTongueCrossHair()
     {

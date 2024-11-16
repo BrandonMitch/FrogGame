@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-public class PlayerStateMachine 
+using MovementNameSpace;
+public class PlayerStateMachine
 {
+
+    public PositionStatus positionStatus;
     public PlayerState CurrentPlayerState {  get; private set; }
-    private PlayerState PreviousPlayerState;
+    private PlayerState PreviousPlayerState = null;
 
     public PlayerInputManager playerInputManager;
     private List<AttackInputData> attackBuffer;
@@ -13,6 +15,8 @@ public class PlayerStateMachine
     public void Intialize(PlayerState startingState)
     {
         attackBuffer = new List<AttackInputData>();
+        positionStatus = PositionStatus.OnTheGround;
+
         CurrentPlayerState = startingState;
         CurrentPlayerState.EnterState();
     }

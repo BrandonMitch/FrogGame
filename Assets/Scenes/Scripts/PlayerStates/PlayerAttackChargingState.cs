@@ -34,13 +34,13 @@ public class PlayerAttackChargingState : PlayerState
     {
        // FindLeftMouseInputs();
        // FindRightMouseInputs();
-        if (leftMouseUp)
+        if (LeftMouseUp)
         {
             //playerStateMachine.ChangeState(playerAttackState);
             playerStateMachine.ChangeState(player.attackingState);
             return;
         }
-        if (rightMouseButton)
+        if (RightMouseButton)
         {
             playerStateMachine.ChangeState(player.aimingTongueState);
             return;
