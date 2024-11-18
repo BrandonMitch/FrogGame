@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639be5ed17f823f4eaf913ff575d693d, type: 3}
   m_Name: SpellData
   m_EditorClassIdentifier: 
-  name: 
+  name: Fire Spell
   description: 
-  image: {fileID: 0}
+  image: {fileID: 564983740382853904, guid: 284e94ec97dfd604ba0cc871504d5876, type: 3}
   stackable: 0
   coolDown: 1
   maxAmount: 1

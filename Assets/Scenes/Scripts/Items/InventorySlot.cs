@@ -22,6 +22,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     }
     public void OnDrop(PointerEventData eventData)
     {
+        // if nothing in the slot exist
         if (transform.childCount == 0)
         {
             GameObject dropped = eventData.pointerDrag;

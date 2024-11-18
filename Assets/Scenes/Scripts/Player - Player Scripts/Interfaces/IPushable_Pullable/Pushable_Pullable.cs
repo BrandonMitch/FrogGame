@@ -129,7 +129,7 @@ public class Pushable_Pullable : MonoBehaviour, IPushable_Pullable
 
     public bool isLatchable(Player player)
     {
-        return isPullable(player);
+        return isPullable(player) || isPushable(player);
     }
 
     public bool isPullable(Player player)

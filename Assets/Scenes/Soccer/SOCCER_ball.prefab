@@ -254,8 +254,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a875d6d4ac003f4fbfcc3afadd6354d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isPushable: 1
-  isPullable: 0
+  _isPushable: 1
+  _isPullable: 0
   restingDrag: 2
   movingDrag: 0.1
   slowDownTime: 1
@@ -271,4 +271,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 611651d76a6bc7e4c924eceb4e9e74ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceMultiplier: 30
