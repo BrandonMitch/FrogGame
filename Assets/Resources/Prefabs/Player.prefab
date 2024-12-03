@@ -108,9 +108,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55235131c6ca4064daa7ccbfab63b0ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hitpoint: 10
-  maxHitpoint: 10
-  pushRecoverySpeed: 0.3
   playerSpeed: 1
   playerMaxSpeed: 1
   playerRestingDrag: 100
@@ -158,7 +155,9 @@ MonoBehaviour:
   tongueThrowForceModifier: {fileID: 11400000, guid: 2a9e65ea42b68ea43b3ff69a2a33eb85, type: 2}
   lastMoveDirection: {x: 0, y: 0, z: 0}
   Unkillable: 1
+  playerReferenceSO: {fileID: 0}
   statDictionary: {fileID: 11400000, guid: d46b57b6f0443494aa9f2ebe6938424b, type: 2}
+  playerInventory: {fileID: 11400000, guid: 788223f4afe5e994e87a29c14164a17d, type: 2}
   inputManager: {fileID: 6816962011063937620}
   animator: {fileID: 6816962011063937624}
   customizableWeaponOjbect: {fileID: 6816962010483762103}

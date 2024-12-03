@@ -21,6 +21,11 @@ public class Fighter : MonoBehaviour, IFighter, IHealth
     {
         return true;
     }
+
+    public MonoBehaviour GetMono()
+    {
+        return this;
+    }
     #endregion
     #region Health Interface
     public virtual void ForceTakeDamage(float damage)

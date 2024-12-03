@@ -6,4 +6,6 @@ public interface IFighter
 {
     public bool HasHealth();
     public IHealth GetHealth();
+
+    public MonoBehaviour GetMono();
 }

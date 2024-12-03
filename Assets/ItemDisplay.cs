@@ -6,7 +6,8 @@ public class ItemDisplay : Colliad
 {
     [SerializeField] private Transform itemTransform;
     [SerializeField] private SpriteRenderer itemRenderer;
-    public ItemModifier itemType;
+    public Item itemType;
+    public int qty = 1;
     private bool isItemCollected = false;
 
     protected override void Start()
@@ -37,22 +38,27 @@ public class ItemDisplay : Colliad
             base.Update();
         }
     }
-
     protected override void OnCollide(Collider2D coll)
     {
-        if (coll.CompareTag("Player"))
+        if ( !isItemCollected && coll.CompareTag("Player"))
         {
             Debug.Log("Collided with player");
             PlayerStatManager stats = coll.GetComponent<PlayerStatManager>();
-            if(stats != null)
+            Player player = coll.GetComponent<Player>();
+
+            if(stats != null && player != null)
             {
-                GiveItem(stats);
+                GiveItem(player, stats);
             }
         }
     }
-    public void GiveItem(PlayerStatManager stats)
+    public void GiveItem(Player player, PlayerStatManager stats)
     {
-        stats.RegisterItem(itemType, true);
+        if (itemType as ItemModifier != null)
+        {
+            stats.RegisterItem(itemType as ItemModifier, true);
+        }
+        player.playerInventory?.AddItem(itemType, qty);
         isItemCollected = true;
         itemRenderer.enabled = false;
     }

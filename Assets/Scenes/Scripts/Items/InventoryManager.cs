@@ -2,18 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryManager : MonoBehaviour, IInventory
 {
     // TODO: There is an error when trying to set active
     // NOTE: May be useful to make a hotbar slot array and a full inventory slot arrary and then combine them
-    public int maxStackedItems = 4;
+    public int maxStackedItems = 64;
     public InventorySlot[] inventorySlots;
     public GameObject inventoryItemPrefab;
-
+    [SerializeField] PlayerInventory inventory;
     int selectedSlot = -1;
+
+    public InventorySlot SelectedSlot
+    {
+        get
+        {
+            if (selectedSlot < 0 || selectedSlot > inventorySlots.Length - 1)
+            {
+                return null;
+            }
+            return inventorySlots[selectedSlot];
+        }
+    }
     private void Start()
     {
         ChangeSelectedSlot(0);
+        if(inventory != null)
+        {
+            inventory.inventory = this;
+        }
     }
     void ChangeSelectedSlot(int newValue)
     {
@@ -36,82 +52,39 @@ public class InventoryManager : MonoBehaviour
         }
     }
     // When we add a new item, we will search the inventory for an empty slot
-    public bool AddItem(IInventoryItem item)
+    public bool AddItem(IInventoryItem item, int qty)
     {
-        // Check if any slot has the same item with count lower than max
-        for (int i = 0; i < inventorySlots.Length; i++)
+        for(int i = 0; i <inventorySlots.Length; i++)
         {
             InventorySlot slot = inventorySlots[i];
-            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if (itemInSlot != null &&
-                itemInSlot.GetItem() != null &&
-                itemInSlot.GetItem().Equals(item) &&
-                itemInSlot.count < maxStackedItems &&
-                itemInSlot.GetItem().isStackable() == true)
+           
+            if (slot.hasRoomForItem(item, qty, maxStackedItems))
             {
-                itemInSlot.count++;
-                itemInSlot.RefreshCount();
-                return true;
-            }
-        }
-
-        // Find an empty slot
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            InventorySlot slot = inventorySlots[i];
-            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if (itemInSlot == null)
-            {
-                // If the item in slot is null, then we can spawn the new item in the slots
-                SpawnNewItem(item, slot, count:1);
-                return true;
-            }   
-        }
-        return false;
-    }
-    public bool AddItem(IInventoryItem item, int count)
-    {
-        // Check if any slot has the same item with count lower than max
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            InventorySlot slot = inventorySlots[i];
-            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if (itemInSlot != null &&
-                itemInSlot.GetItem() != null &&
-                itemInSlot.GetItem().Equals(item) &&
-                itemInSlot.count + count < maxStackedItems &&
-                itemInSlot.GetItem().isStackable() == true)
-            {
-                itemInSlot.count += count;
-                itemInSlot.RefreshCount();
-                return true;
-            }
-        }
-
-        // Find an empty slot
-        for (int i = 0; i < inventorySlots.Length; i++)
-        {
-            InventorySlot slot = inventorySlots[i];
-            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            // item slot not intiatialized
-            if (itemInSlot == null)
-            {
-                // If the item in slot is null, then we can spawn the new item in the slots
-                SpawnNewItem(item, slot, count);
-                return true;
-            }
-            else // fill the item in the slot if there it is a null item
-            {
-                if(itemInSlot.GetItem() == null)
+                InventoryItem itemInSlot = slot.Item;
+                if(itemInSlot == null)
                 {
-                    itemInSlot.InitializeItem(item, count);
+                    // we neeed to create a new item
+                    SpawnNewItem(item, slot, qty);
+                    slot.Item.UpdateUI();
+                    return true;
+                }
+                else if (!itemInSlot.hasItem()) /// empty InventoryItem just add the item
+                {
+                    itemInSlot.InitializeItem(item, qty);
+                    itemInSlot.UpdateUI();
+                    return true;
+                }
+                else if(InventorySlot.ItemOfSameType(itemInSlot, item))
+                {
+                    itemInSlot.count += qty;
+                    itemInSlot.UpdateUI();
+                    return true;
                 }
                 else
                 {
-                    continue; // there's already an item in there
+                    continue;
                 }
             }
-
         }
         return false;
     }
@@ -122,7 +95,7 @@ public class InventoryManager : MonoBehaviour
         List<IInventoryItem> unstackable;
         (itemCounts, unstackable) = InventoryContents();
 
-        ClearInventoryy();
+        ClearItems();
 
         // add all stackable items first
         foreach (var kvp in itemCounts)
@@ -132,8 +105,9 @@ public class InventoryManager : MonoBehaviour
 
         foreach (var item in unstackable)
         {
-            AddItem(item);
+            AddItem(item, 1);
         }
+        UpdateUI();
     }
     void SpawnNewItem(IInventoryItem item, InventorySlot slot, int count = 1)
     {
@@ -199,19 +173,45 @@ public class InventoryManager : MonoBehaviour
 
 
     [ContextMenu("Clear Inventory()")]
-    public void ClearInventoryy()
+    public void ClearItems()
     {
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             InventorySlot slot = inventorySlots[i];
-            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if (itemInSlot != null)
-            {
-                itemInSlot.ClearItem();
-            }
+            slot.ClearItem();
         }
     }
 
+    public bool hasRoomForItem(IInventoryItem newItem, int qty, int maxItemsPerStack)
+    {
+        for (int i = 0; i < inventorySlots.Length; i++)
+        {
+            InventorySlot slot = inventorySlots[i];
+
+            if (slot.hasRoomForItem(newItem, qty, maxStackedItems))
+            {
+                InventoryItem itemInSlot = slot.Item;
+                if (itemInSlot == null)
+                {
+                    itemInSlot.UpdateUI();
+                    return true;
+                }
+                else if (!itemInSlot.hasItem())
+                {
+                    return true;
+                }
+                else if (InventorySlot.ItemOfSameType(itemInSlot, newItem))
+                {
+                    return true;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+        }
+        return false;
+    }
 #if UNITY_EDITOR
     [ContextMenu("UpdateUI()")]
     public void UpdateUI()
@@ -231,5 +231,15 @@ public class InventoryManager : MonoBehaviour
     {
         Debug.Log(InventoryContentsString());
     }
+    [SerializeField] Item testItem;
+    [SerializeField] int qty;
+    [ContextMenu("TestAddItem()")]
+    public void TestAddItem()
+    {
+        Debug.Log($"Adding item: {qty}x: {testItem}\n" +
+            $"Worked?: {AddItem(testItem, qty)}");
+    }
+
+
 #endif
 }

@@ -12,15 +12,21 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public Text countText;
 
     [SerializeField] public Item item;
+    private IInventoryItem _item;
     [SerializeField] public int count = 1;
     [HideInInspector] public Transform parentAfterDrag;
 
     //TODO: REMOVE THE START LINE 
-    private void Start()
+    private void Awake()
     {
-        if (item != null)
+        if(_item == null)
         {
-            InitializeItem(item, count);
+            _item = item;
+        }
+
+        if (hasItem())
+        {
+            InitializeItem(GetItem(), count);
         }
         else
         {
@@ -29,29 +35,48 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void InitializeItem(IInventoryItem newItem, int count = 1)
     {
+        _item = newItem;
         item = newItem as Item;
+
         if (item == null)
         {
-            Debug.LogError("Cannot cast newItem: (" + newItem + ") to a IInventoryItem");
+            Debug.LogWarning("Cannot cast newItem: (" + newItem + ") to a Item");
         }
         image.sprite = newItem.GetSprite();
         this.count = count;
         RefreshCount();
     }
+private void InitializeItem(Item newItem, int count = 1)
+    {
+        item = newItem;
+        image.sprite = newItem.GetSprite();
+        this.count = count;
+        RefreshCount();
+    }
+
+
     [ContextMenu("ClearItem()")]
     public void ClearItem()
     {
+        _item = null;
         item = null;
         image.sprite = null;
         count = 0;
-        gameObject.SetActive(false);
+       // gameObject.SetActive(false);
     }
     [ContextMenu("UpdateUI()")]
     public void UpdateUI()
     {
-        InitializeItem(item, count);
+        image.sprite = GetSprite();
         RefreshCount();
-        gameObject.SetActive(item != null);
+        if (hasItem())
+        {
+            image.enabled = true;
+        }
+        else { 
+            Debug.Log("Disabling");
+            image.enabled = false;
+        }
     }
     public void RefreshCount()
     {
@@ -61,7 +86,6 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        //Debug.Log("Begin Drag");
         parentAfterDrag = transform.parent;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
@@ -70,48 +94,72 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnDrag(PointerEventData eventData)
     {
-        //Debug.Log("Dragging");
         transform.position = Input.mousePosition;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //Debug.Log("End Drag");
         transform.SetParent(parentAfterDrag);
         image.raycastTarget = true; // Make the object interactable again
     }
 
     public string GetName()
     {
-        return item?.GetName();
+        return GetItem()?.GetName();
     }
 
     public string GetDescription()
     {
-        return item?.GetDescription();
+        return GetItem()?.GetDescription();
     }
 
     public Sprite GetSprite()
     {
-        return item?.GetSprite();
+        return GetItem()?.GetSprite();
     }
 
     public bool isStackable()
     {
-        if (item != null)
+        if (hasItem())
         {
-            return item.isStackable();
+            return GetItem().isStackable();
         }
         return false;
     }
 
     public IInventoryItem GetItem()
     {
-        return item;
+        if( item != null)
+        {
+            return item;
+        }
+        return _item;
     }
 
     public static explicit operator Item(InventoryItem item)
     {
         return item.item;
+    }
+
+    public bool hasItem()
+    {
+        if (GetItem() == null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    [ContextMenu("PRINT()")]
+    public void print()
+    {
+        string s = 
+            $"item:{item}\n" +
+            $"_item:{item}\n" +
+            $"GetItem():{GetItem()}\n" +
+            $"count:{count}" +
+            $"hasItem():{hasItem()}\n" +
+            $"isStackable():{isStackable()}\n";
+        Debug.Log(s);
     }
 }

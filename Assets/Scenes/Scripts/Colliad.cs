@@ -15,6 +15,10 @@ public class Colliad : MonoBehaviour
         if (isUpdating)
         {
             boxCollider = GetComponent<BoxCollider2D>();
+            if(boxCollider == null)
+            {
+                boxCollider = GetComponent<CircleCollider2D>();
+            }
         }
     }
 

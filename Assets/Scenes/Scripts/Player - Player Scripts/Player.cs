@@ -74,6 +74,7 @@ public class Player: MonoBehaviour, IFighter
     [SerializeField] PlayerReferenceSO playerReferenceSO;
     private PlayerHealth playerHealth;
     public GenericStatDictionary statDictionary;
+    public PlayerInventory playerInventory;
     public PlayerInputManager inputManager;
     [SerializeField] private Animator animator;
     public GameObject customizableWeaponOjbect;
@@ -296,8 +297,29 @@ public class Player: MonoBehaviour, IFighter
             stateMachine.CurrentPlayerState.FrameUpdate();
             tongueStateMachine.CurrentTongueState.FrameUpdate();
 
+            SpellCode(ENABLE_SPELL_CODE_TEST);
+
+
             ProcessInputs();
             Animate();
+        }
+    }
+    [SerializeField] bool ENABLE_SPELL_CODE_TEST = true;
+    public void SpellCode(bool t)
+    {
+        if (!t) { return; }
+
+        if (inputManager.LeftMouseUp)
+        {
+            // try to activate spell;
+            IInventoryItem inHand = playerInventory.ItemInHand;
+            IActivatable activatable = ((Object) inHand) as IActivatable;
+            Debug.Log($"Inhand:{inHand}\n" +
+                $"ItemInHand Type: {inHand?.GetType().Name}\n" +
+                $"activatable:{activatable}\n" +
+                $"canActivate:{activatable?.CanActivate()}\n");
+            if (activatable == null) { return; }
+            if (activatable.CanActivate()) { activatable.Activate(null, fighter: this); }
         }
     }
     private void ProcessInputs()
@@ -413,7 +435,18 @@ public class Player: MonoBehaviour, IFighter
 
     public IHealth GetHealth()
     {
-        return playerHealth;
+        if (HasHealth())
+        {
+            return playerHealth;
+        }
+        return null;
     }
+
+    public MonoBehaviour GetMono()
+    {
+        return this;
+    }
+
+
     #endregion
 }
