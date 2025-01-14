@@ -40,10 +40,10 @@ public class PlayerIdleState : PlayerState
             SaveStateData(0,"startChargingTime = " + Time.time); ;
         }
 
-        if (LeftMouseButton) // while the button is being held down, we want to save the time
+/*        if (LeftMouseButton) // while the button is being held down, we want to save the time
         {
             if (TryChangingToAttackChargingState()) return;
-        }
+        }*/
 
         // Then check movement
         if(moveVec != Vector2.zero)
