@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d961b0ccda75d724bbfe6afbf490e09a, type: 3}
   m_Name: FireSpellBehavior
   m_EditorClassIdentifier: 
+  crossHairSprite: {fileID: -6125570968653715395, guid: e1acfedae04a8bf4c81b56d4b7f27e06, type: 3}
   bouncySpellPrefab: {fileID: 5919723351411497457, guid: 528b0ef01bfb15549b8d725d5198c9c0, type: 3}

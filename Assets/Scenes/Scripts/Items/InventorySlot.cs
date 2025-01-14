@@ -9,6 +9,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public Image image;
     public Color selectedColor, notSelectedColor;
 
+    public IChangeCrossHair changesCrossHair = null;
     private InventoryItem _item;
     public InventoryItem Item
     {
@@ -33,10 +34,22 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public void Select()
     {
         image.color = selectedColor;
+        // check if there is a IChangeCrossHair
+        if(Item == null)
+        {
+            return;
+        }
+        IChangeCrossHair changesCrossHair = Item.GetItem() as IChangeCrossHair;
+        if(changesCrossHair != null)
+        {
+            this.changesCrossHair = changesCrossHair;
+        }
+
     }
     public void Deselect()
     {
         image.color = notSelectedColor;
+        this.changesCrossHair = null;
     }
     public void OnDrop(PointerEventData eventData)
     {
@@ -110,8 +123,8 @@ public class InventorySlot : MonoBehaviour, IDropHandler
             Item.ClearItem();
         }
         _item = null;
+        changesCrossHair = null;
     }
-
     /// <summary>
     /// Will set an item to something, overides the current item. returns false if there is no inventory item, returns true if it worked
     /// </summary>

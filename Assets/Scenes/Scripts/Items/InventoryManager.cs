@@ -9,6 +9,18 @@ public class InventoryManager : MonoBehaviour, IInventory
     public int maxStackedItems = 64;
     public InventorySlot[] inventorySlots;
     public GameObject inventoryItemPrefab;
+    public GameEvent OnSelectedSlotChanged;
+    // used if a spell/item changes the max distance of the crosshair
+    public IChangeCrossHair CrossHairChangeParams {
+        get{
+            if(SelectedSlot != null)
+            {
+                return SelectedSlot.changesCrossHair;
+            }
+            return null;
+        }
+
+    }
     [SerializeField] PlayerInventory inventory;
     int selectedSlot = -1;
 
@@ -39,6 +51,8 @@ public class InventoryManager : MonoBehaviour, IInventory
         }
         inventorySlots[newValue].Select();
         selectedSlot = newValue;
+
+        OnSelectedSlotChanged?.Raise();
     }
     private void Update()
     {
@@ -66,18 +80,27 @@ public class InventoryManager : MonoBehaviour, IInventory
                     // we neeed to create a new item
                     SpawnNewItem(item, slot, qty);
                     slot.Item.UpdateUI();
+
+                    // Make sure to update selected slot if is selected
+                    if (SlotIsSelected(i)) { ChangeSelectedSlot(i); }
                     return true;
                 }
                 else if (!itemInSlot.hasItem()) /// empty InventoryItem just add the item
                 {
                     itemInSlot.InitializeItem(item, qty);
                     itemInSlot.UpdateUI();
+
+                    // Make sure to update selected slot if is selected
+                    if (SlotIsSelected(i)) { ChangeSelectedSlot(i); }
                     return true;
                 }
                 else if(InventorySlot.ItemOfSameType(itemInSlot, item))
                 {
                     itemInSlot.count += qty;
                     itemInSlot.UpdateUI();
+
+                    // Make sure to update selected slot if is selected
+                    if (SlotIsSelected(i)) { ChangeSelectedSlot(i); }
                     return true;
                 }
                 else
@@ -87,6 +110,15 @@ public class InventoryManager : MonoBehaviour, IInventory
             }
         }
         return false;
+    }
+
+    public bool SlotIsSelected(InventorySlot slot)
+    {
+        return SelectedSlot.Equals(slot);
+    }
+    public bool SlotIsSelected(int slotN)
+    {
+        return slotN == selectedSlot;
     }
     [ContextMenu("ReorganizeInventory()")]
     public void ReorganizeInventory()
@@ -219,6 +251,7 @@ public class InventoryManager : MonoBehaviour, IInventory
         for (int i = 0; i < inventorySlots.Length; i++)
         {
             InventorySlot slot = inventorySlots[i];
+
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot != null)
             {
@@ -241,5 +274,53 @@ public class InventoryManager : MonoBehaviour, IInventory
     }
 
 
+    [ContextMenu("Check if current slot changes CrossHair")]
+    public void PrintSlotInfo()
+    {
+        string s = "";
+        s += $"Selected Slot #: {selectedSlot}\n";
+        s += $"Inventory Slot: {SelectedSlot}\n";
+        s += $"Inventory Item: {SelectedSlot.Item}\n";
+
+        if (SelectedSlot.Item != null && SelectedSlot.Item.GetItem() != null)
+        {
+            s += $" Item: {inventorySlots[selectedSlot].Item.GetItem()}\n";
+            var x = SelectedSlot.Item.GetItem() as IChangeCrossHair;
+
+            s += $"IChangeCrossHair: {x}\n";
+            if (x != null)
+            {
+                var y = x.GetCrossHairParams();
+                s += $"hasMax:{y.hasMaxDistance}\n";
+                s += $"hasMin:{y.hasMinDistance}\n";
+                s += $"max:{y.maxDistance}\n";
+                s += $"min:{y.minDistance}\n";
+                s += $"Sprite:{y.spriteTexture}\n";
+            }
+        }
+        Debug.Log(s);
+    }
+    [ContextMenu("Check If Changes Selected Slot")]
+    public void PrintChangesSelectedSlot()
+    {
+        string s = "";
+        s += $"Inventory Slot: {SelectedSlot}\n";
+        s += $"Inventory Item: {SelectedSlot.Item}\n";
+        s += $"CrossHairChangeParams: {CrossHairChangeParams}\n";
+        
+        var x = CrossHairChangeParams;
+
+        if (x != null)
+        {
+            var y = x.GetCrossHairParams();
+            s += $"hasMax:{y.hasMaxDistance}\n";
+            s += $"hasMin:{y.hasMinDistance}\n";
+            s += $"max:{y.maxDistance}\n";
+            s += $"min:{y.minDistance}\n";
+            s += $"Sprite:{y.spriteTexture}\n";
+        }
+
+        Debug.Log(s);
+    }
 #endif
 }

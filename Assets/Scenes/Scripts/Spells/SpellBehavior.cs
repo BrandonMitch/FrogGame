@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpellBehavior : ScriptableObject, IActivatable
+public class SpellBehavior : ScriptableObject, IActivatable, IChangeCrossHair
 {
     public const string XPOS = "XPOS";
     public const string YPOS = "YPOS";
@@ -11,6 +11,8 @@ public class SpellBehavior : ScriptableObject, IActivatable
     public const string XOFF = "XOFF";
     public const string YOFF = "YOFF";
     public const string VEL = "VEL";
+
+    [SerializeField] Sprite crossHairSprite;
     public void Activate()
     {
         Activate(null, null);
@@ -72,5 +74,17 @@ public class SpellBehavior : ScriptableObject, IActivatable
             [XOFF] = 0,
             [YOFF] = 0,
         };
+    }
+
+    public virtual CrossHairScript.CrossHairParams GetCrossHairParams()
+    {
+        CrossHairScript.CrossHairParams crossHairParams = new CrossHairScript.CrossHairParams(
+            hasMaxDistance: true,
+            hasMinDistance: false,
+            maxDistance: 0.8f,
+            minDistance: 0.0f,
+            spriteTexture: crossHairSprite
+            ); 
+        return crossHairParams;
     }
 }

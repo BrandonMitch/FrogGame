@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName ="SpellData", menuName = "Item/Spells/Spell Data")]
-public class SpellData : Item, IActivatable
+public class SpellData : Item, IActivatable, IChangeCrossHair
 {
     [Space]
     [Header("--Spell Related--")]
@@ -75,4 +75,10 @@ public class SpellData : Item, IActivatable
     {
         return spellBehavior.LocationOfSelf();
     }
+
+    public CrossHairScript.CrossHairParams GetCrossHairParams()
+    {
+        return spellBehavior.GetCrossHairParams();
+    }
+
 }

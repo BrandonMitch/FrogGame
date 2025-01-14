@@ -70,6 +70,10 @@ public class Player: MonoBehaviour, IFighter
     public bool Unkillable = true;
 
     [Space]
+    [SerializeField] private float maxCrossHairDistance = 0.5f;
+    [SerializeField] private float maxCrossHairDistanceDefault = 0.5f;
+    [SerializeField] private float maxCrossHairAimTongueDistance = 1f;
+    [Space]
     [Header("|-----References-----|")]
     [SerializeField] PlayerReferenceSO playerReferenceSO;
     private PlayerHealth playerHealth;
@@ -83,6 +87,7 @@ public class Player: MonoBehaviour, IFighter
     [SerializeField] private Transform characterSpriteTransform;
     [SerializeField] private CrossHairScript crossHair;
     
+
     public enum ExternalCall
     {
         backSlash,
@@ -366,24 +371,47 @@ public class Player: MonoBehaviour, IFighter
             characterSpriteTransform.rotation = rotation;
         }
     }
+    public void OnInventorySlotChanged()
+    {
+        // when we change selected inventory slots we need to check if it should update the crosshair
+        if(playerInventory.inventory.CrossHairChangeParams != null)
+        {
+            crossHair.setCrossHairState(playerInventory.inventory.CrossHairChangeParams.GetCrossHairParams());
+        }
+        else{
+            crossHair.setCrossHairState(0);
+        }
+    }
     public void AnimateRetract_Reset()
     {
         animator.CrossFade(LungeRetractResetAnimation, 0, 0);
         //animator.SetTrigger(LungeRetractResetAnimation);
        // animator.SetTrigger("Retract_Reset");
     }
+
     public void AimTongueCrossHair()
     {
-        crossHair.setCrossHairState(1); // 1 corresponds to the tongue cross hair
-        crossHair.setCrossHairDistance(1);
-
-        //tongue.AimTongue(crossHair.getCrossHairPosition()); // Intialize Aiming
+        crossHair.setCrossHairState(crossHair.tongueCrossHair);
         tongueAimState.AimTongue(GetCrossHairPosition());
     }
     public void SpitOutTongueOnRelease()
     {
-        crossHair.setCrossHairState(0); // 0 corresponds to the normal attack cross hair
-        crossHair.setCrossHairDistance(); // the empty bracket resets it to its default
+        if (playerInventory != null) { 
+
+            var x = playerInventory.inventory.CrossHairChangeParams;
+            if (x != null)
+            {
+                crossHair.setCrossHairState(x.GetCrossHairParams());
+            }
+            else
+            {
+                crossHair.setCrossHairState(0);
+            }
+        }
+        else
+        {
+            crossHair.setCrossHairState(crossHair.swordCrossHair);
+        }
     }
 
     public void Animate()
